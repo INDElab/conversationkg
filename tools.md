@@ -34,4 +34,6 @@
    - CORE: OpenIE model which integrates contextual information to increase accuracy <br>
      (_Petroni et al.: CORE: Context-Aware Open Relation Extraction with Factorization Machines_) <br>
      -> related: _Sorokin & Gurevych: Context-Aware Representations for Knowledge Base Relation Extraction_
+     
+ ## Python Libraries for Graph Datastructures and Algorithms
    
