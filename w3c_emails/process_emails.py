@@ -1,12 +1,7 @@
-#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-Created on Fri Feb 14 12:01:54 2020
 
-@author: valentin
-"""
 
-#import pickle
+import pickle
 #import os
 from datetime import datetime
 #from tqdm import tqdm
@@ -32,7 +27,7 @@ to_pattern = re.compile(r"[tT][oO]:([\w\W]+)")
 cc_pattern = re.compile(r"[cC][cC]:([\w\W]+)")
 
 email_address_pattern = re.compile(r'[\w\.-]+@[\w\.-]+')
-url_pattern = re.compile(r"http[s]?:\/\/(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+")
+url_pattern = re.compile(r"http[s]?:\/\/(?:[a-zA-Z]|[0-9]|[$-_@.&+~]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+")
 
 
 # HELPER FUNCTIONS
@@ -90,163 +85,24 @@ parse_header.errors=[]
 
 
 
+def group_into_convos(emails_temp_sorted):
+    convos = []
+    ids = {}
 
-# CLASSES
+    i = 0   
+    id_not_found = []  
 
-class Person:
-    def __init__(self, name, address):
-        self.name = name
-        self.address =  address
-        self.org = self.extract_org()
-        
-    def __str__(self):
-        return self.name + " <" + self.address +  ">"
-    
-    def __repr__(self):
-        return str(self)
-    
-    def __hash__(self):
-        return hash(str(self))
-    
-    def extract_org(self):
-        if self.address:
-            return self.address[self.address.rfind("@")+1:]
-        else:
-            None
-
-
-class Org:
-    def __init__(self, domain_name):
-        self.domain_name = domain_name
-
-
-
-class Link:
-    def __init__(self, url):
-        self.url = url
-        try:
-            parsed = urlparse(url)
-            self.domain = parsed.netloc
-            self.path = parsed.path
-        except ValueError:
-            self.domain = None
-            self.path = None
-        
-        
-class Address:
-    def __init__(self, addr):
-        self.address = addr
-        self.org = self.extract_org()
-
-    def extract_org(self):
-        if self.address:
-            return self.address[self.address.rfind("@")+1:]
-        else:
-            None
-
-
-class Email:
-    def __init__(self, raw_text):
-        header_d, mail_body_raw = extract_meta(raw_text)
-        header_d = parse_header(header_d)
-        if header_d:
-            self.has_header = True
-            for k, v in header_d.items():
-                setattr(self, k, v)
+    for mail in emails_temp_sorted:
+        if mail.inreplyto is None or mail.inreplyto not in ids:
+            convos.append([mail])
+            ids[mail.id] = i # need to check if ID actually exists! ->  runs fine without (weird?)
+            i += 1
                 
-            self.sender = Person(self.name, self.email)
-            self.receiver = Person(*self.to)
-        else: 
-            self.has_header = False
-        
-        self.body_raw = mail_body_raw
-        
-    def extract_from_to(self):
-        return (Person(self.name, self.email), 
-                Person(*self.to))
-    
-    def extract_links(self):
-        return url_pattern.findall(self.body_raw)
-    
-    def extract_addresses(self):
-        return email_address_pattern.findall(self.body_raw)
-        
-    
-    def __hash__(self):
-        if self.has_header:
-            return hash(self.id)
-        else:
-            return hash(self.body_raw)
-        
-    
-    
-class Conversation:
-    @classmethod
-    def conversations_from_sorted_emails(cls, emails_in_temp_order):
-        convos = []
-        ids = {}
-
-        i = 0
-        id_not_found = []  
-
-        for mail in emails_in_temp_order:
-            if mail.inreplyto is None or mail.inreplyto not in ids:
-                convos.append([mail])
-                ids[mail.id] = i # need to check if ID actually exists! ->  runs fine without (weird?)
-                i += 1
-                
-                if mail.inreplyto not in ids:
-                    id_not_found.append(mail)
+            if mail.inreplyto not in ids:
+                id_not_found.append(mail)
                     
-            else:
-                convos[ids[mail.inreplyto]].append(mail)
-                ids[mail.id] = ids[mail.inreplyto] # again check
-                
-        return [cls(mail_ls) for mail_ls in convos]
-
-    
-    def __init__(self, list_of_emails):
-        if len(list_of_emails) > 1:
-            first, *_, last = list_of_emails
-        else: 
-            first = last = list_of_emails[0]
-        self.start_time = first.sent
-        self.end_time = last.sent
-        
-        self.emails = tuple(mail.id for mail in list_of_emails)
-
-        self.senders = [m.sender for m in list_of_emails]
-        self.receivers = [m.receiver for m in list_of_emails]
-        
-        self.interlocutors = self.senders + self.receivers
-        
-        self.observers = tuple(mail.cc for mail in list_of_emails)
-        
-        self.orgs = tuple(person.org for person in self.interlocutors)
-        
-        self.mentioned_links = tuple(Link(l) for mail in list_of_emails 
-                                    for l in mail.extract_links())
-        
-        self.mentioned_addresses = tuple(Address(addr) for mail in list_of_emails 
-                                            for addr in mail.extract_addresses())
-        
-        self.topic = "\n".join((m.subject for m in list_of_emails))
-        
-        
-    def __len__(self):
-        return len(self.emails)
-    
-
-    def __hash__(self):
-        prod = 1
-        for mail_id in self.emails: 
-            prod *= hash(mail_id)
-        return prod
-        
-
-
-
-
-
-
-
+        else:
+            convos[ids[mail.inreplyto]].append(mail)
+            ids[mail.id] = ids[mail.inreplyto] # again check
+            
+    return convos
