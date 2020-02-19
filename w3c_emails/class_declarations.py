@@ -117,6 +117,10 @@ class Link:
     def __repr__(self):
         return str(self)
         
+    def __hash__(self):
+        return hash(str(self))
+    
+    
 class Address:
     def __init__(self, addr):
         self.address = addr
@@ -128,7 +132,14 @@ class Address:
         else:
             None
 
+    def __str__(self):
+        return str(self.address)
+    
+    def __repr__(self):
+        return str(self.address)
 
+    def __hash__(self):
+        return hash(str(self))
 
 
 class Email:
@@ -201,14 +212,13 @@ class Conversation:
         self.senders = [m.sender for m in list_of_emails]
         self.receivers = [m.receiver for m in list_of_emails]
         
-        self.interlocutors = self.senders + self.receivers
+        self.interlocutors = set(self.senders + self.receivers)
         
         self.observers = tuple(mail.cc for mail in list_of_emails)
         
         self.orgs = tuple(person.org for person in self.interlocutors)
         
         self.mentioned_links = tuple(l for mail in list_of_emails for l in mail.links)
-        
         
         self.mentioned_addresses = tuple(e for mail in list_of_emails for e in mail.addresses)
         
