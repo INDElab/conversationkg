@@ -6,7 +6,7 @@ Created on Mon Feb 24 17:58:57 2020
 @author: valentin
 """
 
-from transformers import DistilBertTokenizer, DistilBertModel, DistilBertConfig
+from transformers import DistilBertTokenizer, DistilBertModel#, DistilBertConfig
 
 import torch
 
@@ -30,7 +30,7 @@ def email_to_ids(email_body):
 
 
 # WRAPPER FOR MODEL CALL
-def email_to_vec(email_body_ids, to_id_first=True):
+def email_to_vec(email_body_ids, to_id_first=False):
     if to_id_first:
         input_ids = email_to_ids(email_body_ids)
     else:
@@ -58,16 +58,42 @@ def cut_up(mail_tensor, n=511, k=20):
 
 
 
-
 if __name__ == "__main__":               
     with open("emails_token_ids.pkl", "rb") as handle:
         ids = pickle.load(handle)
     
     
-    length_adjusted = [cut_up(id_tens) for id_tens in ids]
-    
-    with torch.no_grad():    
+    length_adjusted = [cut_up(id_tens) for id_tens in ids[:70000]]
+            
+    with torch.no_grad():
         vecs = [[email_to_vec(v, to_id_first=False) for v in tt] for tt in tqdm(length_adjusted)]
     
     with open("LISA/vectors.pkl", "wb") as handle:
         pickle.dump(vecs, handle)
+        
+        
+        
+        
+#    import multiprocessing as mp
+#    with mp.Pool() as p:
+#        with torch.no_grad():    
+#            vecs = []
+#            for tt in tqdm(length_adjusted):
+#                print(tt)
+#                map_result = p.map_async(email_to_vec, tt)
+#                
+#                map_result.wait()
+#                
+#                
+#                cur_mail_vecs = [p.get() for p in map_result]
+#                
+#                vecs.append(cur_mail_vecs)
+#                
+#                print(type(map_result))
+#                print(map_result[0])
+#                print(map_result.shape)
+#                
+#    
+#    
+#    
+#    exit(13)
