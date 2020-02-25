@@ -63,12 +63,12 @@ if __name__ == "__main__":
         ids = pickle.load(handle)
     
     
-    length_adjusted = [cut_up(id_tens) for id_tens in ids[:70000]]
+    length_adjusted = [cut_up(id_tens) for id_tens in ids[70000:]]
             
     with torch.no_grad():
         vecs = [[email_to_vec(v, to_id_first=False) for v in tt] for tt in tqdm(length_adjusted)]
     
-    with open("vectors.pkl", "wb") as handle:
+    with open("vectors2.pkl", "wb") as handle:
         pickle.dump(vecs, handle)
         
         
