@@ -47,10 +47,13 @@ def email_to_vec(email_body_ids, to_id_first=True):
 # CUTS A LIST OF TOKENS IDs INTO CHUNKS OF 512 IF LONGER
 # ENSURES OVERLAP BETWEEN THE CHUNKS
 def cut_up(mail_tensor, n=511, k=20):
-   unfolded = mail_tensor.unfold(0, n, n-k)
-   covered = unfolded.shape[0]-unfolded.shape[1]
+    if mail_tensor.shape[0] <= n:
+        return (mail_tensor, )
+    
+    unfolded = mail_tensor.unfold(0, n, n-k)
+    covered = unfolded.shape[0]-unfolded.shape[1]
    
-   return tuple(v for v in unfolded) + (mail_tensor[covered:],)
+    return tuple(v for v in unfolded) + (mail_tensor[covered:],)
     
 
 
