@@ -22,7 +22,7 @@ module load CUDA/10.0.130
 module load cuDNN/7.3.1-CUDA-10.0.130
 
 
-echo "Stat job $PBS_JOBID started at `date`"
+echo "Job `BERT_on_emails` $PBS_JOBID started at `date`"
 
 
 cp $HOME/work/conversationkg/embeddings_for_the_people $TMPDIR
@@ -30,3 +30,8 @@ cp $HOME/work/conversationkg/embeddings_for_the_people $TMPDIR
 cd $TMPDIR/embeddings_for_the_people/raw_BERT
 
 python3 BERT_on_emails_on_LISA.py
+
+
+cp $TMPDIR/embeddings_for_the_people/raw_BERT $HOME
+
+
