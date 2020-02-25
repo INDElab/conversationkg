@@ -3,7 +3,7 @@
 
 #SBATCH --job-name=BERT_on_emails
 
-#SBATCH --time=20:00:00
+#SBATCH --time=1:00:00
 #SBATCH --mem=10G
 
 #SBATCH --ntasks=1
