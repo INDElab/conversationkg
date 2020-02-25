@@ -57,7 +57,7 @@ def cut_up(mail_tensor, n=511, k=20):
 
 
 if __name__ == "__main__":               
-    with open("../emails_token_ids.pkl", "rb") as handle:
+    with open("emails_token_ids.pkl", "rb") as handle:
         ids = pickle.load(handle)
     
     

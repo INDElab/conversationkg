@@ -2,7 +2,7 @@
 
 ## Plan
 
-# Idea 1:
+### Idea 1:
 
 Re-train BERT with a binary classifier for people on top:
 
@@ -19,7 +19,7 @@ Re-train BERT with a binary classifier for people on top:
       2. with string distance high enough, an author label from a different e-mail truly is from a different author
     
     
-# Idea 2:
+### Idea 2:
 
 Fine-tune BERT on each person, obtaining an LM for each person, then use Bayes Theorem
 
