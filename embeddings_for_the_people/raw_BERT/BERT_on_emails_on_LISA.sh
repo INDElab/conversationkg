@@ -3,8 +3,8 @@
 
 #SBATCH --job-name=BERT_on_emails
 
-#SBATCH --time=2:00:00
-#SBATCH --mem=6000M
+#SBATCH --time=20:00:00
+#SBATCH --mem=10G
 
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=6
