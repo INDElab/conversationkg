@@ -31,7 +31,7 @@ cd $TMPDIR/embeddings_for_the_people/raw_BERT
 
 
 for j in 0 1 2 3; do
-    python3 BERT_on_emails_on_LISA.py --k=4 --i=$j
+    python3 BERT_on_emails_on_LISA.py --k=4 --i=$j &
     echo "started process with i=$j"
 done
 
