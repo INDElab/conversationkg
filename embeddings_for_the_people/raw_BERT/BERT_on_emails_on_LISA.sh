@@ -35,6 +35,8 @@ for j in 0 1 2 3; do
     echo "started process with i=$j"
 done
 
+wait
+
 cp -r $TMPDIR/embeddings_for_the_people/raw_BERT $HOME
 
 
