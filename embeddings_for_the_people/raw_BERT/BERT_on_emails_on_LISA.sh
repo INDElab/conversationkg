@@ -4,7 +4,7 @@
 #SBATCH --job-name=BERT_on_emails
 
 #SBATCH --time=10:00:00
-#SBATCH --mem=10G
+#SBATCH --mem=40G
 
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=6
@@ -29,11 +29,9 @@ cp -r $HOME/work/conversationkg/embeddings_for_the_people $TMPDIR
 
 cd $TMPDIR/embeddings_for_the_people/raw_BERT
 
-
-
-python3 BERT_on_emails_on_LISA.py
-
-
+for j in 0 1 2 3; do
+    python3 BERT_on_emails_on_LISA.py --k=4 --i=$j
+done
 
 cp -r $TMPDIR/embeddings_for_the_people/raw_BERT $HOME
 

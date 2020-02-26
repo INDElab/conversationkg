@@ -57,18 +57,46 @@ def cut_up(mail_tensor, n=511, k=20):
     
 
 
+import argparse
 
-if __name__ == "__main__":               
+def parse_args():
+    p = argparse.ArgumentParser()
+    
+    p.add_argument("--k", type=int)
+    p.add_argument("--i", type=int)
+    
+    args = p.parse_args()
+    return args.k, args.i
+
+
+
+if __name__ == "__main__":   
+    num_parts, part_i = parse_args() 
+    
+    
+    
+    print("\t\t--- BERT_on_emails_on_LISA.py ---")
+    print(f"\t\tcalled with k={num_parts}, i={part_i}")
+    
+            
     with open("emails_token_ids.pkl", "rb") as handle:
         ids = pickle.load(handle)
+        
+    start = (len(ids)//num_parts)*part_i
+    end = (len(ids)//num_parts)*(part_i+1)
+    if part_i == (num_parts -1): end = None
+    small = ids[start:end]
+    
+    print(f"\t\tstart={start}, end={end}")
     
     
-    length_adjusted = [cut_up(id_tens) for id_tens in ids[70000:]]
+    length_adjusted = [cut_up(id_tens) for id_tens in small]
             
     with torch.no_grad():
-        vecs = [[email_to_vec(v, to_id_first=False) for v in tt] for tt in tqdm(length_adjusted)]
+        vecs = [[email_to_vec(v, to_id_first=False) for v in tt]
+                    for tt in tqdm(length_adjusted)]
     
-    with open("vectors2.pkl", "wb") as handle:
+    with open(f"vectors_{part_i}.pkl", "wb") as handle:
         pickle.dump(vecs, handle)
         
         
