@@ -29,15 +29,23 @@ def email_to_ids(email_body):
     return torch.tensor(tokenizer.encode(email_body, add_special_tokens=True))
 
 
+
+def cut_up(mail_tensor, n=512):
+    return mail_tensor.split(n)
+
 # WRAPPER FOR MODEL CALL
-def email_to_vec(email_body_ids, to_id_first=False):
+def email_to_vec(email_body_ids, to_id_first=False, chunk_size=512):
     if to_id_first:
         input_ids = email_to_ids(email_body_ids)
     else:
         input_ids = email_body_ids
         
-    input_ids = input_ids.unsqueeze(0)
-    outputs = model(input_ids)
+    chunks = cut_up(input_ids, chunk_size)
+    
+    outputs = []
+    for chunk in chunks:
+        chunk_batch = chunk.unsqueeze(0)
+        outputs.append(model(chunk_batch))
     return outputs
     
 #     last_hidden_states = outputs[0][0]
@@ -46,16 +54,18 @@ def email_to_vec(email_body_ids, to_id_first=False):
 
 # CUTS A LIST OF TOKENS IDs INTO CHUNKS OF 512 IF LONGER
 # ENSURES OVERLAP BETWEEN THE CHUNKS
-def cut_up(mail_tensor, n=511, k=20):
-    if mail_tensor.shape[0] <= n:
-        return (mail_tensor, )
+# def cut_up(mail_tensor, n=511, k=20):
+#     if mail_tensor.shape[0] <= n:
+#         return (mail_tensor, )
     
-    unfolded = mail_tensor.unfold(0, n, n-k)
-    covered = unfolded.shape[0]-unfolded.shape[1]
+#     unfolded = mail_tensor.unfold(0, n, n-k)
+#     covered = unfolded.shape[0]-unfolded.shape[1]
    
-    return tuple(v for v in unfolded) + (mail_tensor[covered:],)
+#     return tuple(v for v in unfolded) + (mail_tensor[covered:],)
     
 
+    
+    
 
 import argparse
 
@@ -86,15 +96,20 @@ if __name__ == "__main__":
     end = (len(ids)//num_parts)*(part_i+1)
     if part_i == (num_parts -1): end = None
     small = ids[start:end]
+    del ids
     
     print(f"\t\tstart={start}, end={end}")
     
-    
-    length_adjusted = [cut_up(id_tens) for id_tens in small]
+#     length_adjusted = [cut_up(id_tens) for id_tens in small]
             
+    
     with torch.no_grad():
-        vecs = [[email_to_vec(v, to_id_first=False) for v in tt]
-                    for tt in tqdm(length_adjusted)]
+        vecs = [email_to_vec(tt) for tt in tqdm(small)]
+    
+    
+#     with torch.no_grad():
+#         vecs = [[email_to_vec(v, to_id_first=False) for v in tt]
+#                     for tt in tqdm(length_adjusted)]
     
     with open(f"vectors_{part_i}.pkl", "wb") as handle:
         pickle.dump(vecs, handle)
