@@ -31,12 +31,12 @@ cd $TMPDIR/embeddings_for_the_people/personalised_GPT2
 
 if ! test -f "W3CGPT2/full.train.all"; then
     echo "W3CGPT2/full.train.all does not exist; creating..."
-    cat W3CGPT2/full.train.raw.* > W3CGPT2/full.train.all
+    cat W3CGPT2/full.train.raw.* > W3CGPT2/full.train.raw.all
 fi
 
 if ! test -f "W3CGPT2/full.test.all"; then
     echo "W3CGPT2/full.test.all does not exist; creating..."
-    cat W3CGPT2/full.test.raw.* > W3CGPT2/full.test.all
+    cat W3CGPT2/full.test.raw.* > W3CGPT2/full.test.raw.all
 fi
 
 if ! test -d "W3CGPT2/lm"; then
