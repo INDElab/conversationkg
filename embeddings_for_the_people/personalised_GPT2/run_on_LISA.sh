@@ -5,8 +5,8 @@
 
 #SBATCJ -N 1
 
-#SBATCH --time=100:00:00
-#SBATCH --mem=60G
+#SBATCH --time=1:00:00
+#SBATCH --mem=6G
 
 ##SBATCH --ntasks=1
 ##SBATCH --cpus-per-task=6
