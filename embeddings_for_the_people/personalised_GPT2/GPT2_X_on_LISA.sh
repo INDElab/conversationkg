@@ -31,7 +31,7 @@ cp -r $HOME/work/conversationkg/embeddings_for_the_people $TMPDIR
 cd $TMPDIR/embeddings_for_the_people/personalised_GPT2/
 
 
-for n in $(cat auth_names.txt); do
+for n in $(GPT2_X/cat auth_names.txt); do
     trainfile="GPT2_X/$n.train.raw"
     outdir="GPT2_X/lm_$n"
     
