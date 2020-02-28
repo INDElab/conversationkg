@@ -1,0 +1,2 @@
+      Miscellaneous:    1. Does anyone know if aural style sheets are supported by screen readers?  As far as I know, they are not.  2. I think Lynx displays the source XML file.  If the elements (tags) are indeed semantic and not like <red>, <flashing>, then the source file itself might be the best way to go.    3. IE seems to use some default display.  Can I get IE 5 to display a source XML file that does not have an associated CSS or XSlL file as a plain text file?    I think that draft is a very good start.    Steve        
+
