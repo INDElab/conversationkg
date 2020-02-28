@@ -5,15 +5,15 @@
 
 #SBATCJ -N 1
 
-#SBATCH --time=1:00:00
-#SBATCH --mem=6G
+#SBATCH --time=100:00:00
+#SBATCH --mem=60G
 
 ##SBATCH --ntasks=1
 ##SBATCH --cpus-per-task=6
 ##SBATCH --ntasks-per-node=1
 
-#SBATCH --partition=gpu_shared
-#SBATCH --gres=gpu:1
+##SBATCH --partition=gpu_shared
+##SBATCH --gres=gpu:1
 
 
 module load pre2019
