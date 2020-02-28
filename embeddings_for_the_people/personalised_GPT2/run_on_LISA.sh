@@ -45,7 +45,7 @@ if ! test -d "W3CGPT2/lm"; then
 fi
 
 
-python3 run_language_modeling.py --train_data_file=W3CGPT2/full.train.raw --model_type=gpt2 --output_dir=W3CGPT2/lm --model_name_or_path=gpt2 --do_train --line_by_line --num_train_epochs=2
+python3 run_language_modeling.py --train_data_file=W3CGPT2/full.train.raw.all --model_type=gpt2 --output_dir=W3CGPT2/lm --model_name_or_path=gpt2 --do_train --line_by_line --num_train_epochs=2
 
 cp -r $TMPDIR/embeddings_for_the_people/personalised_GPT2 $HOME
 
