@@ -65,12 +65,14 @@ Fine-tune BERT on each person, obtaining an LM for each person, then use Bayes T
  - no sentence segmentation by DistilBertTokenizer (not needed?) <br>
    -> no sentence segmentation for now (although punctuation marks are encoded)
  - what is the sequence vector in the outputs of the model? (cf what Peter mentioned) <br>
-   -> for development using the sum of the token vectors
+   -> using the average of the token vectors, like most others (cf [SBERT])
    -> use specific architecture for sentence embeddings? (such as [SBERT])
- - need to add special tokens at start and end of each text? (pertains to DistilBertTokenizer)
-   -> added for now, results probably invariant anyway
- - need to overlap chunks of 512 tokens in e-mails
-   -> currently cutting e-mails longer than 512 into independent chunks and averaging
+ - BERT takes at most 512 tokens, so need to split into smaller chunks
+   -> was cutting e-mails longer than 512 into independent chunks and averaging
+   -> now: cutting up into chunks of size at most 512 each with 20 tokens overlap with the previous
+ - GPT-2 takes at most 1024 tokens
+   -> splitting up into independent chunks (with overlap complicated from probability computation)
+   -> to generate batches: omitting last chunk if has fewer tokens than the other chunks
 
 
 

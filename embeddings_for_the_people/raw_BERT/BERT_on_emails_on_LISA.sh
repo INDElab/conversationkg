@@ -7,7 +7,7 @@
 #SBATCH --mem=40G
 
 #SBATCH --ntasks=1
-#SBATCH --cpus-per-task=6
+##SBATCH --cpus-per-task=6
 #SBATCH --ntasks-per-node=1
 
 ##SBATCH --partition=gpu_shared
