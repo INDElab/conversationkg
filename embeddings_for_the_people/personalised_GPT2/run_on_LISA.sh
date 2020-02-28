@@ -3,8 +3,8 @@
 
 #SBATCH --job-name=W3CGPT2
 
-#SBATCH --time=1:00:00
-#SBATCH --mem=10G
+#SBATCH --time=10:00:00
+#SBATCH --mem=60G
 
 #SBATCH --ntasks=1
 ##SBATCH --cpus-per-task=6
