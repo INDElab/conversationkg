@@ -31,7 +31,7 @@ cp -r $HOME/work/conversationkg/embeddings_for_the_people $TMPDIR
 cd $TMPDIR/embeddings_for_the_people/personalised_GPT2/
 
 
-for n in $(GPT2_X/cat auth_names.txt); do
+for n in $(cat "GPT2_X/auth_names.txt"); do
     trainfile="GPT2_X/$n.train.raw"
     outdir="GPT2_X/lm_$n"
     
@@ -45,7 +45,7 @@ for n in $(GPT2_X/cat auth_names.txt); do
     echo "DONE WITH AUTHOR: $n"
 done
 
-cp -r $TMPDIR/embeddings_for_the_people/personalised_GPT2/GPT2_X $HOME
+cp -r $TMPDIR/embeddings_for_the_people/personalised_GPT2/ $HOME
 
 
 echo "Job W3CGPT2 $PBS_JOBID ENDED at `date`"
