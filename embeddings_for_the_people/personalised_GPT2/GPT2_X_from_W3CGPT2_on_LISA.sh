@@ -40,7 +40,7 @@ for n in $(cat "GPT2_X_from_W3CGPT2/auth_names.txt"); do
     echo "CURRENT AUTHOR: $n"
    
 
-    python3 run_language_modeling.py --train_data_file=$trainfile --model_type=gpt2 --output_dir=$outdir -model_name_or_path=gpt2 --do_train --line_by_line --num_train_epochs=10 --model_name_or_path="W3CGPT2/lm"
+    python3 run_language_modeling.py --train_data_file=$trainfile --model_type=gpt2 --output_dir=$outdir --do_train --line_by_line --num_train_epochs=10 --model_name_or_path="W3CGPT2/lm"
 
     echo "DONE WITH AUTHOR: $n"
 done
