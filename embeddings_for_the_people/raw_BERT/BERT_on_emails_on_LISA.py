@@ -96,6 +96,7 @@ if __name__ == "__main__":
     end = (len(ids)//num_parts)*(part_i+1)
     if part_i == (num_parts -1): end = None
     small = ids[start:end]
+    print("\t\tLEN SMALL ", len(small))
     del ids
     
     print(f"\t\tstart={start}, end={end}")
