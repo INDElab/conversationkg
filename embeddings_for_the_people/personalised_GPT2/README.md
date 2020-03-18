@@ -11,13 +11,19 @@
 - idea, at least theoretically, enabled especially by large-scale pre-trained LMs such as GPT-2 <br>
   -> such LMs have extensive knowledge of the entire semantic and syntagmatic space of language and can therefore
   ground e-mails in larger linguistic context <br>
-  -> such LMs have remarkably low perplexities, indicating high and detailed understanding of data they are subjected to, which leads to the expectation that they should be able to detect even subtle differences in texts such as authorship
+  -> such LMs have remarkably low perplexities, indicating high and detailed understanding of data they are subjected to, which leads to the expectation that they should be able to detect even subtle differences in texts such as authorship <br>
   -> potential downside: an already confident LM may be difficult to be truly adapted to the task at hand; instead such an LM
   may simply ingore additional learning signals since it already achieves low loss
  
  
  
 ## Implementation
+
+### Part 0: Preparation and Splitting of Data
+
+- author selection
+
+- data splits
 
 ### Part 1: tuning GPT-2 on W3C e-mail corpus -> W3CGPT2
 
@@ -28,14 +34,12 @@
 ### Part 3: obtaining priors
 
 
-- author selection
-
-- data splits
-
 - training details: num_epochs, 
 
 
  
 ## Results
+
+### Calculations
 
 - investigated quantities: posterior log-odds (all sorts), 
