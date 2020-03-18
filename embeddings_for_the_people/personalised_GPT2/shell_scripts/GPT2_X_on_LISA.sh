@@ -3,17 +3,17 @@
 
 #SBATCH --job-name=GPT2_x
 
-#SBATCJ -N 1
+#SBATCH -N 1
 
-#SBATCH --time=100:00:00
-#SBATCH --mem=60G
+#SBATCH --time=10:00:00
+#SBATCH --mem=20G
 
 ##SBATCH --ntasks=1
-##SBATCH --cpus-per-task=6
-##SBATCH --ntasks-per-node=1
+#SBATCH --cpus-per-task=6
+#SBATCH --ntasks-per-node=1
 
-##SBATCH --partition=gpu_shared
-##SBATCH --gres=gpu:1
+#SBATCH --partition=gpu_shared
+#SBATCH --gres=gpu:1
 
 
 module load pre2019
@@ -32,20 +32,35 @@ cd $TMPDIR/embeddings_for_the_people/personalised_GPT2/
 
 
 for n in $(cat "GPT2_X/auth_names2.txt"); do
+    echo "CURRENT AUTHOR: $n"
+
     trainfile="GPT2_X/$n.train.raw"
     outdir="GPT2_X/lm_$n"
     
-    rm "$outdir/nothing.txt"
     
-    echo "CURRENT AUTHOR: $n"
-   
+#     elif [[ ! -d $dir ]]; then
+#         echo "$dir already exists but is not a directory" 1>&2
+#     fi
+    # mkdir -p $trainfile
+    # rm "$outdir/nothing.txt"
+    
+    if [[ ! -e $outdir ]]; then
+        mkdir $outdir  
 
-    python3 run_language_modeling.py --train_data_file=$trainfile --model_type=gpt2 --output_dir=$outdir --model_name_or_path=gpt2 --do_train --line_by_line --num_train_epochs=10
+        python3 run_language_modeling.py --train_data_file=$trainfile --model_type=gpt2 --output_dir=$outdir --model_name_or_path=gpt2 --do_train --line_by_line --num_train_epochs=30
 
-    echo "DONE WITH AUTHOR: $n"
+        echo "DONE WITH AUTHOR: $n"
+    
+    
+    else
+        echo "$outdir already exists! skipping this author!"    
+    fi
 done
 
 cp -r $TMPDIR/embeddings_for_the_people/personalised_GPT2/ $HOME
 
 
 echo "Job W3CGPT2 $PBS_JOBID ENDED at `date`"
+
+
+
