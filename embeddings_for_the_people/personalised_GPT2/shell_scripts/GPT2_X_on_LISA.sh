@@ -26,7 +26,7 @@ module load cuDNN/7.3.1-CUDA-10.0.130
 echo "Job GPT2_X $PBS_JOBID STARTED at `date`"
 
 
-cp -r $HOME/work/conversationkg/embeddings_for_the_people $TMPDIR
+cp -r $HOME/conversationkg/embeddings_for_the_people $TMPDIR
 
 cd $TMPDIR/embeddings_for_the_people/personalised_GPT2/
 
