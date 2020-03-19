@@ -2,7 +2,7 @@
 
 
 ## Motivation & Theory
-
+-
 - bigger idea: text as representation of entities -> entity resolution as authorship attribution
 - idea for personalised GPT-2: entity is a generative process for text, a language model can capture this <br>
   -> specicially, an LM can capture $P(m|X)$ for an e-mail $m$ and a person $X$ <br>
