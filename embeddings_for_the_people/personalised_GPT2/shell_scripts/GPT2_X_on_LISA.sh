@@ -59,7 +59,7 @@ for n in $(cat "GPT2_X/auth_names.txt"); do
     if [[ ! -e $outdir ]]; then
         mkdir $outdir  
 
-        python3 run_language_modeling.py --train_data_file=$trainfile --model_type=gpt2 --output_dir=$outdir --model_name_or_path=gpt2 --do_train --line_by_line --num_train_epochs=30
+        python3 run_language_modeling.py --train_data_file=$trainfile --model_type=gpt2 --output_dir=$outdir --model_name_or_path=gpt2 --do_train --line_by_line --num_train_epochs=30 --fp16
 
         echo "DONE WITH AUTHOR: $n"
     
