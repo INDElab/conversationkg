@@ -9,9 +9,9 @@
 #SBATCH --nodes=1
 #SBATCH --partition=gpu
 
-#SBATCH --ntasks=1
-#SBATCH --cpus-per-task=6
-#SBATCH --ntasks-per-node=1
+##SBATCH --ntasks=1
+##SBATCH --cpus-per-task=6
+##SBATCH --ntasks-per-node=1
 
 
 
@@ -59,7 +59,7 @@ for n in $(cat "GPT2_X/auth_names.txt"); do
     if [[ ! -e $outdir ]]; then
         mkdir $outdir  
 
-        python3 run_language_modeling.py --train_data_file=$trainfile --model_type=gpt2 --output_dir=$outdir --model_name_or_path=gpt2 --do_train --line_by_line --num_train_epochs=30 --local_rank=4
+        python3 run_language_modeling.py --train_data_file=$trainfile --model_type=gpt2 --output_dir=$outdir --model_name_or_path=gpt2 --do_train --line_by_line --num_train_epochs=30
 
         echo "DONE WITH AUTHOR: $n"
     
