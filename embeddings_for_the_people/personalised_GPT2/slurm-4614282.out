@@ -1,0 +1,4 @@
+Job GPT2_X  STARTED at Thu Mar 19 17:15:15 CET 2020
+CURRENT AUTHOR: Brian_McBride
+03/19/2020 17:15:21 - WARNING - __main__ -   Process rank: -1, device: cuda, n_gpu: 2, distributed training: False, 16-bits training: False
+slurmstepd: error: *** JOB 4614282 ON r32n4 CANCELLED AT 2020-03-19T17:15:21 ***
