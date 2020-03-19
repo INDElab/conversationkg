@@ -3,17 +3,29 @@
 
 #SBATCH --job-name=GPT2_x
 
-#SBATCH -N 1
-
 #SBATCH --time=10:00:00
 #SBATCH --mem=40G
 
-##SBATCH --ntasks=1
+#SBATCH --nodes=1
+#SBATCH --partition=gpu
+
+#SBATCH --ntasks=1
 #SBATCH --cpus-per-task=6
 #SBATCH --ntasks-per-node=1
 
-#SBATCH --partition=gpu_shared
-#SBATCH --gres=gpu:2
+
+
+
+
+##SBATCH --time=10:00:00
+##SBATCH --mem=40G
+
+##SBATCH --ntasks=1
+##SBATCH --cpus-per-task=6
+##SBATCH --ntasks-per-node=1
+
+##SBATCH --partition=gpu_shared
+##SBATCH --gres=gpu:2
 
 
 module load pre2019
