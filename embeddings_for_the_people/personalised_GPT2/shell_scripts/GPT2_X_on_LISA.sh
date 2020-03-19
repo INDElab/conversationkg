@@ -31,7 +31,7 @@ cp -r $HOME/conversationkg/embeddings_for_the_people $TMPDIR
 cd $TMPDIR/embeddings_for_the_people/personalised_GPT2/
 
 
-for n in $(cat "GPT2_X/auth_names2.txt"); do
+for n in $(cat "GPT2_X/auth_names.txt"); do
     echo "CURRENT AUTHOR: $n"
 
     trainfile="GPT2_X/$n.train.raw"
