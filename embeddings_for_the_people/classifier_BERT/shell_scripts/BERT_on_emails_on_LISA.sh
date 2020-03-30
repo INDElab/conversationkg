@@ -28,7 +28,7 @@ echo "Job BERT_on_emails $PBS_JOBID STARTED at `date`"
 
 cp -r $HOME/conversationkg/embeddings_for_the_people $TMPDIR
 
-cd $TMPDIR/embeddings_for_the_people/classifiert_BERT/
+cd $TMPDIR/embeddings_for_the_people/classifier_BERT/
 
 
 python3 BERT_on_emails.py
