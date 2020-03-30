@@ -17,12 +17,14 @@ import logging
 logging.getLogger("transformers.tokenization_utils").setLevel(logging.ERROR)
 
 
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
 
 # LOAD TOKENIZER AND MODEL
 tokenizer = DistilBertTokenizer.from_pretrained('distilbert-base-cased')
 bert = DistilBertModel.from_pretrained('distilbert-base-cased')
 bert.eval()
-bert.to("cuda")
+bert.to(device)
 
 
 # WRAPPER FOR TOKENIZER CALL
@@ -48,13 +50,13 @@ def email_to_vec(email_body_ids, to_id_first=False, chunk_size=512):
         
     chunks, end_chunk = cut_up(input_ids, chunk_size)
     
-    chunks_cuda = chunks.to("cuda")
+    chunks_cuda = chunks.to(device)
     outputs, *_ = bert(chunks_cuda)
     
     outputs_flattened = outputs.view(-1, outputs.shape[-1])
     
     if end_chunk is not None:
-        end_cuda = end_chunk.to("cuda")
+        end_cuda = end_chunk.to(device)
         end_output, *_ = bert(end_cuda)
         outputs_flattened = torch.cat((outputs_flattened, end_output.squeeze(0)), 0)
         
