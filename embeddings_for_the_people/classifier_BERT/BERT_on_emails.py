@@ -10,8 +10,9 @@ from transformers import DistilBertTokenizer, DistilBertModel#, DistilBertConfig
 
 import torch
 
+import glob
 import pickle
-from tqdm import tqdm
+from tqdm.auto import tqdm
 
 import logging
 logging.getLogger("transformers.tokenization_utils").setLevel(logging.ERROR)
@@ -60,31 +61,29 @@ def email_to_vec(email_body_ids, to_id_first=False, chunk_size=512):
         end_output, *_ = bert(end_cuda)
         outputs_flattened = torch.cat((outputs_flattened, end_output.squeeze(0)), 0)
         
-    return outputs_flattened.cpu().numpy()
-
-
-# import argparse
-
-# def parse_args():
-#     p = argparse.ArgumentParser()
-    
-#     p.add_argument("--k", type=int)
-#     p.add_argument("--i", type=int)
-    
-#     args = p.parse_args()
-#     return args.k, args.i
+    return outputs_flattened.cpu()
 
 
 if __name__ == "__main__":
-    with open("emails_token_ids.pkl", "rb") as handle:
-        ids = pickle.load(handle)
     
     
-    less_ids = ids[:100]
+    if not glob.glob("./emails_token_ids.pkl"):
+        print("Tokenising first...")
+        with open("emails.pkl", "rb") as handle:
+            mails = pickle.load(handle)
+        
+        mails_tokenised = [email_to_ids(e) for e in tqdm(mails)]
     
+        with open("emails_token_ids.pkl", "wb") as handle:
+            pickle.dump(mails_tokenised, handle)
+    else:
+        with open("emails_token_ids.pkl", "rb") as handle:
+            mails_tokenised = pickle.load(handle)
+    
+        
     with torch.no_grad():
         ls = []
-        for mail_tens in ids:
+        for mail_tens in mails_tokenised:
             mail_vec = email_to_vec(mail_tens)
             ls.append(mail_vec)
             
