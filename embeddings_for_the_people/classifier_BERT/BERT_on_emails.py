@@ -65,10 +65,8 @@ def email_to_vec(email_body_ids, to_id_first=False, chunk_size=512):
 
 
 if __name__ == "__main__":
-    
-    
     if not glob.glob("./emails_token_ids.pkl"):
-        print("Tokenising first...")
+        print("TOKENISING FIRST...")
         with open("emails.pkl", "rb") as handle:
             mails = pickle.load(handle)
         
@@ -80,15 +78,14 @@ if __name__ == "__main__":
         with open("emails_token_ids.pkl", "rb") as handle:
             mails_tokenised = pickle.load(handle)
     
+    print("TOKENISATION/LOADING DONE...")
+    print("="*30)
         
     with torch.no_grad():
         ls = []
-        for mail_tens in mails_tokenised:
+        for mail_tens in tqdm(mails_tokenised):
             mail_vec = email_to_vec(mail_tens)
             ls.append(mail_vec)
             
         with open("emails_vectors.pkl", "wb") as handle:
             pickle.dump(ls, handle)
-        
-        
-
