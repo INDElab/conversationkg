@@ -72,7 +72,7 @@ if __name__ == "__main__":
         with open("emails.pkl", "rb") as handle:
             mails = pickle.load(handle)
         
-        mails_tokenised = [email_to_ids(e) for e in tqdm(mails)]
+        mails_tokenised = [email_to_ids(e.body_raw) for e in tqdm(mails)]
     
         with open("emails_token_ids.pkl", "wb") as handle:
             pickle.dump(mails_tokenised, handle)
