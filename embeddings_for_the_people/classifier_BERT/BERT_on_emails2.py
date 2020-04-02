@@ -6,6 +6,26 @@ Created on Thur Apr 02 17:58:57 2020
 @author: valentin
 """
 
+import argparse
+
+def parse_args():
+    p = argparse.ArgumentParser()
+    
+    p.add_argument("--k", type=int)
+    p.add_argument("--i", type=int)
+    
+    args = p.parse_args()
+    return args.k, args.i
+
+num_parts, part_i = parse_args() 
+    
+print("\t\t--- BERT_on_emails2.py ---")
+print(f"\t\tcalled with k={num_parts}, i={part_i}")
+
+
+
+
+
 from transformers import DistilBertTokenizer, DistilBertModel#, DistilBertConfig
 
 import torch
@@ -39,13 +59,18 @@ with torch.no_grad():
 
     with open("emails_token_ids.pkl", "rb") as handle:
         mails_tokenised = pickle.load(handle)
+        start = (len(mails_tokenised)//num_parts)*part_i
+        end = (len(mails_tokenised)//num_parts)*(part_i+1)
+        if part_i == (num_parts - 1): end = None
+        print(f"\t\tstart={start}, end={end}")
+        mails_tokenised = mails_tokenised[start:end]
         
-        
+    chunk_size = 512
         
     ls = []
     
     for mail in tqdm(mails_tokenised):
-        chunks, end_chunk = cut_up(mail, 512) 
+        chunks, end_chunk = cut_up(mail, chunk_size) 
         chunks = chunks[:50]
     
         chunks_cuda = chunks.to(device)
@@ -61,5 +86,5 @@ with torch.no_grad():
         ls.append(outputs_flattened.cpu())
     
     
-    with open("emails_vectors.pkl", "wb") as handle:
+    with open(f"emails_vectors_{part_i}.pkl", "wb") as handle:
         pickle.dump(ls, handle)
