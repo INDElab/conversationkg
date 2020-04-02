@@ -31,7 +31,7 @@ cp -r $HOME/conversationkg/embeddings_for_the_people $TMPDIR
 cd $TMPDIR/embeddings_for_the_people/classifier_BERT/
 
 
-python3 BERT_on_emails.py
+python3 BERT_on_emails2.py
 
 
 cp -r $TMPDIR/embeddings_for_the_people/classifier_BERT/ $HOME
