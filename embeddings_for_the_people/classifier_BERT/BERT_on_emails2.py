@@ -45,7 +45,7 @@ with torch.no_grad():
     ls = []
     
     for mail in tqdm(mails_tokenised):
-        chunks, end_chunk = cut_up(input_ids, chunk_size) 
+        chunks, end_chunk = cut_up(mail, chunk_size) 
         chunks = chunks[:50]
     
         chunks_cuda = chunks.to(device)
