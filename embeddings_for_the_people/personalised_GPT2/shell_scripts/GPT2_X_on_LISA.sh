@@ -1,7 +1,7 @@
 #!/bin/bash
 
 
-#SBATCH --job-name=GPT2_x
+#SBATCH --job-name=GPT2_X
 
 #SBATCH --time=10:00:00
 #SBATCH --mem=60G
@@ -72,7 +72,7 @@ done
 cp -r $TMPDIR/embeddings_for_the_people/personalised_GPT2/ $HOME
 
 
-echo "Job W3CGPT2 $PBS_JOBID ENDED at `date`"
+echo "Job GPT2_X $PBS_JOBID ENDED at `date`"
 
 
 
