@@ -1,4 +1,5 @@
 __pycache__
 /*.pkl
-
-
+data/*.gz
+data/*.pkl
+!data/train_and_test.pkl
