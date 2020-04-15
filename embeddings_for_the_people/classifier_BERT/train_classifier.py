@@ -14,7 +14,7 @@ from tqdm import tqdm
 # logging.getLogger("transformers.tokenization_utils").setLevel(logging.ERROR)
 
 
-from defs_classifier2 import CosineSimilarityClassifierCell, Classifier
+from defs_classifier import CosineSimilarityClassifierCell, Classifier
 
 
 def gen_X(train_X, tknsd_emails):
