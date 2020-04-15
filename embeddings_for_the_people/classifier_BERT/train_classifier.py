@@ -52,7 +52,7 @@ if __name__ == "__main__":
         data
     
     """
-    pairs, true_labels = data_to_list()
+    pairs, true_labels = data_to_ls()
     
     
     """
