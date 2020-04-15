@@ -7,9 +7,9 @@
 #SBATCH --mem=60G
 
 #SBATCH --nodes=1
-#SBATCH --partition=gpu
-# #SBATCH --partition=gpu_shared
-# #SBATCH --gres=gpu:1
+# #SBATCH --partition=gpu
+#SBATCH --partition=gpu_shared
+#SBATCH --gres=gpu:1
 
 
 ##SBATCH --ntasks=1
