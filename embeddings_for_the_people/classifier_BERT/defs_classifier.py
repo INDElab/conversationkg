@@ -168,7 +168,7 @@ class Classifier(nn.Module):
     def fit(self, inputs, true_outputs, epochs=10, num_checkpoints=1):
         loss_f = torch.nn.BCELoss()
         optim = torch.optim.Adam(self.parameters(), lr=0.0001)
-        scheduler = ReduceLROnPlateau(optim, verbose=True)
+#         scheduler = ReduceLROnPlateau(optim, verbose=True)
 
         checkpoint_epochs, path_prefix = self.init_checkpoints(epochs, num_checkpoints)
 
@@ -195,7 +195,7 @@ class Classifier(nn.Module):
 
             # print(loss)
             if i in checkpoint_epochs:
-              self.checkpoint(i, optim, loss, path_prefix)
+                self.checkpoint(i, optim, loss, path_prefix)
         return preds, losses
 
 
