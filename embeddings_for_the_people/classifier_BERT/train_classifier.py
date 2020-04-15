@@ -19,8 +19,10 @@ from defs_classifier import CosineSimilarityClassifierCell, Classifier
 
 def gen_X(train_X, tknsd_emails):
     for i1, i2 in train_X:
-        yield torch.tensor(tknsd_emails[i1], dtype=torch.long),\
-              torch.tensor(tknsd_emails[i2], dtype=torch.long)
+        yield tknsd_emails[i1], tknsd_emails[i2]
+        
+#         yield torch.tensor(tknsd_emails[i1], dtype=torch.long),\
+#               torch.tensor(tknsd_emails[i2], dtype=torch.long)
         
 def gen_Y(train_Y, tknsd_emails):
     return iter(torch.tensor(train_Y, dtype=torch.float))
@@ -90,7 +92,7 @@ if __name__ == "__main__":
         training
     """
     
-    preds, losses = c.fit(pairs, true_labels, epochs=50, num_checkpoints=5)
+    preds, losses = c.fit(pairs, true_labels, epochs=100, num_checkpoints=10)
     
     
     with open(c.checkpoint_folder + "train_predictions.pkl") as handle:
