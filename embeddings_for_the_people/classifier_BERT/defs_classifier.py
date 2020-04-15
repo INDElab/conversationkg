@@ -121,7 +121,7 @@ class Classifier(nn.Module):
             chunks = chunks[:50]
     
             chunks_cuda = chunks.to(device)
-            outputs, *_ = bert(chunks_cuda)
+            outputs, *_ = self.bert(chunks_cuda)
             # outputs = outputs.to("cpu")
   
             outputs_flattened = outputs.view(-1, outputs.shape[-1])
@@ -130,7 +130,7 @@ class Classifier(nn.Module):
 
             if end_chunk is not None:
                 end_cuda = end_chunk.to(device)
-                end_output, *_ = bert(end_cuda)
+                end_output, *_ = self.bert(end_cuda)
                 # end_output = end_output.to("cpu")
                 # print("\t2 ", end_output.shape)
                 # outputs = torch.cat((outputs, end_output), 1)
