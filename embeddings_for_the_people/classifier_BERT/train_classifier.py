@@ -80,7 +80,7 @@ if __name__ == "__main__":
     bert.to(device)
 
     
-    c = Classifier(bert, word_emb_size=bert.config.dim, lstm_hidden_size=int(2**10), lstm_num_layers=2, 
+    c = Classifier(bert, word_emb_size=bert.config.dim, rnn_hidden_size=int(2**10), rnn_num_layers=2, 
                clssfr_cell_type=CosineSimilarityClassifierCell, clssfr_hidden_size=0)
     c.to(device)
 
