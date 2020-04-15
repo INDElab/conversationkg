@@ -5,8 +5,8 @@ from time import time, strftime
 
 import os
 
-# import pickle
-# from tqdm import tqdm
+import pickle
+from tqdm import tqdm
 
 class CosineSimilarityClassifierCell(nn.Module):
     def __init__(self, input_size, hidden_size=None, dropout=0.):
