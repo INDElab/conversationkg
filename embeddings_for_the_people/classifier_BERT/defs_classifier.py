@@ -177,7 +177,7 @@ class Classifier(nn.Module):
         # print(true_outputs)
 
         for i in tqdm(range(1, epochs+1)):
-            for (e1, e2), y in tqdm(zip(inputs, true_outputs), desc="epoch " + str(i)):
+            for (e1, e2), y in tqdm(list(zip(inputs, true_outputs)), desc="epoch " + str(i)):
                 embedded_e1, embedded_e2 = self.bert_embed(e1).unsqueeze(1), self.bert_embed(e2).unsqueeze(1)
                 pred = self.forward((embedded_e1, embedded_e2))
                 preds.append(pred.cpu())
