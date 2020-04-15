@@ -1,13 +1,16 @@
 #!/bin/bash
 
 
-#SBATCH --job-name=BERT_on_emails
+#SBATCH --job-name=train_classifier_BERT
 
 #SBATCH --time=05:00:00
 #SBATCH --mem=60G
 
 #SBATCH --nodes=1
 #SBATCH --partition=gpu
+# #SBATCH --partition=gpu_shared
+# #SBATCH --gres=gpu:1
+
 
 ##SBATCH --ntasks=1
 ##SBATCH --cpus-per-task=6
@@ -28,23 +31,26 @@ echo "Job BERT_on_emails $PBS_JOBID STARTED at `date`"
 
 cp -r $HOME/conversationkg/embeddings_for_the_people $TMPDIR
 
-mkdir $HOME/classifier_BERT
+# mkdir $HOME/classifier_BERT
 
 cd $TMPDIR/embeddings_for_the_people/classifier_BERT/
 
-for j in 0 1 2 3; do
-    echo "SH: call with i=$j"
-    python3 BERT_on_emails2.py --k=4 --i=$j
+python3 train_classifier.py
+
+
+# for j in 0 1 2 3; do
+#     echo "SH: call with i=$j"
+#     python3 BERT_on_emails2.py --k=4 --i=$j
     
     
-    echo "FILE SIZE: " $(du -hcs emails_vectors_$j.pkl)
+#     echo "FILE SIZE: " $(du -hcs emails_vectors_$j.pkl)
     
-    cp emails_vectors_$j.pkl $HOME/classifier_BERT
-done
+#     cp emails_vectors_$j.pkl $HOME/classifier_BERT
+# done
 
 
 
-# cp -r $TMPDIR/embeddings_for_the_people/classifier_BERT/ $HOME
+cp -r $TMPDIR/embeddings_for_the_people/classifier_BERT/ $HOME
 
 
 echo "Job BERT_on_emails $PBS_JOBID ENDED at `date`"
