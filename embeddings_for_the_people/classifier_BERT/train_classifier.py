@@ -19,8 +19,8 @@ from defs_classifier import CosineSimilarityClassifierCell, Classifier
 
 def gen_X(train_X, tknsd_emails):
     for i1, i2 in train_X:
-        yield torch.tensor(tknsd_emails[i1], dtype=torch.int),\
-              torch.tensor(tknsd_emails[i2], dtype=torch.int)
+        yield torch.tensor(tknsd_emails[i1], dtype=torch.long),\
+              torch.tensor(tknsd_emails[i2], dtype=torch.long)
         
 def gen_Y(train_Y, tknsd_emails):
     return iter(torch.tensor(train_Y, dtype=torch.float))
