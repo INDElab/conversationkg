@@ -36,8 +36,8 @@ def generate_forever(iter_func, iter_args):
 def data_to_gen():
     with open("data/train_inds.pkl", "rb") as handle:
         train_data = pickle.load(handle)
-    pairs = train_data[:100, :-1]
-    true = train_data[:100, -1:]
+    pairs = train_data[:, :-1]
+    true = train_data[:, -1:]
     
     with open("data/emails_token_ids.pkl", "rb") as handle:
         emails = pickle.load(handle)
@@ -75,7 +75,7 @@ if __name__ == "__main__":
     """
         parameters
     """
-    epochs = 100
+    epochs = 20
     checkpoints = 10
     
     sentence_vector_len = int(2**10)
@@ -97,7 +97,7 @@ if __name__ == "__main__":
     bert.to(device)
 
     
-    c = Classifier(bert, word_emb_size=bert.config.dim, rnn_hidden_size=int(2**10), rnn_num_layers=2, 
+    c = Classifier(bert, word_emb_size=bert.config.dim, rnn_hidden_size=sentence_vector_len, rnn_num_layers=2, 
                clssfr_cell_type=CosineSimilarityClassifierCell, clssfr_hidden_size=0)
     c.to(device)
 
@@ -107,7 +107,7 @@ if __name__ == "__main__":
         training
     """
     
-    preds, losses = c.fit(pairs, true_labels, epochs=20, num_checkpoints=10, save_to=save_dir)
+    preds, losses = c.fit(pairs, true_labels, epochs=epochs, num_checkpoints=checkpoints, save_to=save_dir)
     
     
     with open(c.checkpoint_folder + "train_predictions.pkl") as handle:
