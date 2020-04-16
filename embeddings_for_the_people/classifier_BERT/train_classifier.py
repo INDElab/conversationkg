@@ -107,7 +107,7 @@ if __name__ == "__main__":
         training
     """
     
-    preds, losses = c.fit(pairs, true_labels, epochs=20, num_checkpoints=10, save_to=save_dirs)
+    preds, losses = c.fit(pairs, true_labels, epochs=20, num_checkpoints=10, save_to=save_dir)
     
     
     with open(c.checkpoint_folder + "train_predictions.pkl") as handle:
