@@ -3,7 +3,7 @@
 
 #SBATCH --job-name=train_classifier_BERT
 
-#SBATCH --time=05:00:00
+#SBATCH --time=32:00:00
 #SBATCH --mem=60G
 
 #SBATCH --nodes=1
