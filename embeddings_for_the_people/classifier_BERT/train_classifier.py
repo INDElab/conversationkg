@@ -36,8 +36,8 @@ def generate_forever(iter_func, iter_args):
 def data_to_gen():
     with open("data/train_inds.pkl", "rb") as handle:
         train_data = pickle.load(handle)
-    pairs = train_data[:, :-1]
-    true = train_data[:, -1:]
+    pairs = train_data[:100, :-1]
+    true = train_data[:100, -1:]
     
     with open("data/emails_token_ids.pkl", "rb") as handle:
         emails = pickle.load(handle)
