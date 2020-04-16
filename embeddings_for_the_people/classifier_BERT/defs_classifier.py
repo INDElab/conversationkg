@@ -165,12 +165,12 @@ class Classifier(nn.Module):
         return self.clssfr((enc1, enc2))
 
 
-    def fit(self, inputs, true_outputs, epochs=10, num_checkpoints=1):
+    def fit(self, inputs, true_outputs, epochs=10, num_checkpoints=1, save_to="./"):
         loss_f = torch.nn.BCELoss()
         optim = torch.optim.Adam(self.parameters(), lr=0.0001)
 #         scheduler = ReduceLROnPlateau(optim, verbose=True)
 
-        checkpoint_epochs, path_prefix = self.init_checkpoints(epochs, num_checkpoints)
+        checkpoint_epochs, path_prefix = self.init_checkpoints(epochs, num_checkpoints, save_to)
 
         losses, preds = [], []
 
@@ -199,9 +199,9 @@ class Classifier(nn.Module):
         return preds, losses
 
 
-    def init_checkpoints(self, epochs, num_checkpoints):
+    def init_checkpoints(self, epochs, num_checkpoints, save_to="./"):
         checkpoint_epochs = {epochs-i*(epochs//num_checkpoints) for i in reversed(range(num_checkpoints))}
-        foldername = "checkpoints_" + strftime("%Y%m%d-%H%M") + "/"
+        foldername = save_to + "checkpoints_" + strftime("%Y%m%d-%H%M") + "/"
 
         self.checkpoint_folder = foldername
 

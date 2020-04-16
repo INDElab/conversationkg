@@ -48,8 +48,23 @@ def data_to_ls():
     pair_gen, true_gen = data_to_gen()
     return list(pair_gen), list(true_gen)
     
+
+    
+    
+import argparse
+
+def parse_args():
+    p = argparse.ArgumentParser()
+    
+    p.add_argument("--save_dir", type=str)
+    
+    args = p.parse_args()
+    return args.save_dir
+
     
 if __name__ == "__main__":
+    save_dir = parse_args() 
+    
     """
         data
     
@@ -92,7 +107,7 @@ if __name__ == "__main__":
         training
     """
     
-    preds, losses = c.fit(pairs, true_labels, epochs=100, num_checkpoints=10)
+    preds, losses = c.fit(pairs, true_labels, epochs=20, num_checkpoints=10, save_to=save_dirs)
     
     
     with open(c.checkpoint_folder + "train_predictions.pkl") as handle:

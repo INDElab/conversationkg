@@ -31,11 +31,11 @@ echo "Job BERT_on_emails $PBS_JOBID STARTED at `date`"
 
 cp -r $HOME/conversationkg/embeddings_for_the_people $TMPDIR
 
-# mkdir $HOME/classifier_BERT
+mkdir $HOME/classifier_BERT
 
 cd $TMPDIR/embeddings_for_the_people/classifier_BERT/
 
-python3 train_classifier.py
+python3 train_classifier.py --save_dir="$HOME/classifier_BERT/"
 
 
 # for j in 0 1 2 3; do
@@ -50,7 +50,7 @@ python3 train_classifier.py
 
 
 
-cp -r $TMPDIR/embeddings_for_the_people/classifier_BERT/ $HOME
+# cp -r $TMPDIR/embeddings_for_the_people/classifier_BERT/ $HOME
 
 
 echo "Job BERT_on_emails $PBS_JOBID ENDED at `date`"
