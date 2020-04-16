@@ -78,7 +78,10 @@ if __name__ == "__main__":
     epochs = 20
     checkpoints = 10
     
-    sentence_vector_len = int(2**10)
+    sentence_vector_len = int(2**9)
+    
+    
+    print("SENTENCE VECOR LENGTH ", sentence_vector_len)
     
 
     
