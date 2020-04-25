@@ -26,12 +26,12 @@ def generate_forever(iter_func, iter_args):
         iter_instance = iter_func(*iter_args)
 
 def data_to_gen():
-    with open("train_inds.pkl", "rb") as handle:
+    with open("data/train_inds.pkl", "rb") as handle:
         train_data = pickle.load(handle)
     pairs = train_data[:, :-1]
     true = train_data[:, -1:]
     
-    with open("emails_token_ids.pkl", "rb") as handle:
+    with open("data/emails_token_ids.pkl", "rb") as handle:
         emails = pickle.load(handle)
         
     return gen_X(pairs, emails), gen_Y(true, emails)
