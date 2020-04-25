@@ -119,7 +119,7 @@ class Classifier(nn.Module):
         # print("\t0 ", text_inds.shape)
         with torch.no_grad():
             chunks, end_chunk = cut_up(text_inds, self.chunk_size) 
-            chunks = chunks[:50]
+            chunks = chunks[:20]
     
             chunks_cuda = chunks.to(device)
             outputs, *_ = self.bert(chunks_cuda)
@@ -179,10 +179,11 @@ class Classifier(nn.Module):
         for i in tqdm(range(1, epochs+1)):
             permutation_inds = np.random.permutation(len(inputs))
             permuted_inputs = [inputs[i] for i in permutation_inds]
-            permuted_true_outputs = torch.tensor([true_outputs[i] for i in permutation_inds]).to(device)
+            permuted_true_outputs = torch.tensor([true_outputs[i] for i in permutation_inds])
             
             for j in tqdm(list(range(0, len(inputs), batch_size)), desc="Epoch " + str(i)):
-                batch_inputs, batch_true_outputs = permuted_inputs[j:j+batch_size], permuted_true_outputs[j:j+batch_size]
+                batch_inputs = permuted_inputs[j:j+batch_size]
+                batch_true_outputs = permuted_true_outputs[j:j+batch_size].to(device)
                 batch_preds = torch.zeros(len(batch_inputs)).to(device)
                 for k, (e1, e2) in list(enumerate(batch_inputs)):
                     embedded_e1, embedded_e2 = self.bert_embed(e1).unsqueeze(1), self.bert_embed(e2).unsqueeze(1)
