@@ -1,20 +1,10 @@
 import torch
-
-from transformers import DistilBertTokenizer, DistilBertModel#, DistilBertConfig
-# from transformers import BertTokenizer, BertModel
-# BERTTokenizer = DistilBertTokenizer
-# BERT = DistilBertModel
-
-import torch
+from transformers import DistilBertTokenizer, DistilBertModel
 
 import pickle
 from tqdm import tqdm
 
 import numpy as np
-
-# import logging
-# logging.getLogger("transformers.tokenization_utils").setLevel(logging.ERROR)
-
 
 from defs_classifier import CosineSimilarityClassifierCell, Classifier
 
@@ -36,28 +26,32 @@ def generate_forever(iter_func, iter_args):
         iter_instance = iter_func(*iter_args)
 
 def data_to_gen():
-    with open("data/train_inds.pkl", "rb") as handle:
+    with open("train_inds.pkl", "rb") as handle:
         train_data = pickle.load(handle)
     pairs = train_data[:, :-1]
     true = train_data[:, -1:]
     
-    with open("data/emails_token_ids.pkl", "rb") as handle:
+    with open("emails_token_ids.pkl", "rb") as handle:
         emails = pickle.load(handle)
         
     return gen_X(pairs, emails), gen_Y(true, emails)
 
-def data_to_ls():
+def data_to_ls(n=-1):
     pair_gen, true_gen = data_to_gen()
-    return list(pair_gen), list(true_gen)
+    if n > 0:
+        return [pair for _, pair in zip(range(n), pair_gen)],\
+                [pair for _, pair in zip(range(n), true_gen)]
+    else:
+        return list(pair_gen), list(true_gen)
     
-
 def train_val_sets(pairs, labels, train_ratio=0.8):
     permutation_inds = np.random.permutation(len(pairs))
-    permuted_pairs = [pairs[i] for i permutation_inds]
-    permuted_labels = [labels[i] for i permutation_inds]
+    permuted_pairs = [pairs[i] for i in permutation_inds]
+    permuted_labels = [labels[i] for i in permutation_inds]
     
-    train = (permuted_pairs[:train_ratio], permuted_labels[:train_ratio])
-    val = (permuted_pairs[train_ratio:], permuted_labels[train_ratio:])
+    train_size = int(len(pairs)*train_ratio)
+    train = (permuted_pairs[:train_size], permuted_labels[:train_size])
+    val = (permuted_pairs[train_size:], permuted_labels[train_size:])
     return train, val
     
     
@@ -78,30 +72,31 @@ if __name__ == "__main__":
     """
         data
     """
-    pairs, true_labels = data_to_ls()
-    
-    (train_pairs, train_labels), (val_pairs, val_labels) = train_val_sets(pairs, true_labels, train_ratio=0.8)
+    pairs, true_labels = data_to_ls(n=-1)
+
+    (train_pairs, train_labels), (val_pairs, val_labels) = train_val_sets(
+                        pairs, true_labels, train_ratio=0.8)
     
     
     """
         parameters
     """
-    epochs = 20
-    checkpoints = 10
+    epochs = 30
+    batch_size = 64
+    checkpoints = 30
     
     sentence_vector_len = int(2**9)
     
     
     print("SENTENCE VECOR LENGTH ", sentence_vector_len)
-    
 
     
     """
-        initialisation 
+            initialisation 
     """
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    
+
     bert = DistilBertModel.from_pretrained("distilbert-base-uncased")
     bert.eval()
 
@@ -110,9 +105,9 @@ if __name__ == "__main__":
 
     bert.to(device)
 
-    
+
     c = Classifier(bert, word_emb_size=bert.config.dim, rnn_hidden_size=sentence_vector_len, rnn_num_layers=2, 
-               clssfr_cell_type=CosineSimilarityClassifierCell, clssfr_hidden_size=0)
+                   clssfr_cell_type=CosineSimilarityClassifierCell, clssfr_hidden_size=0)
     c.to(device)
 
     
@@ -121,7 +116,8 @@ if __name__ == "__main__":
         training
     """
     
-    preds, losses = c.fit(pairs, true_labels, epochs=epochs, num_checkpoints=checkpoints, 
+    preds, losses = c.fit(pairs, true_labels, epochs=epochs, batch_size=batch_size,
+                          num_checkpoints=checkpoints, 
                           validation_data=(val_pairs, val_labels), 
                           save_to=save_dir)
     
