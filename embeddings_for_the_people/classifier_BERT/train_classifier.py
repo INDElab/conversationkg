@@ -82,7 +82,7 @@ if __name__ == "__main__":
         parameters
     """
     epochs = 30
-    batch_size = 64
+    batch_size = 32
     checkpoints = 30
     
     sentence_vector_len = int(2**9)
