@@ -165,18 +165,19 @@ class Classifier(nn.Module):
         return self.clssfr((enc1, enc2))
 
 
-    def fit(self, inputs, true_outputs, epochs=10, num_checkpoints=1, validation_data=None, save_to="./"):
+    def fit(self, inputs, true_outputs, epochs=10, num_checkpoints=1, save_to="./"):
         loss_f = torch.nn.BCELoss()
-        optim = torch.optim.AdamW(self.parameters(), lr=0.001, amsgrad=True, weight_decay=0.01)
+        optim = torch.optim.AdamW(self.parameters(), lr=0.001, amsgrad=True)
 #         scheduler = ReduceLROnPlateau(optim, verbose=True)
 
         checkpoint_epochs, path_prefix = self.init_checkpoints(epochs, num_checkpoints, save_to)
 
         losses, preds = [], []
 
+        # print(true_outputs)
 
         for i in tqdm(range(1, epochs+1)):
-            for (e1, e2), y in tqdm(list(zip(inputs, true_outputs)), desc="Epoch " + str(i)):
+            for (e1, e2), y in tqdm(list(zip(inputs, true_outputs)), desc="epoch " + str(i)):
                 embedded_e1, embedded_e2 = self.bert_embed(e1).unsqueeze(1), self.bert_embed(e2).unsqueeze(1)
                 pred = self.forward((embedded_e1, embedded_e2))
                 preds.append(pred.cpu())
@@ -194,8 +195,7 @@ class Classifier(nn.Module):
 
             # print(loss)
             if i in checkpoint_epochs:
-                self.checkpoint(i, optim, losses, preds, 
-                                validation_data=validation_data, loss_f=loss_f, path=path_prefix)
+                self.checkpoint(i, optim, loss, path_prefix)
         return preds, losses
 
 
@@ -204,65 +204,28 @@ class Classifier(nn.Module):
         foldername = save_to + "checkpoints_" + strftime("%Y%m%d-%H%M") + "/"
 
         self.checkpoint_folder = foldername
+
         os.mkdir(foldername)
+
+        with open(c.checkpoint_folder + "train_predictions.pkl") as handle:
+            pickle.dump(preds)
+                    
+        with open(c.checkpoint_folder + "train_losses.pkl") as handle:
+            pickle.dump(losses)
         
         return checkpoint_epochs, foldername
 
-    
-    def checkpoint(self, epoch, optimizer, losses, preds, validation_data=None, loss_f=None, path=""):        
-        if validation_data:
-            vecs1, vecs2, probs, losses = self.validate(valiadation_data, loss_f)
-            with open(f"{path}/validation_epoch_{epoch:02d}.pth") as handle:
-                pickle.dump({
-                    "vecs1": vecs1,
-                    "vecs2": vecs2,
-                    "probs": probs,
-                    "losses": losses})
-            print("Std. Dev. Validation Probs:\t", round(torch.var(probs).item()**.5, 4))
-            print("Avg. Validation Loss:\t", round(torch.mean(losses).item(), 4))
-            
-        
-        with open(f"{path}/train_losses.pkl", "wb") as handle:
-            pickle.dump(losses)
-        
-        with open(f"{path}/train_preds.pkl", "wb") as handle:
-            pickle.dump(preds)
-        
+    def checkpoint(self, epoch, optimizer, loss, path=None):
         filename = path + f"Classifier_epoch_{epoch:02d}.pth"
+        
         torch.save({
             'epoch': epoch,
             'model_state_dict': self.state_dict(),
             'optimizer_state_dict': optimizer.state_dict(),
-            'loss': losses[-1]}, 
+            'loss': loss}, 
             filename)
-    
-    
-    def validate(self, val_data, loss_f):
-        pairs, labels = val_data
-        k = len(pairs)
-        with torch.no_grad():
-            vecs1 = torch.zeros((k, rnn_hidden_size)).to(device)
-            vecs2 = torch.zeros((k, rnn_hidden_size)).to(device)
-            probs = torch.zeros(k).to(device)
-            losses = torch.zeros(k).to(device)
-            
-            with torch.no_grad():
-                for j, (e1, e2) in tqdm(enumerate(pairs), total=k, desc="\tValidating"):
-                    embedded_e1, embedded_e2 = self.bert_embed(e1).unsqueeze(1), self.bert_embed(e2).unsqueeze(1)
-                    encoded_e1, encoded_e2 = self.encode(embedded_e1), self.encode(embedded_e2)
-                    prob = self.clssfr((encoded_e1, encoded_e2))
-                    
-                    val_loss = loss_f(prob, val_data[j].to(device))
+        
 
-                    vecs1[j] = encoded_e1
-                    vecs2[j] = encoded_e2
-                    probs[j] = prob
-                    losses[j] = val_loss
-        
-        return vecs1.cpu(), vecs2.cpu(), probs.cpu(), losses.cpu()
-        
-        
-        
     @classmethod
     def from_checkpoint(cls, chkpt_dir, model_params, chkpt_name="best", load_params=(None, )):
         if chkpt_name == "best":
@@ -286,3 +249,4 @@ class Classifier(nn.Module):
         c = cls(*model_params)
         c.load_state_dict(loaded_model['model_state_dict'])
         return c, loaded_model
+                                   -

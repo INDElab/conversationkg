@@ -77,10 +77,9 @@ if __name__ == "__main__":
     
     """
         data
+    
     """
     pairs, true_labels = data_to_ls()
-    
-    (train_pairs, train_labels), (val_pairs, val_labels) = train_val_sets(pairs, true_labels, train_ratio=0.8)
     
     
     """
@@ -121,15 +120,19 @@ if __name__ == "__main__":
         training
     """
     
-    preds, losses = c.fit(pairs, true_labels, epochs=epochs, num_checkpoints=checkpoints, 
-                          validation_data=(val_pairs, val_labels), 
-                          save_to=save_dir)
+    preds, losses = c.fit(pairs, true_labels, epochs=epochs, num_checkpoints=checkpoints, save_to=save_dir)
     
     
-#     with open(c.checkpoint_folder + "train_predictions.pkl") as handle:
-#         pickle.dump(preds)
+    with open(c.checkpoint_folder + "train_predictions.pkl") as handle:
+        pickle.dump(preds)
                     
-#     with open(c.checkpoint_folder + "train_losses.pkl") as handle:
-#         pickle.dump(losses)
+    with open(c.checkpoint_folder + "train_losses.pkl") as handle:
+        pickle.dump(losses)
                     
     
+    
+    
+        
+    
+
+
