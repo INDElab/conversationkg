@@ -247,7 +247,7 @@ class Classifier(nn.Module):
                     "vecs2": vecs2,
                     "probs": probs,
                     "losses": losses}, handle)
-            print("Std. Dev. Validation Probs:\t", round(torch.var(probs).item()**.5, 4), flush=True)
+            print("\nStd. Dev. Validation Probs:\t", round(torch.var(probs).item()**.5, 4), flush=True)
             print("Avg. Validation Loss:\t", round(torch.mean(losses).item(), 4), flush=True)
             
         
