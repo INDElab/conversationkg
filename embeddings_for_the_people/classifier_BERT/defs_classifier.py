@@ -277,7 +277,8 @@ class Classifier(nn.Module):
                     lowest_loss = cur_loaded["loss"]
                     loaded_model = cur_loaded
         elif chkpt_name == "latest":
-            loaded_model = torch.load(chkpt_dir + sorted(os.listdir(chkpt_dir))[-1], *load_params)
+            latest_fname = [f for f in sorted(os.listdir(chkpt_dir)) if f.startswith("Classifier_epoch_")][-1]
+            loaded_model = torch.load(chkpt_dir + latest_fname, *load_params)
         else:
             loaded_model = torch.load(chkpt_dir + chkpt_name, *load_params)
             
