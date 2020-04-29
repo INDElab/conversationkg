@@ -90,7 +90,7 @@ if __name__ == "__main__":
     sentence_vector_len = int(2**9)
     
     
-    print("SENTENCE VECOR LENGTH ", sentence_vector_len)
+    print("SENTENCE VECOR LENGTH ", sentence_vector_len, flush=True)
 
     
     """

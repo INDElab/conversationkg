@@ -241,14 +241,14 @@ class Classifier(nn.Module):
     def checkpoint(self, epoch, optimizer, losses, preds, validation_data=None, loss_f=None, path=""):        
         if validation_data:
             vecs1, vecs2, probs, losses = self.validate(validation_data, loss_f)
-            with open(path + "validation_epoch_{epoch:02d}.pth", "wb") as handle:
+            with open(path + f"validation_epoch_{epoch:02d}.pth", "wb") as handle:
                 pickle.dump({
                     "vecs1": vecs1,
                     "vecs2": vecs2,
                     "probs": probs,
                     "losses": losses}, handle)
-            print("Std. Dev. Validation Probs:\t", round(torch.var(probs).item()**.5, 4))
-            print("Avg. Validation Loss:\t", round(torch.mean(losses).item(), 4))
+            print("Std. Dev. Validation Probs:\t", round(torch.var(probs).item()**.5, 4), flush=True)
+            print("Avg. Validation Loss:\t", round(torch.mean(losses).item(), 4), flush=True)
             
         
         with open(path + "train_losses.pkl", "wb") as handle:
@@ -282,9 +282,9 @@ class Classifier(nn.Module):
         else:
             loaded_model = torch.load(chkpt_dir + chkpt_name, *load_params)
             
-        print("Loaded")
-        print("\tepoch: ", loaded_model["epoch"])
-        print("\tloss: ", loaded_model["loss"])
+        print("Loaded", flush=True)
+        print("\tepoch: ", loaded_model["epoch"], flush=True)
+        print("\tloss: ", loaded_model["loss"], flush=True)
                                       
                                       
         c = cls(*model_params)
@@ -299,7 +299,7 @@ class Classifier(nn.Module):
         loss_f = torch.nn.BCELoss()
         optim = torch.optim.AdamW(self.parameters(), lr=0.001, amsgrad=True, weight_decay=0.01)
         optim.load_state_dict(optimizer_state)
-        print("Optimizer: AdamW lr=0.001, amsgrad=True, weight_decay=0.01")
+        print("Optimizer: AdamW lr=0.001, amsgrad=True, weight_decay=0.01", flush=True)
 
         path_prefix = save_to
         checkpoint_epochs = {epochs-i*(epochs//num_checkpoints) for i in reversed(range(num_checkpoints))}
