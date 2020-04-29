@@ -73,7 +73,8 @@ if __name__ == "__main__":
     """
         data
     """
-    pairs, true_labels = data_to_ls(n=-1)
+#     pairs, true_labels = data_to_ls(n=-1)
+    pairs, true_labels = data_to_ls(n=10)
 
     (train_pairs, train_labels), (val_pairs, val_labels) = train_val_sets(
                         pairs, true_labels, train_ratio=0.8)
