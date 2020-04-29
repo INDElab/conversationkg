@@ -298,7 +298,7 @@ class Classifier(nn.Module):
         
         loss_f = torch.nn.BCELoss()
         optim = torch.optim.AdamW(self.parameters(), lr=0.001, amsgrad=True, weight_decay=0.01)
-        optimizer.load_state_dict(optimizer_state)
+        optim.load_state_dict(optimizer_state)
         print("Optimizer: AdamW lr=0.001, amsgrad=True, weight_decay=0.01")
 
         path_prefix = save_to
