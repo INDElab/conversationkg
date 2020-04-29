@@ -38,4 +38,4 @@ cd $TMPDIR/embeddings_for_the_people/classifier_BERT/
 python3 train_classifier.py --save_dir="$HOME/classifier_BERT/checkpoints_20200425-2305/" 
 
 
-echo "Job BERT_on_emails $PBS_JOBID ENDED at `date`"
+echo "Job resuming train_classifier_BERT $PBS_JOBID ENDED at `date`"
