@@ -203,45 +203,6 @@ class Classifier(nn.Module):
                                 validation_data=validation_data, loss_f=loss_f, path=path_prefix)
                 
         return preds, losses
-
-
-    def init_checkpoints(self, epochs, num_checkpoints, save_to="./"):
-        checkpoint_epochs = {epochs-i*(epochs//num_checkpoints) for i in reversed(range(num_checkpoints))}
-        foldername = save_to + "checkpoints_" + strftime("%Y%m%d-%H%M") + "/"
-
-        self.checkpoint_folder = foldername
-        os.mkdir(foldername)
-        
-        return checkpoint_epochs, foldername
-
-    
-    def checkpoint(self, epoch, optimizer, losses, preds, validation_data=None, loss_f=None, path=""):        
-        if validation_data:
-            vecs1, vecs2, probs, losses = self.validate(validation_data, loss_f)
-            with open(f"{path}/validation_epoch_{epoch:02d}.pth", "wb") as handle:
-                pickle.dump({
-                    "vecs1": vecs1,
-                    "vecs2": vecs2,
-                    "probs": probs,
-                    "losses": losses}, handle)
-            print("Std. Dev. Validation Probs:\t", round(torch.var(probs).item()**.5, 4))
-            print("Avg. Validation Loss:\t", round(torch.mean(losses).item(), 4))
-            
-        
-        with open(f"{path}/train_losses.pkl", "wb") as handle:
-            pickle.dump(losses, handle)
-        
-        with open(f"{path}/train_preds.pkl", "wb") as handle:
-            pickle.dump(preds, handle)
-        
-        filename = path + f"Classifier_epoch_{epoch:02d}.pth"
-        torch.save({
-            'epoch': epoch,
-            'model_state_dict': self.state_dict(),
-            'optimizer_state_dict': optimizer.state_dict(),
-            'loss': losses[-1]}, 
-            filename)
-    
     
     def validate(self, val_data, loss_f):
         pairs, labels = val_data
@@ -267,8 +228,44 @@ class Classifier(nn.Module):
         
         return vecs1.cpu(), vecs2.cpu(), probs.cpu(), losses.cpu()
         
+
+    def init_checkpoints(self, epochs, num_checkpoints, save_to="./"):
+        checkpoint_epochs = {epochs-i*(epochs//num_checkpoints) for i in reversed(range(num_checkpoints))}
+        foldername = save_to + "checkpoints_" + strftime("%Y%m%d-%H%M") + "/"
+
+        self.checkpoint_folder = foldername
+        os.mkdir(foldername)
+        return checkpoint_epochs, foldername
+
+    
+    def checkpoint(self, epoch, optimizer, losses, preds, validation_data=None, loss_f=None, path=""):        
+        if validation_data:
+            vecs1, vecs2, probs, losses = self.validate(validation_data, loss_f)
+            with open(path + "validation_epoch_{epoch:02d}.pth", "wb") as handle:
+                pickle.dump({
+                    "vecs1": vecs1,
+                    "vecs2": vecs2,
+                    "probs": probs,
+                    "losses": losses}, handle)
+            print("Std. Dev. Validation Probs:\t", round(torch.var(probs).item()**.5, 4))
+            print("Avg. Validation Loss:\t", round(torch.mean(losses).item(), 4))
+            
         
+        with open(path + "train_losses.pkl", "wb") as handle:
+            pickle.dump(losses, handle)
         
+        with open(path + "train_preds.pkl", "wb") as handle:
+            pickle.dump(preds, handle)
+        
+        filename = path + f"Classifier_epoch_{epoch:02d}.pth"
+        torch.save({
+            'epoch': epoch,
+            'model_state_dict': self.state_dict(),
+            'optimizer_state_dict': optimizer.state_dict(),
+            'loss': losses[-1]}, 
+            filename)
+
+
     @classmethod
     def from_checkpoint(cls, chkpt_dir, model_params, chkpt_name="best", load_params=(None, )):
         if chkpt_name == "best":
@@ -295,12 +292,51 @@ class Classifier(nn.Module):
     
     
     
+    def resume_fit(self, inputs, true_outputs, optimizer_state, initial_epoch, 
+                   epochs=10, batch_size=32, num_checkpoints=1, validation_data=None, save_to="./"):
+        
+        loss_f = torch.nn.BCELoss()
+        optim = torch.optim.AdamW(self.parameters(), lr=0.001, amsgrad=True, weight_decay=0.01)
+        optimizer.load_state_dict(optimizer_state)
+        print("Optimizer: AdamW lr=0.001, amsgrad=True, weight_decay=0.01")
+
+        path_prefix = save_to
+        checkpoint_epochs = {epochs-i*(epochs//num_checkpoints) for i in reversed(range(num_checkpoints))}
+        
+        losses, preds = [], []
     
+        for i in tqdm(range(1, epochs+1)):
+            permutation_inds = np.random.permutation(len(inputs))
+            permuted_inputs = [inputs[i] for i in permutation_inds]
+            permuted_true_outputs = torch.tensor([true_outputs[i] for i in permutation_inds])
+            
+            for j in tqdm(list(range(0, len(inputs), batch_size)), desc="Epoch " + str(i)):
+                batch_inputs = permuted_inputs[j:j+batch_size]
+                batch_true_outputs = permuted_true_outputs[j:j+batch_size].to(device)
+                batch_preds = torch.zeros(len(batch_inputs)).to(device)
+                for k, (e1, e2) in list(enumerate(batch_inputs)):
+                    embedded_e1, embedded_e2 = self.bert_embed(e1).unsqueeze(1), self.bert_embed(e2).unsqueeze(1)
+                    pred = self.forward((embedded_e1, embedded_e2))
+                    
+                    batch_preds[k] = pred
+                    preds.append(pred.cpu())
+                    
+                loss = loss_f(batch_preds, batch_true_outputs)
+                losses.append(loss.cpu())
+                
+                optim.zero_grad()
+                loss.backward()
+                optim.step()
+            if i in checkpoint_epochs:
+                self.checkpoint(i+initial_epoch, optim, losses, preds, 
+                                validation_data=validation_data, loss_f=loss_f, path=path_prefix)
+                
+        return preds, losses
+
     
+
     
-    
-    
-    
+
     
 # ======================
 #  OLD FITTING FUNCTION    
