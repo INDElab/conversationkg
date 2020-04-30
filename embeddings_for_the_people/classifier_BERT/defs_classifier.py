@@ -14,17 +14,14 @@ class CosineSimilarityClassifierCell(nn.Module):
         super(CosineSimilarityClassifierCell, self).__init__()
         self.similarity = nn.CosineSimilarity(dim=1, eps=1e-08)
         self.sigmoid = nn.Sigmoid()
+        self.min_p, self.max_p = self.sigmoid(torch.tensor([-1., 1.]))
     
     
     def forward(self, inputs):
         vec1, vec2 = inputs
-        # print("\tclassifier input: ", vec1.shape)
-
-        # inner product instead of concatenation
         sim = self.similarity(vec1, vec2)
-
-        # print("\tsimilarity: ", sim.shape)
-        return self.sigmoid(sim)
+        prob = self.sigmoid(sim)
+        return (prob - self.min_p) / (self.max_p - self.min_p)
 
 
 class InnerProductClassifierCell(nn.Module):
@@ -169,8 +166,9 @@ class Classifier(nn.Module):
     
     def fit(self, inputs, true_outputs, epochs=10, batch_size=32, num_checkpoints=1, validation_data=None, save_to="./"):
         loss_f = torch.nn.BCELoss()
-        optim = torch.optim.AdamW(self.parameters(), lr=0.001, amsgrad=True, weight_decay=0.01)
-#         scheduler = ReduceLROnPlateau(optim, verbose=True)
+        optim = torch.optim.Adam(self.parameters(), lr=0.01, amsgrad=False, weight_decay=0.05)
+        
+        scheduler = ReduceLROnPlateau(optim, patience=2, threshold=0.001, verbose=True)
 
         checkpoint_epochs, path_prefix = self.init_checkpoints(epochs, num_checkpoints, save_to)
         
@@ -199,9 +197,10 @@ class Classifier(nn.Module):
                 loss.backward()
                 optim.step()
             if i in checkpoint_epochs:
-                self.checkpoint(i, optim, losses, preds, 
-                                validation_data=validation_data, loss_f=loss_f, path=path_prefix)
-                
+                mean_val_loss = self.checkpoint(i, optim, losses, preds, 
+                                                validation_data=validation_data, loss_f=loss_f, path=path_prefix)
+            
+                scheduler.step(mean_val_loss)
         return preds, losses
     
     def validate(self, val_data, loss_f):
@@ -264,6 +263,11 @@ class Classifier(nn.Module):
             'optimizer_state_dict': optimizer.state_dict(),
             'loss': losses[-1]}, 
             filename)
+        
+        if validation_data:
+            return torch.mean(losses)
+        else:
+            return None
 
 
     @classmethod

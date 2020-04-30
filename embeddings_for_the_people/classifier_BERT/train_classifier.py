@@ -72,7 +72,10 @@ if __name__ == "__main__":
     """
         data
     """
-    pairs, true_labels = data_to_ls(n=-1)
+    num_pairs = 20000
+    print(f"USING {num_pairs} PAIRS", flush=True)
+    
+    pairs, true_labels = data_to_ls(n=num_pairs)
 
     (train_pairs, train_labels), (val_pairs, val_labels) = train_val_sets(
                         pairs, true_labels, train_ratio=0.8)
@@ -88,7 +91,7 @@ if __name__ == "__main__":
     sentence_vector_len = int(2**9)
     
     
-    print("SENTENCE VECOR LENGTH ", sentence_vector_len)
+    print("SENTENCE VECTOR LENGTH ", sentence_vector_len, flush=True)
 
     
     """
@@ -97,7 +100,7 @@ if __name__ == "__main__":
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
-    bert = DistilBertModel.from_pretrained("distilbert-base-uncased")
+    bert = DistilBertModel.from_pretrained("distilbert-base-cased")
     bert.eval()
 
     for param in bert.parameters():

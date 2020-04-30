@@ -25,7 +25,7 @@ module load CUDA/10.0.130
 module load cuDNN/7.3.1-CUDA-10.0.130
 
 
-echo "Job train_classifier_BERT $PBS_JOBID STARTED at `date`"
+echo "Job EXPERIMENTAL train_classifier_BERT $PBS_JOBID STARTED at `date`"
 
 
 
