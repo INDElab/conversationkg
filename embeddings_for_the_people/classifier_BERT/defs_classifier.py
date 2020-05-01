@@ -168,7 +168,7 @@ class Classifier(nn.Module):
         loss_f = torch.nn.BCELoss()
         optim = torch.optim.Adam(self.parameters(), lr=0.01, amsgrad=False, weight_decay=0.05)
         
-        scheduler = ReduceLROnPlateau(optim, patience=2, threshold=0.001, verbose=True)
+        scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optim, patience=2, threshold=0.001, verbose=True)
 
         checkpoint_epochs, path_prefix = self.init_checkpoints(epochs, num_checkpoints, save_to)
         
