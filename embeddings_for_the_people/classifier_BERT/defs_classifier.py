@@ -308,7 +308,13 @@ class Classifier(nn.Module):
         path_prefix = save_to
         checkpoint_epochs = {epochs-i*(epochs//num_checkpoints) for i in reversed(range(num_checkpoints))}
         
-        losses, preds = [], []
+        with open(path_prefix + "train_losses.pkl", "rb") as handle:
+            losses = pickle.load(handle)
+        
+        with open(path_prefix + "train_preds.pkl", "rb") as handle:
+            preds = pickle.load(handle)
+        
+#         losses, preds = [], []
     
         for i in tqdm(range(1, epochs+1)):
             permutation_inds = np.random.permutation(len(inputs))
