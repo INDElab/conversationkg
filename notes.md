@@ -18,7 +18,7 @@ A place for shared notes and pointers
     - Connecting to KB such as Wikidata, linking and resolving entities
     - Using ML methods on the data, e.g. topic modelling or open IE <br>
        => perhaps embedding-based with BERT
-    - 
+    - Gathering mentioned or attached documents and 
     
 - Conversation-based KG: 
     - (More detailed) indexing of mentions of entities and concepts in dialogues (-> cf. tracking)
@@ -26,9 +26,11 @@ A place for shared notes and pointers
        -> e.g. dialogue-typical distributions and their implications
     - Work more towards conversation-based data structure
     - Tracking and analysing entities' involvement in and across conversations
+    
 
 - Misc:
     - Anticipating the 'completedness' of a conversation? E.g. by modelling the probability of another reply
     - Gauging the degree of 'self-standingness' of a conversation? <br>
       => e.g. by the required number of links to a large KB
+    - Linguistic/Stylistic analyses? 
   
