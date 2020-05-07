@@ -19,7 +19,7 @@ A place for shared notes and pointers
     - Using ML methods on the data, e.g. topic modelling or open IE <br>
        => perhaps embedding-based with BERT
     - Gathering mentioned or attached documents <br>
-      => techniques from data and knowledge fusion [Google Paper](http://www.vldb.org/pvldb/vol7/p881-dong.pdf)
+      => techniques from knowledge fusion [(Google Paper)](http://www.vldb.org/pvldb/vol7/p881-dong.pdf)
     
 - Conversation-based KG: 
     - (More detailed) indexing of mentions of entities and concepts in dialogues (-> cf. tracking)
@@ -34,5 +34,5 @@ A place for shared notes and pointers
     - Gauging the degree of 'self-standingness' of a conversation? <br>
       => e.g. by the required number of links to a large KB
     - Questions & Answers: Decide which questions are answered and find their answers
-    - Linguistic/Stylistic analyses? 
+    - Linguistic/Stylistic analyses? e.g. detecting and classifying meta-dialogue expressions 
   
