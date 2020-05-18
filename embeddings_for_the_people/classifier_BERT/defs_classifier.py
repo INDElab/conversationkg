@@ -239,15 +239,15 @@ class Classifier(nn.Module):
     
     def checkpoint(self, epoch, optimizer, losses, preds, validation_data=None, loss_f=None, path=""):        
         if validation_data:
-            vecs1, vecs2, probs, losses = self.validate(validation_data, loss_f)
+            vecs1, vecs2, val_probs, val_losses = self.validate(validation_data, loss_f)
             with open(path + f"validation_epoch_{epoch:02d}.pth", "wb") as handle:
                 pickle.dump({
                     "vecs1": vecs1,
                     "vecs2": vecs2,
-                    "probs": probs,
-                    "losses": losses}, handle)
-            print("\nStd. Dev. Validation Probs:\t", round(torch.var(probs).item()**.5, 4), flush=True)
-            print("Avg. Validation Loss:\t", round(torch.mean(losses).item(), 4), flush=True)
+                    "probs": val_probs,
+                    "losses": val_losses}, handle)
+            print("\nStd. Dev. Validation Probs:\t", round(torch.var(val_probs).item()**.5, 4), flush=True)
+            print("Avg. Validation Loss:\t", round(torch.mean(val_losses).item(), 4), flush=True)
             
         
         with open(path + "train_losses.pkl", "wb") as handle:
