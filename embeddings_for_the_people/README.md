@@ -47,8 +47,7 @@
 
 - negative samples: from the set of all emails in the corpus, sample a set of pairs
 
-- 
-
+- 100000 samples of type ((e_1, e_2), is_positive)
 
 - positive-negative ratio in the training data is 30/70; <br>
   classifier should be aware that in most cases, two random emails are _not_ from the same author
@@ -73,6 +72,7 @@
 ### Classifier BERT
 
  - instead of averaging, train an LSTM to aggregate the embeddings from BERT into a single vector
+ 
  - the LSTM is explicitly trained s.t. emails from the same label are embedded into vectors with high cosine similarity
     
     
@@ -112,9 +112,7 @@
 
    <br><br>
    
- - embedding space visualisation
-
- - histogram <br>
+ - histogram of classifier predictions <br>
  
  ![Histogram](https://github.com/pgroth/conversationkg/blob/master/embeddings_for_the_people/classifier_BERT/results/images/negative_positive_histograms_LSTM%2BBERT.png)
 
@@ -126,7 +124,8 @@
  
  - fact that averaging BERT embeddings is better than the LSTM which is specifically tuned is puzzling <br>
    => probably something gone wrong during training <br>
-   => BERT embeddings might perhaps obfuscate 
+ 
+ - altogether, BERT embeddings might perhaps obfuscate more than help in detecting the relevant signal in the data 
    
 
 
