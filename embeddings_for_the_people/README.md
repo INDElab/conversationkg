@@ -68,11 +68,27 @@
    | avg BERT  |    0.90   |   | 0.63 |   0.71   |       0.75       |    0.51   |  0.83  |
    | avg BERT  |    0.93   |   | 0.63 |   0.76   |       0.74       |   0.59    |  0.69  |
    |           |           |   |      |          |                  |           |        |
-   | LSTM+BERT |    0.76   |   | 0.43 |   0.67   |       0.60       |   0.44    |  0.42  |
-   | LSTM+BERT |    0.90   |   | 0.31 |   0.70   |       0.56       |   0.49    |  0.23  |
+   | BERT+LSTM |    0.76   |   | 0.43 |   0.67   |       0.60       |   0.44    |  0.42  |
+   | BERT+LSTM |    0.90   |   | 0.31 |   0.70   |       0.56       |   0.49    |  0.23  |
    
    
  - receiver operating characteristic (ROC) and area under the curve (AUC) 
+ 
+   1. Jaccard similarity 
+   ![ROC of Jaccard](
+  https://github.com/pgroth/conversationkg/tree/master/embeddings_for_the_people/classifier_BERT/results/images/ROC_Jaccard.png)
+
+   2. Averaged BERT
+   
+      ![ROC of avg BERT](
+  https://github.com/pgroth/conversationkg/tree/master/embeddings_for_the_people/classifier_BERT/results/images/ROC_avg_BERT.png)
+  
+  3. BERT+LSTM
+  
+     ![ROC of BERT+LSTM](
+  https://github.com/pgroth/conversationkg/tree/master/embeddings_for_the_people/classifier_BERT/results/images/ROC_LSTM+BERT.png)
+
+
 
  - embedding space visualisation
 
