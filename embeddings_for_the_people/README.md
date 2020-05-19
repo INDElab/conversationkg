@@ -60,7 +60,7 @@
  - classifier scoring metrics: F1, accuracy, balanced accuracy (accounts for uneven class proportions), precision, recall
  
 
-   | model     | threshold |   |  F1  | accuracy | balanced accracy | precision | recall |
+   | model     | threshold |   |  F1  | accuracy | balanced accuracy | precision | recall |
    |-----------|:---------:|---|:----:|:--------:|:----------------:|:---------:|:------:|
    | Jaccard   |    0.15   |   | 0.69 |   0.82   |       0.77       |    0.72   |  0.66  |
    | Jaccard   |    0.18   |   | 0.67 |   0.83   |       0.76       |    0.81   |  0.57  |
@@ -92,7 +92,8 @@
    
  - embedding space visualisation
 
- - histogram 
+ - histogram <br>
+ 
  ![Histogram](https://github.com/pgroth/conversationkg/blob/master/embeddings_for_the_people/classifier_BERT/results/images/negative_positive_histograms_LSTM%2BBERT.png)
 
 ## Conclusions
