@@ -59,14 +59,16 @@
 
  - classifier scoring metrics: F1, accuracy, balanced accuracy (accounts for uneven class proportions), precision, recall
  
- | model     | threshold | f1   | acc   | b_acc | prec  | rec  |
- |-----------|-----------|------|-------|-------|-------|------|
- | Jaccard   | 0.15      | 0.69 | 0.82  | 0.77  | 0.72  | 0.66 |
- | Jaccard   | 0.18      | 0.67 | 0.83  | 0.76  | 0.81  | 0.57 |
- | avg BERT  | 0.90      | 0.63 | 0.71  | 0.75  | 0.51  | 0.83 |
- | avg BERT  | 0.93      | 0.63 | 0.76  | 0.74  | 0.59  | 0.69 |
- | LSTM+BERT |           |      |       |       |       |      |
- 
+   | model     | threshold |  F1  | accuracy | balanced accracy | precision | recall |
+   |-----------|:---------:|:----:|:--------:|:----------------:|:---------:|:------:|
+   | Jaccard   |    0.15   | 0.69 |   0.82   |       0.77       |    0.72   |  0.66  |
+   | Jaccard   |    0.18   | 0.67 |   0.83   |       0.76       |    0.81   |  0.57  |
+   |           |           |      |          |                  |           |        |
+   | avg BERT  |    0.90   | 0.63 |   0.71   |       0.75       |    0.51   |  0.83  |
+   | avg BERT  |    0.93   | 0.63 |   0.76   |       0.74       |   0.59    |  0.69  |
+   |           |           |      |          |                  |           |        |
+   | LSTM+BERT |    0.76   | 0.43 |   0.67   |       0.60       |   0.44    |  0.42  |
+   | LSTM+BERT |    0.90   | 0.31 |   0.70   |       0.56       |   0.49    |  0.23  |
  
  - receiver operating characteristic (ROC) and area under the curve (AUC) 
 
