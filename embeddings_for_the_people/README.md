@@ -42,15 +42,22 @@
  1. Jaccard Similarity: arguably a most naive baseline; no learning involved, i.e. no parameters <br>
     given emails e_1 and e_2 simply computes the multiset Jaccard similarity between them
    
- 2. averaged BERT embeddings: given a tokenised text, the pre-trained BERT model returns embeddings for each token in the text <br>
-    this baseline computes the average embedding of the tokens in e_1 and e_2, respectively, and then the similarity of the averages <br>
-    however: [1] show that average BERT embeddings 
+ 2. averaged BERT embeddings: given a tokenised text, the pre-trained BERT model returns embeddings for each token in the text
+    - this baseline computes the average embedding of the tokens in e_1 and e_2, respectively, and then the similarity of the averages
+    - however: [1] demonstrate that averaged BERT embeddings do not perform better than averaged GloVe embeddings and [2] explain why BERT does not directly allow for language model interpretations
+    - moreover, initial visualisations of the embedding space suggest that true positives are not likely detected by this model (embeddings of emails from the same author labels are uniformly spread across the embedding space)
+    
+    
+### Classifier BERT
+
+ - instead of averaging, train an LSTM to aggregate the embeddings from BERT into a single vector
+ - 
     
     
     
     
-[1]: (Sentence-BERT: Sentence Embeddings using Siamese BERT-Networks) https://arxiv.org/pdf/1908.10084.pdf
-[2]: 
+[1]: Sentence-BERT: Sentence Embeddings using Siamese BERT-Networks (https://arxiv.org/pdf/1908.10084.pdf)
+[2]: Language Models with Transformers (https://arxiv.org/pdf/1904.09408.pdf)
 
 
 
