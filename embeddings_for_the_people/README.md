@@ -74,17 +74,11 @@
    
  - receiver operating characteristic (ROC) and area under the curve (AUC) 
  
-   1. Jaccard similarity 
-   ![ROC of Jaccard](
-  https://github.com/pgroth/conversationkg/tree/master/embeddings_for_the_people/classifier_BERT/results/images/ROC_Jaccard.png)
+   1. Jaccard similarity ![ROC of Jaccard](https://github.com/pgroth/conversationkg/blob/master/embeddings_for_the_people/classifier_BERT/results/images/ROC_Jaccard.png)
 
-   2. Averaged BERT
-      ![ROC of avg BERT](
-  https://github.com/pgroth/conversationkg/blob/master/embeddings_for_the_people/classifier_BERT/results/images/ROC_avg_BERT.png)
+   2. Averaged BERT ![ROC of avg BERT](https://github.com/pgroth/conversationkg/blob/master/embeddings_for_the_people/classifier_BERT/results/images/ROC_avg_BERT.png)
   
-  3. BERT+LSTM
-     ![ROC of BERT+LSTM](
-  https://github.com/pgroth/conversationkg/blob/master/embeddings_for_the_people/classifier_BERT/results/images/ROC_LSTM%2BBERT.png)
+  3. BERT+LSTM ![ROC of BERT+LSTM](https://github.com/pgroth/conversationkg/blob/master/embeddings_for_the_people/classifier_BERT/results/images/ROC_LSTM%2BBERT.png)
 
 
 
