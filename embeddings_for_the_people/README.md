@@ -21,7 +21,67 @@
 
 ## Task
 
-- given two emails $e_1$ and $e_2$ with labels $l_1$ and $l_2$
+- given two emails e_1 and e_2 from author _labels_ X and Y, decide whether X and Y are labels for the same entity <br>
+  can be phrased as P(author(e_1) = author(e_2))
+
+- in order perform entity resolution, we form/sample email pairs from all/some labels X and Y and merge the labels if the emails pair has high probability of being from the same author (labels becomes aliases) <br>
+    advantage: 
+ 
+## Data
+
+- need pairs of e-mails to train a 
+
+
+## Models
+
+- all models first compute a similarity score that is then transformed into a probability by the sigmoid function
+
+
+### Baselines
+
+ 1. Jaccard Similarity: arguably a most naive baseline; no learning involved, i.e. no parameters <br>
+    given emails e_1 and e_2 simply computes the multiset Jaccard similarity between them
+   
+ 2. averaged BERT embeddings: given a tokenised text, the pre-trained BERT model returns embeddings for each token in the text <br>
+    this baseline computes the average embedding of the tokens in e_1 and e_2, respectively, and then the similarity of the averages <br>
+    however: [1] show that average BERT embeddings 
+    
+    
+    
+    
+[1]: (Sentence-BERT: Sentence Embeddings using Siamese BERT-Networks) https://arxiv.org/pdf/1908.10084.pdf
+[2]: 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
