@@ -57,6 +57,7 @@
     
     
 [1]: Sentence-BERT: Sentence Embeddings using Siamese BERT-Networks (https://arxiv.org/pdf/1908.10084.pdf)
+
 [2]: Language Models with Transformers (https://arxiv.org/pdf/1904.09408.pdf)
 
 
