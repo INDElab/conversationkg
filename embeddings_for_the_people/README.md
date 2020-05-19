@@ -93,7 +93,7 @@
  - embedding space visualisation
 
  - histogram 
- ![Histogram](https://github.com/pgroth/conversationkg/tree/master/embeddings_for_the_people/classifier_BERT/results/images/negative_positive_histograms_LSTM+BERT.png)
+ ![Histogram](https://github.com/pgroth/conversationkg/blob/master/embeddings_for_the_people/classifier_BERT/results/images/negative_positive_histograms_LSTM%2BBERT.png)
 
 ## Conclusions
 
