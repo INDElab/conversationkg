@@ -88,17 +88,22 @@
   
   ![ROC of BERT+LSTM](https://github.com/pgroth/conversationkg/blob/master/embeddings_for_the_people/classifier_BERT/results/images/ROC_LSTM%2BBERT.png)
 
-
-
+   <br><br>
+   
  - embedding space visualisation
 
-
+ - histogram 
+ ![Histogram](https://github.com/pgroth/conversationkg/tree/master/embeddings_for_the_people/classifier_BERT/results/images/negative_positive_histograms_LSTM+BERT.png)
 
 ## Conclusions
 
  - Jaccard similarity is a very strong baseline, could actually provide a useful model <br>
    -> shows that task is feasible in principle (additional heuristics could further improve performance)
- - fact that averaging BERT embeddings is better than 
+ 
+ - fact that averaging BERT embeddings is better than the LSTM which is specifically tuned is puzzling <br>
+   => probably something gone wrong during training <br>
+   => BERT embeddings might perhaps obfuscate 
+   
 
 
 
