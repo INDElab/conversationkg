@@ -1,5 +1,5 @@
 # conversationkg
-Building knowledge graphs and analysis from dialogue
+Building knowledge graphs from dialogue and analyzing them
 
 Guide to directories
 
