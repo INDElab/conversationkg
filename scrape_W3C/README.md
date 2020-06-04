@@ -26,7 +26,11 @@ The hierarchical structure of the W3C mailinglist archives is `[mailinglist]/[ti
 
 ### Data Structure
 
-- mailinglists.json: a plain list of the names of the mailinglists listed on [lists.w3.org](https://lists.w3.org)
+- [mailinglists.json](LINK HERE): a plain list of the names of the mailinglists listed on https://lists.w3.org
+
+
+- [periods.json](LINK HERE): 
+
 
 
 ### Stats (Theoretical)
