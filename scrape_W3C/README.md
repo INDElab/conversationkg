@@ -19,6 +19,10 @@
 
 
 
+
+
+
+
 ## The Corpus
 
 The hierarchical structure of the W3C mailinglist archives is `[mailinglist]/[time period]/[subject string]/[email]`. Rather than collecting all emails into one set, we keep this structure so that we can later readily recover conversations and their organisational and temporal contexts.
@@ -29,7 +33,9 @@ The hierarchical structure of the W3C mailinglist archives is `[mailinglist]/[ti
 - [mailinglists.json](LINK HERE): a plain list of the names of the mailinglists listed on https://lists.w3.org
 
 
-- [periods.json](LINK HERE): 
+- [periods.json](LINK HERE): a dict which lists the time period names (such as `2002Aug`) per mailinglist
+
+- [subjects](LINK HERE): in which each folder 
 
 
 
@@ -40,8 +46,21 @@ those obtained from the pages which list these hierarchies (which were in fact a
 
 - mailinglists: 1597
 
-- time periods: 37681 in total;<br> see `periods.json` for the lists of periods per mailinglist;<br> 406 mailinglists do not have a single period (partly due to parsing issues)
+- time periods: 37681 in total;<br> see `periods.json` for the lists of periods per mailinglist;<br> 406 mailinglists do not have any time periods (partly due to parsing issues)
 
 - subjects: 
+
+
+
+### Omitted Data
+
+Email(s) omitted in the case of:
+
+- mailinglist does not have a time period listing in the standard W3C archive format (some older lists and announcement lists)
+
+- subject lists unparseable, either wholly or partly (mainly due to inconsistent character encodings)
+
+- 
+
 
 
