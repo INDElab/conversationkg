@@ -35,7 +35,7 @@ The hierarchical structure of the W3C mailinglist archives is `[mailinglist]/[ti
 
 - [periods.json](LINK HERE): a dict which lists the time period names (such as `2002Aug`) per mailinglist
 
-- [subjects](LINK HERE): in which each folder 
+- [subjects](LINK HERE): each subdirectory has a file `subjects.json` which contains a list of lists of subject strings; each of the sublists corresponds (by index) to a period (as listed in `periods.json`)
 
 
 
