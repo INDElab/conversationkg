@@ -10,11 +10,11 @@ The hierarchical structure of the W3C mailinglist archives is `[mailinglist]/[ti
 
 ### Listings
 
-- [mailinglists.json](LINK HERE): a plain list of the names of the mailinglists listed on https://lists.w3.org
+- [mailinglists.json](https://github.com/pgroth/conversationkg/blob/master/scrape_W3C/collected_listings/mailinglists.json): a plain list of the names of the mailinglists listed on https://lists.w3.org
 
-- [periods.json](LINK HERE): a dict which lists the time period names (such as `2002Aug`) per mailinglist
+- [periods.json](https://github.com/pgroth/conversationkg/blob/master/scrape_W3C/collected_listings/periods.json): a dict which lists the time period names (such as `2002Aug`) per mailinglist
 
-- [subjects](LINK HERE): each file (named by a mailinglist, e.g. `html-tidy.json`) contains a list of lists of subject strings; each of the sublists corresponds (by index) to a period (as listed in `periods.json`); hence, each file is a list of lists (each subject in each sublist is actually a tuple consisting of the subject string itself and a list of the names of the emails in that subject)
+- [subjects](https://github.com/pgroth/conversationkg/blob/master/scrape_W3C/collected_listings/subjects/): each file (named by a mailinglist, e.g. `html-tidy.json`) contains a list of lists of subject strings; each of the sublists corresponds (by index) to a period (as listed in `periods.json`); hence, each file is a list of lists (each subject in each sublist is actually a tuple consisting of the subject string itself and a list of the names of the emails in that subject)
 
 ### Stats (Theoretical)
 
