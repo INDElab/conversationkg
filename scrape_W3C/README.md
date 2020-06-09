@@ -48,7 +48,8 @@ those obtained from the pages which list these hierarchies (which were in fact a
 
 - emails: 1886020 in total; each mailinglist has an average of 1180 emails (std dev 4905)
 
-Additionally, the pages listing the time periods of each mailinglist indicate the number of emails per time period. These numbers can be used to check the number numbers of obtained download links and emails against, to know how many fall through the cracks due to server or parsing errors. 
+Additionally, the pages listing the time periods of each mailinglist indicate the number of emails per time period. These numbers can be used to check the number numbers of obtained download links and emails against, to know how many fall through the cracks due to server or parsing errors. NB: upon manual inspections, these numbers are not always accurate.
+Can be found in `number.json`, a dict of lists, listing the numbers of emails per time period and mailinglist.
 
 
 ### Omitted Data
@@ -60,6 +61,3 @@ Email(s) omitted in the case of:
 - subject lists unparseable, either wholly or partly (mainly due to inconsistent character encodings)
 
 - 
-
-
-
