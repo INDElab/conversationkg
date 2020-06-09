@@ -1,0 +1,467 @@
+[09-06-2020 03:20:52]: xml-dist-app/2002Mar/subject.html: process_ul: <li> 0 has no <ul>
+[09-06-2020 03:20:56]: public-dap-commits/2012Jan/subject.html: process_ul: <li> 0 has no <ul>
+[09-06-2020 03:20:57]: www-p3p-dev/2002Sep/subject.html: process_ul: <li> 3 contains no email links
+[09-06-2020 03:21:17]: public-identity/2011Jul/subject.html: process_ul: <li> 0 has no <ul>
+[09-06-2020 03:21:17]: public-identity/2011Jul/subject.html: process_ul: <li> 1 has no <ul>
+[09-06-2020 03:21:17]: public-identity/2011Jul/subject.html: process_ul: <li> 2 has no <ul>
+[09-06-2020 03:21:27]: public-html-ig-zh/2014Apr/subject.html: process_ul: <li> 3 contains no email links
+[09-06-2020 03:21:27]: public-html-ig-zh/2013Nov/subject.html: process_ul: <li> 2 contains no email links
+[09-06-2020 03:21:27]: public-html-ig-zh/2013May/subject.html: process_ul: <li> 2 contains no email links
+[09-06-2020 03:21:27]: public-html-ig-zh/2012Nov/subject.html: process_ul: <li> 0 contains no email links
+[09-06-2020 03:21:27]: public-html-ig-zh/2012Oct/subject.html: process_ul: <li> 0 contains no email links
+[09-06-2020 03:21:27]: public-html-ig-zh/2012Jul/subject.html: process_ul: <li> 0 contains no email links
+[09-06-2020 03:21:27]: public-html-ig-zh/2012Jun/subject.html: process_ul: <li> 0 contains no email links
+[09-06-2020 03:21:27]: public-html-ig-zh/2012Apr/subject.html: process_ul: <li> 1 contains no email links
+[09-06-2020 03:21:27]: public-html-ig-zh/2012Mar/subject.html: process_ul: <li> 0 contains no email links
+[09-06-2020 03:21:27]: public-html-ig-zh/2012Feb/subject.html: process_ul: <li> 0 contains no email links
+[09-06-2020 03:21:27]: public-html-ig-zh/2011Dec/subject.html: process_ul: <li> 0 contains no email links
+[09-06-2020 03:21:27]: public-html-ig-zh/2011Nov/subject.html: process_ul: <li> 0 contains no email links
+[09-06-2020 03:21:27]: public-html-ig-zh/2011Sep/subject.html: process_ul: <li> 1 contains no email links
+[09-06-2020 03:21:27]: public-html-ig-zh/2011Jun/subject.html: process_ul: <li> 1 contains no email links
+[09-06-2020 03:21:27]: public-html-ig-zh/2011May/subject.html: process_ul: <li> 3 contains no email links
+[09-06-2020 03:21:27]: public-html-ig-zh/2011Apr/subject.html: process_ul: <li> 0 contains no email links
+[09-06-2020 03:21:27]: public-html-ig-zh/2011Feb/subject.html: process_ul: <li> 0 contains no email links
+[09-06-2020 03:21:27]: public-html-ig-zh/2011Jan/subject.html: process_ul: <li> 1 contains no email links
+[09-06-2020 03:21:27]: public-html-ig-zh/2010Oct/subject.html: process_ul: <li> 2 contains no email links
+[09-06-2020 03:21:27]: ietf-charsets/2002AprJun/subject.html: process_ul: <li> 32 contains no email links
+[09-06-2020 03:21:49]: ietf-http-wg-old/1995SepDec/subject.html: process_ul: <li> 0 has no <ul>
+[09-06-2020 03:21:52]: public-rdfa-wg/2010Aug/subject.html: process_ul: <li> 0 has no <ul>
+[09-06-2020 03:21:52]: public-rdfa-wg/2010Aug/subject.html: process_ul: <li> 1 has no <ul>
+[09-06-2020 03:21:52]: public-rdfa-wg/2010Aug/subject.html: process_ul: <li> 2 has no <ul>
+[09-06-2020 03:21:52]: public-rdfa-wg/2010Aug/subject.html: process_ul: <li> 3 has no <ul>
+[09-06-2020 03:21:57]: w3c-dist-auth/2004OctDec/subject.html: process_ul: <li> 121 contains no email links
+[09-06-2020 03:22:00]: w3c-dist-auth/1997JanMar/subject.html: process_ul: <li> 0 has no <ul>
+[09-06-2020 03:22:35]: www-xsl-fo/2008Oct/subject.html: process_ul: <li> 0 has no <ul>
+[09-06-2020 03:22:35]: www-xsl-fo/2008Oct/subject.html: process_ul: <li> 1 has no <ul>
+[09-06-2020 03:22:35]: www-xsl-fo/2008Oct/subject.html: process_ul: <li> 2 has no <ul>
+[09-06-2020 03:22:37]: www-mobile/2003Apr/subject.html: process_ul: <li> 4 contains no email links
+[09-06-2020 03:22:48]: w3c-wai-er-ig/2004Nov/subject.html: process_ul: <li> 1 contains no email links
+[09-06-2020 03:22:48]: w3c-wai-er-ig/2002Nov/subject.html: process_ul: <li> 0 has no <ul>
+[09-06-2020 03:22:49]: www-rdf-perllib/2002Jun/subject.html: process_ul: <li> 1 contains no email links
+[09-06-2020 03:22:49]: www-rdf-perllib/2002Apr/subject.html: process_ul: <li> 35 contains no email links
+[09-06-2020 03:22:49]: www-rdf-perllib/2002Mar/subject.html: process_ul: <li> 20 contains no email links
+[09-06-2020 03:22:49]: www-rdf-perllib/2002Feb/subject.html: process_ul: <li> 2 contains no email links
+[09-06-2020 03:22:50]: www-rdf-perllib/2002Jan/subject.html: process_ul: <li> 2 contains no email links
+[09-06-2020 03:22:50]: www-rdf-perllib/2001Dec/subject.html: process_ul: <li> 4 contains no email links
+[09-06-2020 03:22:50]: www-rdf-perllib/2001Nov/subject.html: process_ul: <li> 1 contains no email links
+[09-06-2020 03:22:50]: www-rdf-perllib/2001Oct/subject.html: process_ul: <li> 5 contains no email links
+[09-06-2020 03:23:03]: public-i18n-japanese/2020AprJun/subject.html: process_ul: <li> 2 contains no email links
+[09-06-2020 03:23:06]: public-audio/2012JulSep/subject.html: process_ul: <li> 0 has no <ul>
+[09-06-2020 03:23:06]: public-audio/2012JulSep/subject.html: process_ul: <li> 1 has no <ul>
+[09-06-2020 03:23:07]: www-webdav-dasl/2001OctDec/subject.html: process_ul: <li> 50 contains no email links
+[09-06-2020 03:23:16]: www-eta/2003Jul/subject.html: process_ul: <li> 0 contains no email links
+[09-06-2020 03:23:17]: www-amaya-doc/2001Dec/subject.html: process_ul: <li> 0 has no <ul>
+[09-06-2020 03:23:17]: www-amaya-doc/2001Dec/subject.html: process_ul: <li> 1 has no <ul>
+[09-06-2020 03:23:17]: www-style/2016Dec/subject.html: process_ul: <li> 47 contains no email links
+[09-06-2020 03:23:34]: www-style/2002Sep/subject.html: process_ul: <li> 74 contains no email links
+[09-06-2020 03:23:37]: www-style/1996Aug/subject.html: process_ul: <li> 0 has no <ul>
+[09-06-2020 03:23:37]: www-style/1996Aug/subject.html: process_ul: <li> 1 has no <ul>
+[09-06-2020 03:23:42]: www-archive/2006Nov/subject.html: process_ul: <li> 0 has no <ul>
+[09-06-2020 03:23:42]: www-archive/2006Nov/subject.html: process_ul: <li> 1 has no <ul>
+[09-06-2020 03:23:42]: www-archive/2006Nov/subject.html: process_ul: <li> 2 has no <ul>
+[09-06-2020 03:23:43]: www-archive/2002Feb/subject.html: process_ul: <li> 0 has no <ul>
+[09-06-2020 03:23:43]: www-archive/2002Feb/subject.html: process_ul: <li> 1 has no <ul>
+[09-06-2020 03:23:43]: www-archive/2002Feb/subject.html: process_ul: <li> 2 has no <ul>
+[09-06-2020 03:23:44]: svg-testsuite-comments/2003Nov/subject.html: process_ul: <li> 0 has no <ul>
+[09-06-2020 03:23:44]: svg-testsuite-comments/2002Dec/subject.html: process_ul: <li> 4 contains no email links
+[09-06-2020 03:23:44]: svg-testsuite-comments/2002Jun/subject.html: process_ul: <li> 0 contains no email links
+[09-06-2020 03:23:44]: svg-testsuite-comments/2002May/subject.html: process_ul: <li> 0 contains no email links
+[09-06-2020 03:23:44]: svg-testsuite-comments/2002Mar/subject.html: process_ul: <li> 1 contains no email links
+[09-06-2020 03:23:47]: www-rdf-interest/2002Jul/subject.html: process_ul: <li> 56 contains no email links
+[09-06-2020 03:23:49]: www-rdf-interest/2000Dec/subject.html: process_ul: <li> 39 contains no email links
+[09-06-2020 03:24:04]: public-auth-trans-ar/2013Apr/subject.html: process_ul: <li> 0 has no <ul>
+[09-06-2020 03:24:04]: public-auth-trans-ar/2013Apr/subject.html: process_ul: <li> 1 has no <ul>
+[09-06-2020 03:24:04]: public-auth-trans-ar/2013Apr/subject.html: process_ul: <li> 2 has no <ul>
+[09-06-2020 03:24:15]: w3c-wai-ig/2004JulSep/subject.html: process_ul: <li> 0 has no <ul>
+[09-06-2020 03:24:15]: w3c-wai-ig/2004JulSep/subject.html: process_ul: <li> 1 has no <ul>
+[09-06-2020 03:24:15]: w3c-wai-ig/2004JulSep/subject.html: process_ul: <li> 2 has no <ul>
+[09-06-2020 03:24:15]: w3c-wai-ig/2004JulSep/subject.html: process_ul: <li> 3 has no <ul>
+[09-06-2020 03:24:15]: w3c-wai-ig/2004JulSep/subject.html: process_ul: <li> 4 has no <ul>
+[09-06-2020 03:24:15]: w3c-wai-ig/2004JulSep/subject.html: process_ul: <li> 5 has no <ul>
+[09-06-2020 03:24:15]: w3c-wai-ig/2004JulSep/subject.html: process_ul: <li> 6 has no <ul>
+[09-06-2020 03:24:15]: w3c-wai-ig/2004JulSep/subject.html: process_ul: <li> 7 has no <ul>
+[09-06-2020 03:24:15]: w3c-wai-ig/2004JulSep/subject.html: process_ul: <li> 8 has no <ul>
+[09-06-2020 03:24:15]: w3c-wai-ig/2004JulSep/subject.html: process_ul: <li> 9 has no <ul>
+[09-06-2020 03:24:15]: w3c-wai-ig/2004JulSep/subject.html: process_ul: <li> 10 has no <ul>
+[09-06-2020 03:24:15]: w3c-wai-ig/2004JulSep/subject.html: process_ul: <li> 11 has no <ul>
+[09-06-2020 03:24:15]: w3c-wai-ig/2004JulSep/subject.html: process_ul: <li> 12 has no <ul>
+[09-06-2020 03:24:16]: w3c-wai-ig/2002OctDec/subject.html: process_ul: <li> 0 has no <ul>
+[09-06-2020 03:24:16]: w3c-wai-ig/2002OctDec/subject.html: process_ul: <li> 1 has no <ul>
+[09-06-2020 03:24:16]: w3c-wai-ig/2002OctDec/subject.html: process_ul: <li> 2 has no <ul>
+[09-06-2020 03:24:16]: w3c-wai-ig/2002OctDec/subject.html: process_ul: <li> 3 has no <ul>
+[09-06-2020 03:24:18]: w3c-wai-ig/2001AprJun/subject.html: process_ul: <li> 0 has no <ul>
+[09-06-2020 03:24:19]: w3c-wai-ig/2000OctDec/subject.html: process_ul: <li> 203 contains no email links
+[09-06-2020 03:24:29]: www-xml-stylesheet-comments/2002Feb/subject.html: process_ul: <li> 16 contains no email links
+[09-06-2020 03:24:32]: www-rdf-comments/2002OctDec/subject.html: process_ul: <li> 31 contains no email links
+[09-06-2020 03:24:33]: www-rdf-comments/2002AprJun/subject.html: process_ul: <li> 49 contains no email links
+[09-06-2020 03:24:33]: www-rdf-comments/2001OctDec/subject.html: process_ul: <li> 14 contains no email links
+[09-06-2020 03:24:33]: www-rdf-comments/2001JulSep/subject.html: process_ul: <li> 3 contains no email links
+[09-06-2020 03:24:33]: www-rdf-comments/2001AprJun/subject.html: process_ul: <li> 68 contains no email links
+[09-06-2020 03:24:33]: ietf-http-ng-goals/2001OctDec/subject.html: process_ul: <li> 5 contains no email links
+[09-06-2020 03:24:33]: ietf-http-ng-goals/2001AprJun/subject.html: process_ul: <li> 2 contains no email links
+[09-06-2020 03:24:37]: www-talk/2003JulAug/subject.html: process_ul: <li> 5 contains no email links
+[09-06-2020 03:24:38]: www-talk/1996MayJun/subject.html: process_ul: <li> 0 has no <ul>
+[09-06-2020 03:24:38]: www-talk/1996JanFeb/subject.html: process_ul: <li> 0 has no <ul>
+[09-06-2020 03:24:39]: www-talk/1995JulAug/subject.html: process_ul: <li> 0 has no <ul>
+[09-06-2020 03:24:39]: www-talk/1995JulAug/subject.html: process_ul: <li> 1 has no <ul>
+[09-06-2020 03:24:39]: www-talk/1995MayJun/subject.html: process_ul: <li> 0 has no <ul>
+[09-06-2020 03:24:39]: www-talk/1995MayJun/subject.html: process_ul: <li> 1 has no <ul>
+[09-06-2020 03:24:39]: www-talk/1995MarApr/subject.html: process_ul: <li> 0 has no <ul>
+[09-06-2020 03:24:39]: www-talk/1995MarApr/subject.html: process_ul: <li> 1 has no <ul>
+[09-06-2020 03:24:39]: www-talk/1995MarApr/subject.html: process_ul: <li> 2 has no <ul>
+[09-06-2020 03:24:39]: www-talk/1995MarApr/subject.html: process_ul: <li> 3 has no <ul>
+[09-06-2020 03:24:40]: public-sws-ig/2006Mar/subject.html: process_ul: <li> 0 has no <ul>
+[09-06-2020 03:24:50]: spec-prod/2002JulSep/subject.html: process_ul: <li> 27 contains no email links
+[09-06-2020 03:24:51]: public-bpwg-comments/2007OctDec/subject.html: process_ul: <li> 0 has no <ul>
+[09-06-2020 03:24:51]: public-bpwg-comments/2007OctDec/subject.html: process_ul: <li> 1 has no <ul>
+[09-06-2020 03:24:51]: public-bpwg-comments/2007OctDec/subject.html: process_ul: <li> 2 has no <ul>
+[09-06-2020 03:24:51]: wai-wcag-editor/2004OctDec/subject.html: process_ul: <li> 15 contains no email links
+[09-06-2020 03:24:51]: wai-wcag-editor/2001JanMar/subject.html: process_ul: <li> 147 contains no email links
+[09-06-2020 03:25:05]: wai-xtech/2001Dec/subject.html: process_ul: <li> 13 contains no email links
+[09-06-2020 03:25:05]: wai-xtech/2001Nov/subject.html: process_ul: <li> 5 contains no email links
+[09-06-2020 03:25:40]: w3c-wai-gl/2002OctDec/subject.html: process_ul: <li> 0 has no <ul>
+[09-06-2020 03:25:44]: www-xpath-comments/2001AprJun/subject.html: process_ul: <li> 25 contains no email links
+[09-06-2020 03:25:50]: www-dom/2002JulSep/subject.html: process_ul: <li> 117 contains no email links
+[09-06-2020 03:25:50]: www-dom/2002AprJun/subject.html: process_ul: <li> 79 contains no email links
+[09-06-2020 03:25:54]: www-qa/2002Jun/subject.html: process_ul: <li> 9 contains no email links
+[09-06-2020 03:26:00]: smil-editors/2002OctDec/subject.html: process_ul: <li> 4 contains no email links
+[09-06-2020 03:26:00]: smil-editors/2002JulSep/subject.html: process_ul: <li> 72 contains no email links
+[09-06-2020 03:26:00]: smil-editors/2002JanMar/subject.html: process_ul: <li> 0 contains no email links
+[09-06-2020 03:26:00]: smil-editors/2001OctDec/subject.html: process_ul: <li> 3 contains no email links
+[09-06-2020 03:26:03]: wai-events/2002Mar/subject.html: process_ul: <li> 1 contains no email links
+[09-06-2020 03:26:03]: wai-events/2002Feb/subject.html: process_ul: <li> 2 contains no email links
+[09-06-2020 03:26:03]: wai-events/2001Dec/subject.html: process_ul: <li> 8 contains no email links
+[09-06-2020 03:26:03]: wai-events/2001Aug/subject.html: extract_subject_list: no <ul> with subjects found
+[09-06-2020 03:26:03]: wai-events/2001Apr/subject.html: extract_subject_list: no <ul> with subjects found
+[09-06-2020 03:26:03]: wai-events/2000Oct/subject.html: extract_subject_list: no <ul> with subjects found
+[09-06-2020 03:26:19]: public-ws-addressing/2005Nov/subject.html: process_ul: <li> 0 has no <ul>
+[09-06-2020 03:26:20]: public-ws-addressing/2004Nov/subject.html: process_ul: <li> 0 has no <ul>
+[09-06-2020 03:26:26]: www-xml-blueberry-comments/2002Jul/subject.html: process_ul: <li> 9 contains no email links
+[09-06-2020 03:26:26]: www-xml-blueberry-comments/2002Jun/subject.html: process_ul: <li> 4 contains no email links
+[09-06-2020 03:26:26]: www-xml-blueberry-comments/2002May/subject.html: process_ul: <li> 10 contains no email links
+[09-06-2020 03:26:26]: www-xml-blueberry-comments/2002Apr/subject.html: process_ul: <li> 0 contains no email links
+[09-06-2020 03:26:26]: www-xml-blueberry-comments/2002Mar/subject.html: process_ul: <li> 2 contains no email links
+[09-06-2020 03:26:26]: www-xml-blueberry-comments/2002Feb/subject.html: process_ul: <li> 2 contains no email links
+[09-06-2020 03:26:26]: www-xml-blueberry-comments/2002Jan/subject.html: process_ul: <li> 4 contains no email links
+[09-06-2020 03:26:26]: www-xml-blueberry-comments/2001Dec/subject.html: process_ul: <li> 17 contains no email links
+[09-06-2020 03:26:26]: www-xml-blueberry-comments/2001Nov/subject.html: process_ul: <li> 3 contains no email links
+[09-06-2020 03:26:26]: www-xml-blueberry-comments/2001Oct/subject.html: process_ul: <li> 16 contains no email links
+[09-06-2020 03:26:29]: www-email-discuss/2002Jan/subject.html: process_ul: <li> 1 contains no email links
+[09-06-2020 03:26:30]: www-email-discuss/2001Sep/subject.html: process_ul: <li> 76 contains no email links
+[09-06-2020 03:26:30]: www-email-discuss/2001Aug/subject.html: process_ul: <li> 2 contains no email links
+[09-06-2020 03:26:30]: www-email-discuss/2001May/subject.html: process_ul: <li> 44 contains no email links
+[09-06-2020 03:26:30]: www-email-discuss/2001Apr/subject.html: process_ul: <li> 0 has no <ul>
+[09-06-2020 03:26:30]: www-email-discuss/2001Apr/subject.html: process_ul: <li> 1 has no <ul>
+[09-06-2020 03:26:30]: www-email-discuss/2001Apr/subject.html: process_ul: <li> 45 contains no email links
+[09-06-2020 03:26:30]: www-email-discuss/2001Mar/subject.html: process_ul: <li> 0 has no <ul>
+[09-06-2020 03:26:30]: www-email-discuss/2001Mar/subject.html: process_ul: <li> 1 has no <ul>
+[09-06-2020 03:26:30]: www-email-discuss/2001Mar/subject.html: process_ul: <li> 2 has no <ul>
+[09-06-2020 03:26:30]: www-email-discuss/2001Feb/subject.html: process_ul: <li> 0 has no <ul>
+[09-06-2020 03:26:30]: www-email-discuss/2000May/subject.html: process_ul: <li> 2 contains no email links
+[09-06-2020 03:26:31]: www-email-discuss/2000Feb/subject.html: process_ul: <li> 0 has no <ul>
+[09-06-2020 03:26:31]: www-email-discuss/1999Dec/subject.html: process_ul: <li> 0 has no <ul>
+[09-06-2020 03:26:31]: www-email-discuss/1999Dec/subject.html: process_ul: <li> 1 has no <ul>
+[09-06-2020 03:26:31]: www-email-discuss/1999Dec/subject.html: process_ul: <li> 2 has no <ul>
+[09-06-2020 03:26:31]: www-email-discuss/1999Dec/subject.html: process_ul: <li> 3 has no <ul>
+[09-06-2020 03:26:31]: www-email-discuss/1999Dec/subject.html: process_ul: <li> 4 has no <ul>
+[09-06-2020 03:26:31]: www-email-discuss/1999Dec/subject.html: process_ul: <li> 5 has no <ul>
+[09-06-2020 03:26:31]: www-email-discuss/1999Dec/subject.html: process_ul: <li> 6 has no <ul>
+[09-06-2020 03:26:31]: www-email-discuss/1999Dec/subject.html: process_ul: <li> 7 has no <ul>
+[09-06-2020 03:26:31]: www-email-discuss/1999Nov/subject.html: process_ul: <li> 0 has no <ul>
+[09-06-2020 03:26:31]: www-email-discuss/1999Nov/subject.html: process_ul: <li> 1 has no <ul>
+[09-06-2020 03:26:31]: www-email-discuss/1999May/subject.html: process_ul: <li> 44 contains no email links
+[09-06-2020 03:26:37]: www-international/2007JanMar/subject.html: process_ul: <li> 0 has no <ul>
+[09-06-2020 03:26:37]: www-international/2007JanMar/subject.html: process_ul: <li> 1 has no <ul>
+[09-06-2020 03:26:37]: www-international/2004AprJun/subject.html: process_ul: <li> 35 contains no email links
+[09-06-2020 03:26:38]: www-international/2000OctDec/subject.html: process_ul: <li> 0 has no <ul>
+[09-06-2020 03:26:38]: www-international/1997OctDec/subject.html: process_ul: <li> 0 has no <ul>
+[09-06-2020 03:26:39]: www-international/1997JanMar/subject.html: process_ul: <li> 0 has no <ul>
+[09-06-2020 03:26:43]: www-zig/2002Apr/subject.html: process_ul: <li> 42 contains no email links
+[09-06-2020 03:26:43]: www-zig/2002Mar/subject.html: process_ul: <li> 56 contains no email links
+[09-06-2020 03:26:43]: www-zig/2002Feb/subject.html: process_ul: <li> 25 contains no email links
+[09-06-2020 03:26:52]: www-voice/2003JulSep/subject.html: process_ul: <li> 0 has no <ul>
+[09-06-2020 03:26:54]: w3c-ietf-xmldsig/2004JulSep/subject.html: process_ul: <li> 0 has no <ul>
+[09-06-2020 03:26:54]: w3c-ietf-xmldsig/2002JulSep/subject.html: process_ul: <li> 63 contains no email links
+[09-06-2020 03:26:54]: w3c-ietf-xmldsig/2000JulSep/subject.html: process_ul: <li> 0 has no <ul>
+[09-06-2020 03:26:54]: w3c-ietf-xmldsig/2000JulSep/subject.html: process_ul: <li> 1 has no <ul>
+[09-06-2020 03:26:55]: w3c-ietf-xmldsig/1999OctDec/subject.html: process_ul: <li> 0 has no <ul>
+[09-06-2020 03:26:55]: w3c-ietf-xmldsig/1999OctDec/subject.html: process_ul: <li> 1 has no <ul>
+[09-06-2020 03:27:18]: public-orca/2013Dec/subject.html: process_ul: <li> 0 has no <ul>
+[09-06-2020 03:27:18]: public-jlreq-admin/2020JanMar/subject.html: process_ul: <li> 0 contains no email links
+[09-06-2020 03:27:18]: public-jlreq-admin/2019AprJun/subject.html: process_ul: <li> 2 contains no email links
+[09-06-2020 03:27:50]: www-rdf-validator/2004Feb/subject.html: process_ul: <li> 2 contains no email links
+[09-06-2020 03:27:50]: www-rdf-validator/2001Oct/subject.html: process_ul: <li> 58 contains no email links
+[09-06-2020 03:27:51]: www-html/2006Jul/subject.html: process_ul: <li> 0 has no <ul>
+[09-06-2020 03:27:51]: www-html/2005Aug/subject.html: process_ul: <li> 0 has no <ul>
+[09-06-2020 03:27:51]: www-html/2005Aug/subject.html: process_ul: <li> 1 has no <ul>
+[09-06-2020 03:27:51]: www-html/2005Aug/subject.html: process_ul: <li> 2 has no <ul>
+[09-06-2020 03:27:51]: www-html/2005Aug/subject.html: process_ul: <li> 3 has no <ul>
+[09-06-2020 03:27:53]: www-html/2003Feb/subject.html: process_ul: <li> 38 contains no email links
+[09-06-2020 03:27:53]: www-html/2002Dec/subject.html: process_ul: <li> 0 has no <ul>
+[09-06-2020 03:27:53]: www-html/2002May/subject.html: process_ul: <li> 29 contains no email links
+[09-06-2020 03:27:53]: www-html/2002Mar/subject.html: process_ul: <li> 17 contains no email links
+[09-06-2020 03:27:53]: www-html/2002Feb/subject.html: process_ul: <li> 0 has no <ul>
+[09-06-2020 03:27:53]: www-html/2002Feb/subject.html: process_ul: <li> 1 has no <ul>
+[09-06-2020 03:27:54]: www-html/2001Aug/subject.html: process_ul: <li> 0 has no <ul>
+[09-06-2020 03:27:57]: www-html/1996Jul/subject.html: process_ul: <li> 0 has no <ul>
+[09-06-2020 03:27:57]: www-html/1996Jul/subject.html: process_ul: <li> 1 has no <ul>
+[09-06-2020 03:27:57]: www-html/1996May/subject.html: process_ul: <li> 0 has no <ul>
+[09-06-2020 03:27:57]: www-html/1996May/subject.html: process_ul: <li> 1 has no <ul>
+[09-06-2020 03:27:57]: www-html/1996Mar/subject.html: process_ul: <li> 0 has no <ul>
+[09-06-2020 03:27:57]: www-html/1995Dec/subject.html: process_ul: <li> 0 has no <ul>
+[09-06-2020 03:27:57]: www-html/1995Dec/subject.html: process_ul: <li> 1 has no <ul>
+[09-06-2020 03:27:57]: www-html/1995Dec/subject.html: process_ul: <li> 2 has no <ul>
+[09-06-2020 03:27:57]: www-html/1995Dec/subject.html: process_ul: <li> 3 has no <ul>
+[09-06-2020 03:27:57]: www-html/1995Dec/subject.html: process_ul: <li> 4 has no <ul>
+[09-06-2020 03:27:57]: www-html/1995Dec/subject.html: process_ul: <li> 5 has no <ul>
+[09-06-2020 03:27:57]: www-html/1995Oct/subject.html: process_ul: <li> 0 has no <ul>
+[09-06-2020 03:27:58]: www-html/1995Jul/subject.html: process_ul: <li> 0 has no <ul>
+[09-06-2020 03:27:58]: www-html/1995Jun/subject.html: process_ul: <li> 0 has no <ul>
+[09-06-2020 03:27:58]: www-html/1995Jun/subject.html: process_ul: <li> 1 has no <ul>
+[09-06-2020 03:27:58]: www-html/1995Jun/subject.html: process_ul: <li> 2 has no <ul>
+[09-06-2020 03:27:58]: www-html/1995Jun/subject.html: process_ul: <li> 3 has no <ul>
+[09-06-2020 03:27:58]: www-html/1995Jun/subject.html: process_ul: <li> 4 has no <ul>
+[09-06-2020 03:27:58]: www-html/1995Jun/subject.html: process_ul: <li> 5 has no <ul>
+[09-06-2020 03:27:58]: www-html/1995Jun/subject.html: process_ul: <li> 6 has no <ul>
+[09-06-2020 03:27:58]: www-html/1995Jun/subject.html: process_ul: <li> 7 has no <ul>
+[09-06-2020 03:27:58]: www-html/1995May/subject.html: process_ul: <li> 0 has no <ul>
+[09-06-2020 03:27:58]: www-html/1995May/subject.html: process_ul: <li> 1 has no <ul>
+[09-06-2020 03:27:58]: www-html/1995May/subject.html: process_ul: <li> 2 has no <ul>
+[09-06-2020 03:27:58]: www-html/1995May/subject.html: process_ul: <li> 3 has no <ul>
+[09-06-2020 03:27:58]: www-html/1995May/subject.html: process_ul: <li> 4 has no <ul>
+[09-06-2020 03:27:58]: www-html/1995May/subject.html: process_ul: <li> 5 has no <ul>
+[09-06-2020 03:27:58]: www-html/1995Apr/subject.html: process_ul: <li> 0 has no <ul>
+[09-06-2020 03:27:58]: www-html/1995Apr/subject.html: process_ul: <li> 1 has no <ul>
+[09-06-2020 03:27:58]: www-html/1995Apr/subject.html: process_ul: <li> 2 has no <ul>
+[09-06-2020 03:27:58]: www-html/1995Apr/subject.html: process_ul: <li> 3 has no <ul>
+[09-06-2020 03:27:58]: www-html/1995Apr/subject.html: process_ul: <li> 4 has no <ul>
+[09-06-2020 03:27:58]: www-html/1995Apr/subject.html: process_ul: <li> 5 has no <ul>
+[09-06-2020 03:27:58]: www-html/1995Apr/subject.html: process_ul: <li> 6 has no <ul>
+[09-06-2020 03:27:58]: www-html/1995Apr/subject.html: process_ul: <li> 7 has no <ul>
+[09-06-2020 03:27:58]: www-html/1995Apr/subject.html: process_ul: <li> 8 has no <ul>
+[09-06-2020 03:27:58]: www-html/1995Apr/subject.html: process_ul: <li> 9 has no <ul>
+[09-06-2020 03:27:58]: www-html/1995Mar/subject.html: process_ul: <li> 0 has no <ul>
+[09-06-2020 03:27:58]: www-html/1995Mar/subject.html: process_ul: <li> 1 has no <ul>
+[09-06-2020 03:27:58]: www-html/1995Mar/subject.html: process_ul: <li> 2 has no <ul>
+[09-06-2020 03:27:58]: www-html/1995Mar/subject.html: process_ul: <li> 3 has no <ul>
+[09-06-2020 03:27:58]: www-html/1994Dec/subject.html: process_ul: <li> 0 has no <ul>
+[09-06-2020 03:27:58]: www-html/1994Dec/subject.html: process_ul: <li> 1 has no <ul>
+[09-06-2020 03:27:58]: www-html/1994Dec/subject.html: process_ul: <li> 2 has no <ul>
+[09-06-2020 03:27:58]: www-html/1994Nov/subject.html: process_ul: <li> 0 has no <ul>
+[09-06-2020 03:27:58]: www-html/1994Sep/subject.html: process_ul: <li> 0 has no <ul>
+[09-06-2020 03:28:03]: www-smil/2010AprJun/subject.html: process_ul: <li> 0 has no <ul>
+[09-06-2020 03:28:03]: www-smil/2010AprJun/subject.html: process_ul: <li> 1 has no <ul>
+[09-06-2020 03:28:03]: www-smil/2010JanMar/subject.html: process_ul: <li> 0 has no <ul>
+[09-06-2020 03:28:03]: www-smil/2010JanMar/subject.html: process_ul: <li> 1 has no <ul>
+[09-06-2020 03:28:03]: www-smil/2010JanMar/subject.html: process_ul: <li> 2 has no <ul>
+[09-06-2020 03:28:04]: www-smil/2007OctDec/subject.html: process_ul: <li> 0 has no <ul>
+[09-06-2020 03:28:05]: www-privacy-evaluator/2002Apr/subject.html: process_ul: <li> 20 contains no email links
+[09-06-2020 03:28:05]: www-privacy-evaluator/2002Mar/subject.html: process_ul: <li> 9 contains no email links
+[09-06-2020 03:28:05]: www-privacy-evaluator/2002Feb/subject.html: process_ul: <li> 13 contains no email links
+[09-06-2020 03:28:05]: www-privacy-evaluator/2001Dec/subject.html: process_ul: <li> 4 contains no email links
+[09-06-2020 03:28:05]: www-privacy-evaluator/2001Nov/subject.html: process_ul: <li> 0 contains no email links
+[09-06-2020 03:28:05]: public-xsd-databinding/2008Feb/subject.html: process_ul: <li> 0 has no <ul>
+[09-06-2020 03:28:08]: www-patentpolicy-comment/2002Jul/subject.html: process_ul: <li> 18 contains no email links
+[09-06-2020 03:28:08]: www-patentpolicy-comment/2002Jun/subject.html: process_ul: <li> 7 contains no email links
+[09-06-2020 03:28:08]: www-patentpolicy-comment/2002Mar/subject.html: process_ul: <li> 35 contains no email links
+[09-06-2020 03:28:08]: www-patentpolicy-comment/2002Feb/subject.html: process_ul: <li> 93 contains no email links
+[09-06-2020 03:28:08]: www-patentpolicy-comment/2001Dec/subject.html: process_ul: <li> 8 contains no email links
+[09-06-2020 03:28:08]: www-patentpolicy-comment/2001Nov/subject.html: process_ul: <li> 45 contains no email links
+[09-06-2020 03:28:08]: www-patentpolicy-comment/2001Oct/subject.html: process_ul: <li> 18 contains no email links
+[09-06-2020 03:28:12]: site-comments/2001Feb/subject.html: process_ul: <li> 6 contains no email links
+[09-06-2020 03:28:12]: site-comments/2000Nov/subject.html: process_ul: <li> 36 contains no email links
+[09-06-2020 03:28:12]: site-comments/2000Oct/subject.html: process_ul: <li> 27 contains no email links
+[09-06-2020 03:28:16]: public-html-a11y/2013Sep/subject.html: process_ul: <li> 0 has no <ul>
+[09-06-2020 03:28:16]: public-html-a11y/2013Sep/subject.html: process_ul: <li> 1 has no <ul>
+[09-06-2020 03:28:16]: public-html-a11y/2013Sep/subject.html: process_ul: <li> 2 has no <ul>
+[09-06-2020 03:28:16]: public-html-a11y/2013Sep/subject.html: process_ul: <li> 3 has no <ul>
+[09-06-2020 03:28:27]: www-amaya/2002AprJun/subject.html: process_ul: <li> 0 has no <ul>
+[09-06-2020 03:28:27]: www-amaya/2002AprJun/subject.html: process_ul: <li> 141 contains no email links
+[09-06-2020 03:28:28]: www-amaya/1999AprJun/subject.html: process_ul: <li> 0 has no <ul>
+[09-06-2020 03:28:28]: www-amaya/1999AprJun/subject.html: process_ul: <li> 1 has no <ul>
+[09-06-2020 03:28:28]: www-amaya/1999AprJun/subject.html: process_ul: <li> 2 has no <ul>
+[09-06-2020 03:28:31]: www-math/2003Nov/subject.html: process_ul: <li> 0 has no <ul>
+[09-06-2020 03:28:32]: www-math/2002Aug/subject.html: process_ul: <li> 23 contains no email links
+[09-06-2020 03:28:32]: www-math/2002Jun/subject.html: process_ul: <li> 21 contains no email links
+[09-06-2020 03:28:32]: www-math/2002Feb/subject.html: process_ul: <li> 4 contains no email links
+[09-06-2020 03:28:32]: www-math/2000Nov/subject.html: process_ul: <li> 31 contains no email links
+[09-06-2020 03:28:32]: www-math/2000Oct/subject.html: process_ul: <li> 25 contains no email links
+[09-06-2020 03:28:32]: www-math/2000Sep/subject.html: process_ul: <li> 21 contains no email links
+[09-06-2020 03:28:33]: wai-report/2002JulSep/subject.html: process_ul: <li> 3 contains no email links
+[09-06-2020 03:28:33]: wai-report/2002AprJun/subject.html: process_ul: <li> 4 contains no email links
+[09-06-2020 03:28:33]: wai-report/2002JanMar/subject.html: process_ul: <li> 3 contains no email links
+[09-06-2020 03:28:33]: wai-report/2001OctDec/subject.html: process_ul: <li> 9 contains no email links
+[09-06-2020 03:28:33]: www-watchdog/2001Apr/subject.html: extract_subject_list: no <ul> with subjects found
+[09-06-2020 03:28:38]: public-ws-policy-eds/2007Mar/subject.html: process_ul: <li> 0 has no <ul>
+[09-06-2020 03:28:44]: w3c-translators/2002AprJun/subject.html: process_ul: <li> 63 contains no email links
+[09-06-2020 03:28:45]: www-component-extension/2003Jul/subject.html: process_ul: <li> 0 contains no email links
+[09-06-2020 03:28:59]: public-rdf-dawg-comments/2006Dec/subject.html: process_ul: <li> 0 has no <ul>
+[09-06-2020 03:28:59]: public-rdf-dawg-comments/2006Dec/subject.html: process_ul: <li> 1 has no <ul>
+[09-06-2020 03:29:01]: public-appformats/2008Jan/subject.html: process_ul: <li> 0 has no <ul>
+[09-06-2020 03:29:01]: public-appformats/2008Jan/subject.html: process_ul: <li> 1 has no <ul>
+[09-06-2020 03:29:02]: public-wai-eo-badtf/2005Sep/subject.html: process_ul: <li> 0 has no <ul>
+[09-06-2020 03:29:03]: xml-editor/2000OctDec/subject.html: process_ul: <li> 31 contains no email links
+[09-06-2020 03:29:03]: xml-editor/2000JulSep/subject.html: process_ul: <li> 97 contains no email links
+[09-06-2020 03:29:04]: w3c-wai-rc/2004OctDec/subject.html: process_ul: <li> 3 contains no email links
+[09-06-2020 03:29:04]: w3c-wai-rc/2002OctDec/subject.html: process_ul: <li> 18 contains no email links
+[09-06-2020 03:29:04]: w3c-wai-rc/2002JulSep/subject.html: process_ul: <li> 2 contains no email links
+[09-06-2020 03:29:04]: w3c-wai-rc/2002AprJun/subject.html: process_ul: <li> 77 contains no email links
+[09-06-2020 03:29:04]: w3c-wai-rc/2002JanMar/subject.html: process_ul: <li> 32 contains no email links
+[09-06-2020 03:29:04]: w3c-wai-rc/2001OctDec/subject.html: process_ul: <li> 5 contains no email links
+[09-06-2020 03:29:05]: ietf-swap/2002May/subject.html: process_ul: <li> 0 contains no email links
+[09-06-2020 03:29:05]: ietf-swap/2002Jan/subject.html: process_ul: <li> 1 contains no email links
+[09-06-2020 03:29:06]: www-i18n-comments/2002Oct/subject.html: process_ul: <li> 2 contains no email links
+[09-06-2020 03:29:06]: www-i18n-comments/2002Jun/subject.html: process_ul: <li> 22 contains no email links
+[09-06-2020 03:29:06]: www-i18n-comments/2002Apr/subject.html: process_ul: <li> 5 contains no email links
+[09-06-2020 03:29:06]: www-i18n-comments/2002Jan/subject.html: process_ul: <li> 8 contains no email links
+[09-06-2020 03:29:06]: www-i18n-comments/2001Dec/subject.html: process_ul: <li> 1 contains no email links
+[09-06-2020 03:29:06]: www-i18n-comments/2001Nov/subject.html: process_ul: <li> 39 contains no email links
+[09-06-2020 03:29:06]: www-i18n-comments/2001Oct/subject.html: process_ul: <li> 29 contains no email links
+[09-06-2020 03:29:06]: www-i18n-comments/2001Sep/subject.html: process_ul: <li> 17 contains no email links
+[09-06-2020 03:29:06]: www-i18n-comments/2001Jul/subject.html: process_ul: <li> 0 has no <ul>
+[09-06-2020 03:29:06]: www-i18n-comments/2001May/subject.html: process_ul: <li> 11 contains no email links
+[09-06-2020 03:29:06]: www-i18n-comments/2001Apr/subject.html: process_ul: <li> 12 contains no email links
+[09-06-2020 03:29:09]: www-xml-xinclude-comments/2002Oct/subject.html: process_ul: <li> 1 contains no email links
+[09-06-2020 03:29:10]: www-xml-linking-comments/2002JulSep/subject.html: process_ul: <li> 6 contains no email links
+[09-06-2020 03:29:11]: www-xml-linking-comments/2001OctDec/subject.html: process_ul: <li> 56 contains no email links
+[09-06-2020 03:29:11]: www-xml-linking-comments/2001AprJun/subject.html: process_ul: <li> 53 contains no email links
+[09-06-2020 03:29:11]: www-xml-linking-comments/2001JanMar/subject.html: process_ul: <li> 73 contains no email links
+[09-06-2020 03:29:11]: www-xml-linking-comments/2000JulSep/subject.html: process_ul: <li> 0 has no <ul>
+[09-06-2020 03:29:11]: www-xml-linking-comments/2000JulSep/subject.html: process_ul: <li> 1 has no <ul>
+[09-06-2020 03:29:11]: www-xml-linking-comments/2000JulSep/subject.html: process_ul: <li> 101 contains no email links
+[09-06-2020 03:29:11]: public-w3c-talk-china/2004Aug/subject.html: process_ul: <li> 0 contains no email links
+[09-06-2020 03:29:19]: www-p3p-policy/2002Aug/subject.html: process_ul: <li> 16 contains no email links
+[09-06-2020 03:29:42]: www-xkms/2004Feb/subject.html: process_ul: <li> 0 has no <ul>
+[09-06-2020 03:29:42]: www-xkms/2003Jul/subject.html: process_ul: <li> 4 contains no email links
+[09-06-2020 03:29:45]: www-rdf-calendar/2002Jun/subject.html: process_ul: <li> 2 contains no email links
+[09-06-2020 03:29:45]: www-rdf-calendar/2002Apr/subject.html: process_ul: <li> 23 contains no email links
+[09-06-2020 03:29:45]: www-rdf-calendar/2002Mar/subject.html: process_ul: <li> 15 contains no email links
+[09-06-2020 03:29:45]: www-rdf-calendar/2002Feb/subject.html: process_ul: <li> 29 contains no email links
+[09-06-2020 03:29:45]: www-rdf-calendar/2001Dec/subject.html: process_ul: <li> 3 contains no email links
+[09-06-2020 03:29:45]: www-rdf-calendar/2001Nov/subject.html: process_ul: <li> 1 contains no email links
+[09-06-2020 03:30:03]: www-printing/1999OctDec/subject.html: extract_subject_list: no <ul> with subjects found
+[09-06-2020 03:30:03]: www-xkms-ws/2002Jan/subject.html: process_ul: <li> 6 contains no email links
+[09-06-2020 03:30:03]: www-xkms-ws/2001Dec/subject.html: process_ul: <li> 32 contains no email links
+[09-06-2020 03:30:03]: www-xkms-ws/2001Nov/subject.html: process_ul: <li> 7 contains no email links
+[09-06-2020 03:30:16]: xsl-editors/2000OctDec/subject.html: process_ul: <li> 76 contains no email links
+[09-06-2020 03:30:16]: xsl-editors/2000JulSep/subject.html: process_ul: <li> 69 contains no email links
+[09-06-2020 03:30:25]: www-svg/2002Jan/subject.html: process_ul: <li> 0 has no <ul>
+[09-06-2020 03:30:33]: wai-site-comments/2002Aug/subject.html: process_ul: <li> 8 contains no email links
+[09-06-2020 03:30:38]: www-dom-ts-submission/2001Nov/subject.html: process_ul: <li> 0 contains no email links
+[09-06-2020 03:30:48]: html-tidy/2002JanMar/subject.html: process_ul: <li> 0 has no <ul>
+[09-06-2020 03:30:51]: www-xml-fragment-comments/2002Apr/subject.html: process_ul: <li> 17 contains no email links
+[09-06-2020 03:30:51]: www-xml-fragment-comments/2002Mar/subject.html: process_ul: <li> 2 contains no email links
+[09-06-2020 03:30:51]: www-xml-fragment-comments/2002Feb/subject.html: process_ul: <li> 16 contains no email links
+[09-06-2020 03:30:51]: www-xml-fragment-comments/2002Jan/subject.html: process_ul: <li> 20 contains no email links
+[09-06-2020 03:30:51]: www-xml-fragment-comments/2001Nov/subject.html: process_ul: <li> 10 contains no email links
+[09-06-2020 03:30:51]: www-xml-fragment-comments/2001May/subject.html: process_ul: <li> 4 contains no email links
+[09-06-2020 03:30:51]: www-xml-fragment-comments/2001Apr/subject.html: process_ul: <li> 6 contains no email links
+[09-06-2020 03:30:57]: sw99/2002AprJun/subject.html: process_ul: <li> 4 contains no email links
+[09-06-2020 03:31:00]: www-ccpp-protocol/2002Mar/subject.html: process_ul: <li> 2 contains no email links
+[09-06-2020 03:31:00]: www-ccpp-protocol/2002Feb/subject.html: process_ul: <li> 2 contains no email links
+[09-06-2020 03:31:00]: www-ccpp-protocol/2001Oct/subject.html: extract_subject_list: no <ul> with subjects found
+[09-06-2020 03:31:00]: www-ccpp-protocol/2001Jul/subject.html: extract_subject_list: no <ul> with subjects found
+[09-06-2020 03:31:00]: www-ccpp-protocol/2001Apr/subject.html: extract_subject_list: no <ul> with subjects found
+[09-06-2020 03:31:06]: www-html-editor/2002JanMar/subject.html: process_ul: <li> 3 contains no email links
+[09-06-2020 03:31:06]: www-html-editor/2001OctDec/subject.html: process_ul: <li> 3 contains no email links
+[09-06-2020 03:31:06]: www-html-editor/2001JulSep/subject.html: process_ul: <li> 0 has no <ul>
+[09-06-2020 03:31:06]: www-html-editor/2001JulSep/subject.html: process_ul: <li> 25 contains no email links
+[09-06-2020 03:31:06]: www-html-editor/2001AprJun/subject.html: process_ul: <li> 82 contains no email links
+[09-06-2020 03:31:06]: www-html-editor/2001JanMar/subject.html: process_ul: <li> 5 contains no email links
+[09-06-2020 03:31:07]: www-html-editor/2000AprJun/subject.html: process_ul: <li> 121 contains no email links
+[09-06-2020 03:31:07]: www-html-editor/1999OctDec/subject.html: process_ul: <li> 101 contains no email links
+[09-06-2020 03:31:09]: www-ws-arch/2003Dec/subject.html: process_ul: <li> 0 has no <ul>
+[09-06-2020 03:31:09]: www-ws-arch/2003Dec/subject.html: process_ul: <li> 1 has no <ul>
+[09-06-2020 03:31:09]: www-ws-arch/2003Dec/subject.html: process_ul: <li> 2 has no <ul>
+[09-06-2020 03:31:10]: www-ws-arch/2003Jul/subject.html: process_ul: <li> 4 contains no email links
+[09-06-2020 03:31:14]: wai-uaag-editor/2002Aug/subject.html: process_ul: <li> 1 contains no email links
+[09-06-2020 03:31:19]: w3c-translators-fr/2003Sep/subject.html: process_ul: <li> 0 has no <ul>
+[09-06-2020 03:31:20]: www-forms-editor/2002Apr/subject.html: process_ul: <li> 52 contains no email links
+[09-06-2020 03:31:20]: www-forms-editor/2002Feb/subject.html: process_ul: <li> 72 contains no email links
+[09-06-2020 03:31:23]: w3c-wai-au/2000OctDec/subject.html: process_ul: <li> 89 contains no email links
+[09-06-2020 03:31:23]: w3c-wai-au/2000JanMar/subject.html: process_ul: <li> 88 contains no email links
+[09-06-2020 03:31:24]: www-p3p-public-comments/2002Jun/subject.html: process_ul: <li> 4 contains no email links
+[09-06-2020 03:31:24]: www-p3p-public-comments/2001Apr/subject.html: process_ul: <li> 0 has no <ul>
+[09-06-2020 03:31:24]: www-p3p-public-comments/2000Jun/subject.html: process_ul: <li> 14 contains no email links
+[09-06-2020 03:31:24]: www-p3p-public-comments/2000May/subject.html: process_ul: <li> 0 contains no email links
+[09-06-2020 03:31:26]: wai-tech-comments/2002Sep/subject.html: process_ul: <li> 2 contains no email links
+[09-06-2020 03:31:26]: wai-tech-comments/2002Aug/subject.html: process_ul: <li> 3 contains no email links
+[09-06-2020 03:31:26]: wai-tech-comments/2002Jul/subject.html: process_ul: <li> 3 contains no email links
+[09-06-2020 03:31:26]: wai-tech-comments/2002Jun/subject.html: process_ul: <li> 1 contains no email links
+[09-06-2020 03:31:26]: wai-tech-comments/2002May/subject.html: process_ul: <li> 5 contains no email links
+[09-06-2020 03:31:26]: wai-tech-comments/2002Mar/subject.html: process_ul: <li> 0 contains no email links
+[09-06-2020 03:31:26]: wai-tech-comments/2002Feb/subject.html: process_ul: <li> 3 contains no email links
+[09-06-2020 03:31:26]: wai-tech-comments/2002Jan/subject.html: process_ul: <li> 14 contains no email links
+[09-06-2020 03:31:26]: wai-tech-comments/2001Dec/subject.html: process_ul: <li> 3 contains no email links
+[09-06-2020 03:31:26]: wai-tech-comments/2001Nov/subject.html: process_ul: <li> 4 contains no email links
+[09-06-2020 03:31:26]: wai-tech-comments/2001Oct/subject.html: process_ul: <li> 16 contains no email links
+[09-06-2020 03:31:26]: wai-tech-comments/2001Sep/subject.html: process_ul: <li> 14 contains no email links
+[09-06-2020 03:31:41]: www-rdf-z3950/2002Apr/subject.html: process_ul: <li> 11 contains no email links
+[09-06-2020 03:31:41]: www-rdf-z3950/2002Mar/subject.html: process_ul: <li> 4 contains no email links
+[09-06-2020 03:31:41]: www-rdf-z3950/2002Feb/subject.html: process_ul: <li> 5 contains no email links
+[09-06-2020 03:31:41]: www-rdf-z3950/2001Nov/subject.html: process_ul: <li> 0 contains no email links
+[09-06-2020 03:31:41]: www-rdf-z3950/2001Oct/subject.html: process_ul: <li> 3 contains no email links
+[09-06-2020 03:31:45]: www-forms/2007Jan/subject.html: process_ul: <li> 0 has no <ul>
+[09-06-2020 03:31:47]: www-forms/2002Aug/subject.html: process_ul: <li> 87 contains no email links
+[09-06-2020 03:31:50]: www-lib/1996JulSep/subject.html: process_ul: <li> 0 has no <ul>
+[09-06-2020 03:31:51]: w3c-wai-curric/2002OctDec/subject.html: process_ul: <li> 15 contains no email links
+[09-06-2020 03:31:51]: w3c-wai-curric/2002JulSep/subject.html: process_ul: <li> 2 contains no email links
+[09-06-2020 03:31:51]: w3c-wai-curric/2002AprJun/subject.html: process_ul: <li> 67 contains no email links
+[09-06-2020 03:31:51]: w3c-wai-curric/2002JanMar/subject.html: process_ul: <li> 27 contains no email links
+[09-06-2020 03:31:51]: w3c-wai-curric/2001OctDec/subject.html: process_ul: <li> 5 contains no email links
+[09-06-2020 03:31:53]: www-xml-query-comments/2002Jun/subject.html: process_ul: <li> 2 contains no email links
+[09-06-2020 03:31:54]: www-xml-query-comments/2002Jan/subject.html: process_ul: <li> 13 contains no email links
+[09-06-2020 03:31:54]: www-xml-query-comments/2001Dec/subject.html: process_ul: <li> 2 contains no email links
+[09-06-2020 03:31:54]: www-xml-query-comments/2001Nov/subject.html: process_ul: <li> 4 contains no email links
+[09-06-2020 03:31:54]: www-xml-query-comments/2001Oct/subject.html: process_ul: <li> 54 contains no email links
+[09-06-2020 03:31:54]: www-xml-query-comments/2001Sep/subject.html: process_ul: <li> 32 contains no email links
+[09-06-2020 03:31:54]: www-xml-query-comments/2001Aug/subject.html: process_ul: <li> 37 contains no email links
+[09-06-2020 03:31:54]: www-xml-query-comments/2001Jul/subject.html: process_ul: <li> 35 contains no email links
+[09-06-2020 03:31:54]: www-xml-query-comments/2001Jun/subject.html: process_ul: <li> 24 contains no email links
+[09-06-2020 03:31:54]: www-xml-query-comments/2001May/subject.html: process_ul: <li> 35 contains no email links
+[09-06-2020 03:31:54]: www-xml-query-comments/2001Apr/subject.html: process_ul: <li> 24 contains no email links
+[09-06-2020 03:31:54]: www-xml-query-comments/2000Sep/subject.html: process_ul: <li> 18 contains no email links
+[09-06-2020 03:31:56]: w3c-wai-er-wg/2002Jun/subject.html: process_ul: <li> 1 contains no email links
+[09-06-2020 03:31:56]: w3c-wai-er-wg/2002Mar/subject.html: process_ul: <li> 18 contains no email links
+[09-06-2020 03:31:56]: w3c-wai-er-wg/2002Feb/subject.html: process_ul: <li> 16 contains no email links
+[09-06-2020 03:31:56]: w3c-wai-er-wg/2001Dec/subject.html: process_ul: <li> 5 contains no email links
+[09-06-2020 03:31:56]: w3c-wai-er-wg/2001Nov/subject.html: process_ul: <li> 0 contains no email links
+[09-06-2020 03:32:05]: public-whatwg-archive/2008Nov/subject.html: process_ul: <li> 0 has no <ul>
+[09-06-2020 03:32:05]: public-whatwg-archive/2008Nov/subject.html: process_ul: <li> 1 has no <ul>
+[09-06-2020 03:32:06]: public-whatwg-archive/2008May/subject.html: process_ul: <li> 0 has no <ul>
+[09-06-2020 03:32:06]: public-whatwg-archive/2008May/subject.html: process_ul: <li> 1 has no <ul>
+[09-06-2020 03:32:06]: public-whatwg-archive/2008May/subject.html: process_ul: <li> 2 has no <ul>
+[09-06-2020 03:32:06]: public-whatwg-archive/2008May/subject.html: process_ul: <li> 3 has no <ul>
+[09-06-2020 03:32:06]: public-whatwg-archive/2008May/subject.html: process_ul: <li> 4 has no <ul>
+[09-06-2020 03:32:06]: public-whatwg-archive/2008May/subject.html: process_ul: <li> 5 has no <ul>
+[09-06-2020 03:32:17]: www-lib-survey/2001Jul/subject.html: process_ul: <li> 0 has no <ul>
+[09-06-2020 03:32:19]: www-dom-ts/2002Jun/subject.html: process_ul: <li> 15 contains no email links
+[09-06-2020 03:32:19]: www-dom-ts/2001Jul/subject.html: process_ul: <li> 8 contains no email links
+[09-06-2020 03:32:51]: public-web-security/2012Mar/subject.html: process_ul: <li> 0 has no <ul>
+[09-06-2020 03:32:51]: public-web-security/2012Mar/subject.html: process_ul: <li> 1 has no <ul>
+[09-06-2020 03:32:51]: public-web-security/2012Mar/subject.html: process_ul: <li> 2 has no <ul>
+[09-06-2020 03:32:53]: www-di/2006Oct/subject.html: process_ul: <li> 0 has no <ul>
+[09-06-2020 03:33:01]: uri/2002Oct/subject.html: process_ul: <li> 2 contains no email links
+[09-06-2020 03:33:01]: uri/2002Aug/subject.html: process_ul: <li> 8 contains no email links
+[09-06-2020 03:33:08]: www-xml-schema-comments/2006JulSep/subject.html: process_ul: <li> 0 has no <ul>
+[09-06-2020 03:33:09]: www-xml-schema-comments/2002JulSep/subject.html: process_ul: <li> 76 contains no email links
+[09-06-2020 03:33:09]: www-xml-schema-comments/2002JanMar/subject.html: process_ul: <li> 10 contains no email links
+[09-06-2020 03:33:09]: www-xml-schema-comments/2001OctDec/subject.html: process_ul: <li> 7 contains no email links
+[09-06-2020 03:33:13]: www-webont-wg/2002Apr/subject.html: process_ul: <li> 0 has no <ul>
+[09-06-2020 03:33:30]: www-ws-desc/2003Apr/subject.html: process_ul: <li> 0 has no <ul>
+[09-06-2020 03:33:34]: www-validator-css/2003Apr/subject.html: process_ul: <li> 0 contains no email links
+[09-06-2020 03:33:34]: www-validator-css/2003Mar/subject.html: process_ul: <li> 14 contains no email links
+[09-06-2020 03:33:35]: www-validator-css/2002Jan/subject.html: process_ul: <li> 47 contains no email links
+[09-06-2020 03:33:35]: www-validator-css/2001Dec/subject.html: process_ul: <li> 15 contains no email links
+[09-06-2020 03:33:35]: www-validator-css/2001Sep/subject.html: process_ul: <li> 92 contains no email links
+[09-06-2020 03:33:35]: www-validator-css/2001Jun/subject.html: process_ul: <li> 107 contains no email links
+[09-06-2020 03:33:35]: www-validator-css/2001May/subject.html: process_ul: <li> 110 contains no email links
+[09-06-2020 03:33:35]: www-validator-css/2001Mar/subject.html: process_ul: <li> 38 contains no email links
+[09-06-2020 03:33:38]: xml-uri/2001Oct/subject.html: process_ul: <li> 5 contains no email links
+[09-06-2020 03:33:39]: xml-uri/2000Jun/subject.html: process_ul: <li> 0 has no <ul>
+[09-06-2020 03:33:39]: xml-uri/2000Jun/subject.html: process_ul: <li> 1 has no <ul>
+[09-06-2020 03:33:39]: xml-uri/2000Jun/subject.html: process_ul: <li> 2 has no <ul>
+[09-06-2020 03:33:39]: xml-uri/2000Jun/subject.html: process_ul: <li> 3 has no <ul>
+[09-06-2020 03:33:39]: xml-uri/2000Jun/subject.html: process_ul: <li> 4 has no <ul>
+[09-06-2020 03:33:39]: xml-uri/2000Jun/subject.html: process_ul: <li> 5 has no <ul>
+[09-06-2020 03:33:39]: xml-uri/2000Jun/subject.html: process_ul: <li> 6 has no <ul>

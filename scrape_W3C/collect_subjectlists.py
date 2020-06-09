@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
 
+import json
 import pickle
 from tqdm.auto import tqdm
 
 import http.client
-from bs4 import BeautifulSoup
-import re
 import os
             
 
@@ -14,8 +13,8 @@ if __name__ == "__main__":
     
     d  = "/Archives/Public/"    
     
-    with open("collected/periods.pkl", "rb") as handle:
-        periods = pickle.load(handle)
+    with open("collected/periods.json", "rb") as handle:
+        periods = json.load(handle)
     
     
     conn = http.client.HTTPSConnection(top, port=443)
@@ -46,5 +45,3 @@ if __name__ == "__main__":
             pickle.dump(pages, handle)
     
     print(len(collected))
-        
-        

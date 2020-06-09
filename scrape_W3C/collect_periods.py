@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import pickle
+import json
 from tqdm.auto import tqdm
 
 import http.client
@@ -23,8 +23,8 @@ if __name__ == "__main__":
     d  = "/Archives/Public/"
     
     
-    with open("collected/mailinglists.pkl", "rb") as handle:
-        listnames = pickle.load(handle)
+    with open("collected/mailinglists.json", "rb") as handle:
+        listnames = json.load(handle)
     
     
     conn = http.client.HTTPSConnection(top, port=443)
@@ -46,5 +46,5 @@ if __name__ == "__main__":
         cur_periods = [p for p in cur_periods if p]
         periods[name] = cur_periods
     
-    with open("collected/periods.pkl", "wb") as handle:
-        pickle.dump(periods, handle)
+    with open("collected/periods.json", "w") as handle:
+        json.dump(periods, handle)

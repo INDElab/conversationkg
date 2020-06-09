@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
-import pickle
-from tqdm.auto import tqdm
+
+import json
+from tqdm import tqdm
 
 import http.client
 from bs4 import BeautifulSoup
@@ -8,7 +9,7 @@ from bs4 import BeautifulSoup
 
 def collect_mailinglists(html):
     soup = BeautifulSoup(html, 'lxml')
-    return [anchor.a.text.strip() for anchor in soup.find_all('dt')]
+    return [anchor.a.text.strip() for anchor in tqdm(soup.find_all('dt'))]
         
 
 if __name__ == "__main__":
@@ -28,5 +29,5 @@ if __name__ == "__main__":
     
     print(len(listnames))
     
-    with open("collected/mailinglists.pkl", "wb") as handle:
-        pickle.dump(listnames, handle)
+    with open("collected/mailinglists.json", "w") as handle:
+        json.dump(listnames, handle)

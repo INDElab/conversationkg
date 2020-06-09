@@ -4,12 +4,13 @@ from bs4 import BeautifulSoup
 import re
 import os
 import pickle
+import json
 from tqdm.auto import tqdm
 import logging
 
 top_dir = "collected/"
 raw_page_dir = top_dir + "raw_subject_pages/"
-save_dir = top_dir + "subject_lists/"
+save_dir = top_dir + "subject_lists_new/"
 os.makedirs(save_dir)
 
 logging.basicConfig(filename=save_dir+'log', filemode='w',
@@ -85,8 +86,8 @@ def extract_subject_list(html, suburl=""):
 if __name__ == "__main__":
     print("Context: Extraction Started")
     
-    with open(top_dir+"periods.pkl", "rb") as handle:
-        periods = pickle.load(handle)
+    with open(top_dir+"periods.json", "r") as handle:
+        periods = json.load(handle)
     
     loaded = {}
     for f in os.listdir(raw_page_dir):
@@ -104,8 +105,8 @@ if __name__ == "__main__":
                                     suburl=listname+"/"+period+"/subject.html")
             extracted_subjects.append(current_subjects)
         
-        with open(save_dir+listname+".pkl", "wb") as handle:
-            pickle.dump(extracted_subjects, handle)
+        with open(save_dir+listname+".json", "w") as handle:
+            json.dump(extracted_subjects, handle)
             
         
             
