@@ -59,5 +59,5 @@ Email(s) omitted in the case of:
 
 - pages containing the email cannot be parsed (e.g. some pages announce false character encodings, some contain unfixable HTML)
 
-=> altogether, we loose about 10000 emails which is however less than 1%
+=> altogether, we loose about 10,000 emails which is however less than 1%
 
