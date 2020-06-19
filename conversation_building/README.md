@@ -9,4 +9,5 @@
    
 ### 2. Topic Model
 
-   - 
+   - [x] [sklearn.decomposition.LatentDirichletAllocation](https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.LatentDirichletAllocation.html): classic LDA, uniform topic prior
+   - [ ] [gensim.models.HdpModel](https://radimrehurek.com/gensim/models/hdpmodel.html): Hierarchical Dirichlet Process which generalises LDA in that the number of topics is also inferred
