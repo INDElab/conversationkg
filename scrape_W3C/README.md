@@ -25,7 +25,7 @@ those obtained from the pages which list these hierarchies (which were in fact a
 
 - time periods: 37681 in total; <br> see `periods.json` for the lists of periods per mailinglist; <br> 406 mailinglists do not have any time periods (partly due to parsing issues)
 
-- subjects: 712782 in total; this is also the number of conversations;<br> see `subjects` for the listings where the numbers of subjects per mailinglist can be obtained; <br> each mailinglist contains an average of 446 subjects (i.e. conversations; std dev 1637)
+- subjects: 712782 in total; this is also the number of conversations;<br> see `subjects` for the listings where the numbers of subjects per mailinglist can be obtained; <br> each mailinglist contains an average of 446 subjects (i.e. conversations; std. dev. 1637)
 
 - emails: 1886020 in total; each mailinglist has an average of 1180 emails (std dev 4905)
 
@@ -44,9 +44,7 @@ These refer to the actual stats of the published corpus.
 
 - subjects: 705201
 
-- emails: 1876156
-
-- emails per subject: 6 average, 11 std dev
+- emails: 1876156 in total; on average 6 per subject (std. dev. 11)
 
 
 ### Omitted Data
@@ -59,5 +57,5 @@ Email(s) omitted in the case of:
 
 - pages containing the email cannot be parsed (e.g. some pages announce false character encodings, some contain unfixable HTML)
 
-=> altogether, we loose about 10000 emails which is however less than 1%
+=> altogether, we loose about 10,000 emails which is however less than 1%
 
