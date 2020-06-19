@@ -4,12 +4,8 @@
 import os
 import json
 
-import re
+from tqdm import tqdm
 
-from email.utils import parseaddr
-
-
-sender_re = re.compile(r"[^@]+@[^@]+\.[^@]+")
 
 #%%
 
@@ -37,29 +33,22 @@ convos = [(subj_str, mail_ls) for period, subj_d in mail_dicts.items()
 
 mails = [m for subj_d in mail_dicts.values() for ls in subj_d.values() 
             for m in ls]
-#%%
 
 
-def merge_reported_subjects(subject, subject_from_meta):
-    same = subject == subject_from_meta
-    
-    if same:
-        return subject
-    
-    return subject
+#%% QUOTED TEXT
 
+
+from email_reply_parser import EmailReplyParser
+import quotequail
+import talon
+from talon import quotations
+
+
+for e in convos[1]:
+    email = EmailReplyParser.read(e.body)
+    print(email.text)
     
-def merge_reported_authors(author, from_, name, email):
-    if sender_re.match(from_):
-        from_name, from_email = parseaddr(from_)
-        if not from_name:
-            pass
-        else:
-            pass
-    else:
-        pass
-    
-    
-def merge_reported_ids(id_, id_from_body):
-    if not id_from_body:
-        pass
+    print("\n###")
+    print(email.reply)
+
+    print("------------------------------------------------------------\n\n")
