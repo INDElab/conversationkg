@@ -27,7 +27,7 @@
 ### Operationalisations
 
 * problem: need ground truth, on one hand for measuring analysts' performance, on the other to measure how accurately our KG represents it <br>
-  => remedy: W3C is a _real_ organisation, governing _real_ standards => we can source the ground truth of organisational roles and decided standards from the internet (or at least a close proxy thereof); some document [[1](#1) ... [5](5)].
+  => remedy: W3C is a _real_ organisation, governing _real_ standards => we can source the ground truth of organisational roles and decided standards from the internet (or at least a close proxy thereof); some document [[1](#1)] ... [[5](5)].
 
 
 
@@ -53,10 +53,8 @@ i.e. hopyetheses to be tested and how
  
  <a id="1">[[1]: W3C Group Dependency Graph](https://www.w3.org/2003/02/W3COrg.svgz)</a>
  
- [[2]: W3C Core Staff](https://www.w3.org/People), [W3C Process Document](https://www.w3.org/2019/Process-20190301/) , [W3C Accessibility Document](https://www.w3.org/TR/2020/WD-accessibility-conformance-challenges-20200619)
-  
-
+ [[2]: W3C Core Staff](https://www.w3.org/People), 
  
- [1](google.com)
+ [[3]: W3C Process Document](https://www.w3.org/2019/Process-20190301/) , 
  
- [2](faceboo.com)
+ <a id="4">[[4]: W3C Accessibility Document](https://www.w3.org/TR/2020/WD-accessibility-conformance-challenges-20200619)</a>
