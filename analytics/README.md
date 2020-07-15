@@ -27,14 +27,37 @@
 
 ### Operationalisations
 
-* W3C is a _real_ organisation, governing _real_ standars, so we can source the ground truth (or at least proxies thereof) of organisational roles and standardisation decisions from the internet; links [[1](#1)] ... [[5](#5)] contain examples of documents and organisation charts from which ground truth on specific subgroups and standards of the W3C could be obtained
+* W3C is a _real_ organisation, governing _real_ standards, so we can source the ground truth (or at least proxies thereof) of organisational roles and standardisation decisions from the internet; links [[1](#1)] ... [[5](#5)] contain examples of documents and organisation charts from which ground truth on specific subgroups and standards of the W3C could be obtained/scraped; <br>
+the listed documents contain some but not all information on:
+  - which groups of people belong to specific standardisation bodies
+  - which persons belong to the core staff of the W3C, to managing groups of standardisation bodies and parts of the hierarchies between them
+  - when creatin standardisation decisions have been made and by whom
+  
+* large-scale knowledge bases, such as WikiData, contain entries on the standards and technologies decided and maintained by the W3C; <br>
+  so e.g. the HTTP standard names its ivnentor and the W3C and IETF as its standardising bodies both of which entities could expanded recusively; <br>
+  unfortunately, for this approach of sourcing the ground truth, coverage of the invovled persons and concepts is likely not high enough, leading to
+  small and non-complex organisational networks and in turn to little ground truth
 
-* treat the KG we extracted from 
-   1. see the Section [Email KG vs Text KG](#email-kg-vs-text-kg)
 
-* use ML algorithms on different versions 
+* in a different approach, we can treat the KG we extract from the W3C mailing list archives as representative of the ground truth and create less representative KGs; <br>
+strategies for creating such KGs either could actively introduce non-existing facts (or omit existing ones), based on various heuristics, or could use other sources for trying to create the same KG
+   - for a strategy which uses other sources, see Section [Email KG vs Text KG](#email-kg-vs-text-kg); the idea there is that those other sources both do not contain the same amount of information as the original W3C archive and are associated with less certainty of the extracted facts
+   - 
+
+* use ML algorithms on different versions on our graph to assist human analytics, and measure how much performance improves compared to no assistance
+ 
+* choice in operationalisation: provide analysts with either
+  1. only the version of the KG from which they are tasked to reconstruct the ground truth
+  2. both 1. and the corresponding email texts
+  3. only the corresponding email texts
 
 ### Email KG vs Text KG
+
+The core idea of this approach is that we may treat the KG extracted from the mailing list archives as the ground truth because these archives consist of email transactions between servers. That is, on the one hand, the corresponding email servers have resolved addresses and identities of senders and receivers and their aossciated email domains. On the other hand, we're not extracting performing knowledge extraction in the same sense as e.g. NER but rather are taking facts directly from the headers in email protocols. Hence if the mailing list archives contain an email from X to Y, then we are almost guaranteed that both X and Y factually exist as entities and X factually talked to Y. 
+
+With this KG as ground truth, we construct/extract a second KG which we give to the human analysts:
+We remove all email protocol information from the mailing archives, so that only the email bodies remain and we are left with a purely textual corpus without any metadata. Then, we perform "proper" knowledge extraction, i.e. identify greetings and signatures, perform NER, etc., in order try and construct the same KG as the ground truth graph.
+
 
 
 
