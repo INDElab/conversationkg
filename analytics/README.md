@@ -19,16 +19,22 @@
 ### Setting of Hypothesis Testing
 
 * our KG effectively assists human inference of underlying, ground-truth social networks
-  - specifically, our KG is sufficient quality compared to other potential ones to this end
-  - specifically, the structure of our KG is sufficiently robust to small distortions to this end
+  - specifically, our KG covers a large extent of that ground-truth or at least parts which enable efficient inference (cf. low false-negative ratio)
+  - specifically, our KG is sufficient quality compared to other potential ones to this end (e.g. low false-positive ratio)
+  - specifically, the structure of our KG is sufficiently robust to distortions to this end (confusion matrix is robust to small changes in the extraction method or underlying data)
 * our KG effectively enables machine learning techniques to be derived from it which assist human analystics
-* our KG outperforms other computational methods to assist human analytics, ML-based or text-based
+* our KG outperforms other computational methods to assist human analytics, ML-based or text-based 
 
 ### Operationalisations
 
-* problem: need ground truth, on one hand for measuring analysts' performance, on the other to measure how accurately our KG represents it <br>
-  => remedy: W3C is a _real_ organisation, governing _real_ standards => we can source the ground truth of organisational roles and decided standards from the internet (or at least a close proxy thereof); some document [[1](#1)] ... [[5](5)].
+* W3C is a _real_ organisation, governing _real_ standars, so we can source the ground truth (or at least proxies thereof) of organisational roles and standardisation decisions from the internet; links [[1](#1)] ... [[5](#5)] contain examples of documents and organisation charts from which ground truth on specific subgroups and standards of the W3C could be obtained
 
+* treat the KG we extracted from 
+   1. see the Section [Email KG vs Text KG](#email-kg-vs-text-kg)
+
+* use ML algorithms on different versions 
+
+### Email KG vs Text KG
 
 
 
