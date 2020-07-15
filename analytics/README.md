@@ -61,7 +61,12 @@ strategies for creating such KGs either could actively introduce non-existing fa
 ### Machine Learning Algorithms
 
 * use ML algorithms on different versions on our graph to assist human analytics, and measure how much performance improves compared to no assistance
- 
+
+* testing the aptness of our extracted KG as a basis for ML-assisted analytics <br>
+  e.g. by treating our own extracted KG as ground truth and testing the efficacy of link prediction algorithms on that KG in helping human analysts <br>
+ => operationalisation: train link prediction on KG, distort the KG with omitted true links/added false links, measure how well human analysts reconstruct original KG aided by link prediction system <br>
+
+
 
 ### Email KG vs Text KG
 
@@ -75,19 +80,9 @@ An advantage to this approach is that it is close to real-world scenarios in whi
 To give a more concrete example, while for a given email the original KG contains the single fact that X talked to Y (as obtained from the email's header), the KG extracted from the email's body might posit this relation for every named entity (as extracted by an NER) mentioned there. The _true_ talked-to relation between X and Y may or may not be present in this KG, alongside other instances such as Y talked to X and X talked to Z (where Z is some other entity also mentioned in the email's body).
 
 
-### Settings of hypothesis testing:
-i.e. hopyetheses to be tested and how
 
-* testing the efficacy of our extracted KG itself in assisting human analytics <br>
-  problem: need ground truth, to gauge to what extent the inaccuracies of our KG hinder successful and efficient analytics (and vice-versa) <br>
-  remedy: W3C is a _real_ organisation, governing _real_ standards; so we can source the ground truth of organisational structure and roles in conversation from the internet (or at least a proxy of the ground truth, may not be the full truth); see the links for some documents where organisational structures could be scraped; in addition, KBs contain entries to the governing bodies of W3C standards, from which the relevant subgraphs can be recursively extracted <br>
-  links: [W3C Group Dependency Graph](https://www.w3.org/2003/02/W3COrg.svgz), [W3C Core Staff](https://www.w3.org/People), [W3C Process Document](https://www.w3.org/2019/Process-20190301/) , [W3C Accessibility Document](https://www.w3.org/TR/2020/WD-accessibility-conformance-challenges-20200619)
-  => operationalisation: obtain a (proxy) "ground truth" KG of (a part of) the W3C which contains "real" types, roles, ..., and measures how well analysts can infer these given only the conversations and our KG
   
   
-* testing the aptness of our extracted KG as a basis for ML-assisted analytics <br>
-  e.g. by treating our own extracted KG as ground truth and testing the efficacy of link prediction algorithms on that KG in helping human analysts <br>
- => operationalisation: train link prediction on KG, distort the KG with omitted true links/added false links, measure how well human analysts reconstruct original KG aided by link prediction system <br>
  
  
  <a id="1">[[1]: W3C Group Dependency Graph](https://www.w3.org/2003/02/W3COrg.svgz)</a>
