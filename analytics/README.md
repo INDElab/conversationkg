@@ -18,7 +18,7 @@
 
 ## Setting of Hypothesis Testing
 
-* our KG effectively assists human inference of underlying, ground-truth social networks
+* our KG effectively assists human inference of underlying, ground-truth (social) networks
   - specifically, our KG covers a large extent of that ground-truth or at least parts which enable efficient inference (cf. low false-negative ratio)
   - specifically, our KG is sufficient quality compared to other potential ones to this end (e.g. low false-positive ratio)
   - specifically, the structure of our KG is sufficiently robust to distortions to this end (confusion matrix is robust to small changes in the extraction method or underlying data)
