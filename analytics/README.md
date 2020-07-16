@@ -40,8 +40,7 @@ the listed documents contain some but not all information on:
   - which groups of people belong to specific standardisation bodies
   - which persons belong to the core staff of the W3C, to managing groups of standardisation bodies and parts of the hierarchies between them
   - when creatin standardisation decisions have been made and by whom
-  
-problems with this approach include that it likely does not scale well, i.e. each individual document requires specific scraping scripts but at the same time likely does not lead to a large amount of information
+Problems with this approach include that it likely does not scale well, i.e. each individual document requires specific scraping scripts but at the same time likely does not lead to a large amount of information
   
 * large-scale knowledge bases, such as WikiData, contain entries on the standards and technologies decided and maintained by the W3C; <br>
   so e.g. the HTTP standard names its ivnentor and the W3C and IETF as its standardising bodies both of which entities could expanded recusively; <br>
