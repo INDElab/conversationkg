@@ -78,7 +78,7 @@ An advantage to this approach is that it is close to real-world scenarios in whi
 
 To give a more concrete example, while for a given email the original KG contains the single fact that X talked to Y (as obtained from the email's header), the KG extracted from the email's body might posit this relation for every named entity (as extracted by an NER) mentioned there. The _true_ talked-to relation between X and Y may or may not be present in this KG, alongside other instances such as Y talked to X and X talked to Z (where Z is some other entity also mentioned in the email's body).
 
-<img src="EmailCorpus_vs_TextualGraph.svg" alt="EmailCorpusKG (the original KG) vs TextualKG (extracted from only the email bodies" width="500" height="500"/>  
+<img src="EmailCorpus_vs_TextualGraph.svg" alt="EmailCorpusKG (the original KG) vs TextualKG (extracted from only the email bodies" width="500" height="500"  display="block"  margin-left="auto"/>  
   
  
  
