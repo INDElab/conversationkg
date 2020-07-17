@@ -66,6 +66,10 @@ strategies for creating such KGs either could actively introduce non-existing fa
   e.g. by treating our own extracted KG as ground truth and testing the efficacy of link prediction algorithms on that KG in helping human analysts <br>
  => operationalisation: train link prediction on KG, distort the KG with omitted true links/added false links, measure how well human analysts reconstruct original KG aided by link prediction system <br>
 
+* using the two graphs described in the Section below [Email KG vs Text KG](#email-kg-vs-text-kg), we can train (for instance) a link prediction system on the "ground truth" Email KG and apply it to the extracted Text KG
+
+* the same strategy can be used for node clustering and classification algorithms which open th avenue towards role and social hierarchy identification
+
 
 ### Email KG vs Text KG
 
