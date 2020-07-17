@@ -9,8 +9,11 @@ def add_conversation(tx, conversation):
            MERGE (c:Conversation {id:$h}) 
            ON CREATE SET c.subject = $subj
            ON CREATE SET c.length = $n_emails
+           ON CREATE SET c.start = $start
+           ON CREATE SET c.end = $end
            """,
-           subj=subject_escaped, n_emails=len(conversation), h=hash(conversation))
+           subj=subject_escaped, n_emails=len(conversation), h=hash(conversation),
+           start=conversation.start_time, end=conversation.end_time)
     
     
 def add_person(tx, person):
