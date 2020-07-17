@@ -67,7 +67,6 @@ strategies for creating such KGs either could actively introduce non-existing fa
  => operationalisation: train link prediction on KG, distort the KG with omitted true links/added false links, measure how well human analysts reconstruct original KG aided by link prediction system <br>
 
 
-
 ### Email KG vs Text KG
 
 The core idea of this approach is that we may treat the KG extracted from the mailing list archives as the ground truth because these archives consist of email transactions between servers. That is, on the one hand, the corresponding email servers have resolved addresses and identities of senders and receivers and their aossciated email domains. On the other hand, we're not extracting performing knowledge extraction in the same sense as e.g. NER but rather are taking facts directly from the headers in email protocols. Hence if the mailing list archives contain an email from X to Y, then we are almost guaranteed that both X and Y factually exist as entities and X factually talked to Y. 
@@ -79,9 +78,7 @@ An advantage to this approach is that it is close to real-world scenarios in whi
 
 To give a more concrete example, while for a given email the original KG contains the single fact that X talked to Y (as obtained from the email's header), the KG extracted from the email's body might posit this relation for every named entity (as extracted by an NER) mentioned there. The _true_ talked-to relation between X and Y may or may not be present in this KG, alongside other instances such as Y talked to X and X talked to Z (where Z is some other entity also mentioned in the email's body).
 
-
-
-  
+<p align="center"><img src="EmailCorpus_vs_TextualGraph.svg" alt="EmailCorpusKG (the original KG) vs TextualKG (extracted from only the email bodies" width="500" height="500"/> </p>
   
  
  
