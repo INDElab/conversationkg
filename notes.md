@@ -12,7 +12,7 @@ A place for shared notes and pointers
 
 - More data:
     - larger, higher quality, more extensive coverage of domains
-    - e.g. (1) scrape more of the W3C mailing lists, (2) Spotify Podcast Dataset, (3) revisit other data sets?
+    - e.g. (1) scrape more of the W3C mailing lists, (2) [Spotify Podcast Dataset](https://engineering.atspotify.com/2020/04/16/introducing-the-spotify-podcast-dataset-and-trec-challenge-2020/), (3) revisit other data sets?
     - also obtain attached or mentioned documents in the process of scraping 
     
 - Situating the conversations in larger context:
