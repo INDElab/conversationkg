@@ -170,6 +170,11 @@ class Conversation(tuple, metaclass=Universe):
     
         self.topic = None
     
+    def __eq__(self, other):
+        if not (type(self) == type(other) == Conversation):
+            return False
+        return hash(self) == hash(other)
+    
     # not persistent across Python instances
     def __hash__(self):
         return hash((self.start_time, self.end_time, self.subject))
@@ -188,7 +193,8 @@ class Conversation(tuple, metaclass=Universe):
     
     
     def to_json(self, dumps=False):
-        d = {"subject": self.subject,
+        d = {"class": self.__class__.__name__,
+            "subject": self.subject,
              "self": [e.to_json(dumps=False) for e in self]}
         if self.topic:
             d["topic"] = self.topic.to_json(dumps=False)

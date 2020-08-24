@@ -95,6 +95,10 @@ class Email(metaclass=Universe):
             return True
         return False
     
+    def __eq__(self, other):
+        if not (type(self) == type(other) == Email):
+            return False
+        return hash(self) == hash(other)
     
     def __hash__(self):
         return hash((self.time, self.subject))    
@@ -108,6 +112,7 @@ class Email(metaclass=Universe):
     
     def to_json(self, dumps=False):
         d = {k:v for k, v in self.__dict__.items()}
+        d["class"] = self.__class__.__name__
         d["time"] = str(self.time)
         d["body"] = self.body.to_json(dumps=False)
         d["sender"] = self.sender.to_json(dumps=False)
@@ -184,10 +189,11 @@ class EmailBody(str, metaclass=Universe):
             yield address
     
     def to_json(self, dumps=False):
-        d = dict(self=self.whole, 
-                 links=[l.to_json(dumps=False) for l in self.links],
-                 addresses=[a for a in self.addresses],
-                 entities=[e.to_json(dumps=False) for e in self.entities])
+        d = {"class": self.__class__.__name__,
+             "self": self.whole, 
+             "links": [l.to_json(dumps=False) for l in self.links],
+             "addresses":[a for a in self.addresses],
+             "entities":[e.to_json(dumps=False) for e in self.entities]}
         
         if dumps: return json.dumps(d)
         return d

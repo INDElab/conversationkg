@@ -176,6 +176,12 @@ class Person(EntityInstance):
     def __hash__(self):
         return hash((super().__hash__(), self.instance_label, self.address))
     
+    
+    def __eq__(self, other):
+        if not (type(self) == type(other) == Person):
+            return False
+        return hash(self) == hash(other)
+    
     def to_json(self, dumps=False):
         d = super().to_json(dumps=False)
         d["address"] = self.address
@@ -254,6 +260,8 @@ class Address(EntityInstance, str):
 
     def to_json(self, dumps=False):
         d = super().to_json(dumps=False)
+        d["org_from_address"] = self.org_from_address.to_json(dumps=False)
+        
         d["class"] = "Address"
         if dumps: return json.dumps(d)
         return d

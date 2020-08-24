@@ -110,7 +110,8 @@ class Topic:
     
     
     def to_json(self, dumps=False):
-        d = {"index": self.index,
+        d = {"class": self.__class__.__name__,
+             "index": self.index,
              "words": self.words,
              "word_dist": self.word_dist.tolist()}
         
@@ -145,7 +146,7 @@ class TopicInstance:
     
     
     def to_json(self, dumps=False):
-        d = dict(score=self.score)
+        d = {"class":self.__class__.__name__, "score":self.score}
         d["topic"] = self.topic.to_json(dumps=False)
         if dumps: return json.dumps(d)
         return d
