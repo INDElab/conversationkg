@@ -3,7 +3,7 @@
 
 ## Node Classes
 
-- we are primarily interested in persons' roles in the social network of email exchanges in our corpus; such roles include whether someone is a part of a certain organisation (e.g. the W3C) or to what  
+- we are primarily interested in persons' roles in the social network of email exchanges in our corpus; such roles include whether someone is a part of a certain organisation (e.g. the W3C) or 
 
 
 
@@ -12,6 +12,8 @@
 - the goal is to classify persons in our email corpus into social, organisational (and other) groups based on their email exchanges; what makes this task interesting is that we try to recover these groups purely based on the information contained in emails' bodies; in this approach, we treat the emails' protocol information (fact that email was successfully delivered, addresses of sender and receiver, time sent, etc) as the ground truth for social interactions
 
 - formally: given a graph $G = (V, E)$ and a set of classes $C$, a CGN learns a function $f: V -> P(C)$, i.e. for each vertex $v \in V$ and for each class $c \in C$, $f$ assigns a probability of $v$ belonging to class $c$
+
+
 
 - during training of the CGN, we use labels 
 
