@@ -3,8 +3,13 @@
 
 ## Node Classes
 
-- we are primarily interested in persons' roles in the social network of email exchanges in our corpus; such roles include whether someone is a part of a certain organisation (e.g. the W3C) or 
+- we are primarily interested in persons' roles in the social network of email exchanges in our corpus; such roles include whether someone is a part of a certain organisation (e.g. the W3C) or displays certain patterns of social behaviour
 
+- during pilot experiments, these roles are kept rather general, such as a person's connectivity in a social network, but ultimately we are interested in more detailed roles, such as whether a person belongs to specific small-scale networks of people or whether a person acts rather as an information-giver than an information-taker in interactions
+
+- we define the identification of such roles of people as node classification, i.e. we represent people as nodes in a KG of email interactions (and parts of their contents) and attempt to assign discrete labels to people nodes that are intended to reflect the roles we seek to indentify
+
+- in order to obtain (a proxy of) ground truth for node classification, we generate KGs in two ways: one in which we rely (almost) purely on emails' metadata and another in which we perform actual information extraction from emails' textual bodies and omit (most of the) metadata; roles extracted by (deterministic and simple) heuristics from the former is what we treat as ground truth and we use the latter as a testbed for the ability to recover the extracted roles
 
 
 ## Task Setup
@@ -15,7 +20,6 @@
 
 
 
-- during training of the CGN, we use labels 
 
 
 ## Implementation Details
@@ -23,16 +27,19 @@
 
 ### Roles (i.e. Classes)
 
-
-- we define classes for people in two ways:
+We define classes for people in two ways:
   1. according to a heuristic; a simple example is whether or not someone's email address has the domain `w3c.org` (indicating with high certainty that they belong to the W3C)
   2. according to clustering around graph measures; e.g. we calculate betweenness centrality for each vertex in the EmailKG and subsequently cluster nodes according to their centrality score
 
-
+__Exploration__
 
 - graph measures such as betwenness-centrality follow strongly exponential distributions across vertices, making clustering somewhat meaningless since the vast majority of vertices will belong to the same class
 
-- the clustering coefficient for nodes (taken from `networkx.algorithms.cluster.clustering`) leads to interesting distributions over vertices and has a useful interpretation (?)
+- 
+
+- the clustering coefficient for nodes (taken from `networkx.algorithms.cluster.clustering`) leads to interesting distributions over vertices and has a useful interpretation, namely as a measure which captures how well connected a person is in their local, direct network of interactions; formally, the clustering coefficient is defined as $2T(v)/(deg(v)*(deg(v)-1)))$, where $T(v)$ is the number of triangles through vertex $v$ and $deg(v)$ is its degree; the resulting distribution is more interesting in the sense that density is spread more uniformly over values which in turn leads to more uniformly populated classes after clustering:
+
+
 
 
 
