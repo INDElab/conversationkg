@@ -184,7 +184,7 @@ class Person(EntityInstance):
     
     def to_json(self, dumps=False):
         d = super().to_json(dumps=False)
-        d["address"] = self.address
+        d["address"] = self.address.instance_label
         d["organisation"] = self.organisation.to_json(dumps=False) if self.organisation is not None else None
         d["class"] = "Person"
         if dumps: return json.dumps(d)
