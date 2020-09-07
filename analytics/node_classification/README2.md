@@ -5,12 +5,11 @@
 ## EmailKG
 
 - next to the metadata information, EMailKG  is also enriched with information form the emails' bodies, such as topic modelling, NER and link extraction; in this sense
-  EmailKG is the more complete source of information on the email corpus since it combines the metadata and the information extracted from bodies
+  EmailKG is the more complete source of information (compared to TextKG) on the email corpus since it combines the metadata and the information extracted from bodies
 
 ## TextKG
 
-- even though the TextKG is supposed to only contain information form the emails' bodies themselves (no metadata information), we retain information about <br>
-  which emails belong to the same conversation and which conversation took place before which; we keep this information since it may rpovide important scaffolding
+- even though the TextKG is supposed to only contain information form the emails' bodies themselves (no metadata information), we retain information about which emails belong to the same conversation and which conversation took place before which; we keep this information since it may provide important scaffolding for the subgraphs we care about (e.g. Conversations are only connected among each other by the `before` relation)
   
 - we use Stanford's NER algorithm to extract mentions of persons from an email's body (tag `PERSON`)
 
