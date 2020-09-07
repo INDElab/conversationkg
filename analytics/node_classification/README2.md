@@ -26,6 +26,9 @@
 - the Person entities in TextKG are discovered by NER, so cannot be literally matched with the Person entities in EmailKG <br>
   => matching is done by person.instance_label.lower(), i.e. the lower-case version of a person's name <br>
   => better matching for the future
+
+- the above note not only applies to intersecting the sets of nodes of KGs but also to translating them in a unified way
+  => since this is such a pervasive issue, could temporarily change `Person.__hash__` and `Person.__eq__` to reflect this (would affect testing for set membership, testing for equality, dict indexing)
   
   
   
