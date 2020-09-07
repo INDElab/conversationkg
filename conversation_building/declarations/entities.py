@@ -164,9 +164,10 @@ class Person(EntityInstance):
         
         
         if not name: name = ""        
+        name = name.strip("'").strip('"').replace("\n", " ")
+
         if name == self.address.instance_label.lower():
             name = ""
-        name = name.strip("'").strip('"')
         self.instance_label = name
         
         
