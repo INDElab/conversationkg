@@ -49,6 +49,10 @@ class RoleHeuristic:
     
     
 class MajorOrganisations(RoleHeuristic):
+    def __repr__(self):
+        return "MajorOrganisations"
+    
+    
     def __init__(self, kg, most_common=5, getter_func=lambda x: x):
         
         persons = kg.entities(lambda p: type(p) is Person)
@@ -64,6 +68,9 @@ class MajorOrganisations(RoleHeuristic):
         self.org2label.update({o: 0 for o, _ in org_counts.most_common()[most_common:]})
         
         self.entity2label = {getter_func(p):self.org2label[p.organisation] for p in persons}
+        
+        self.value_seq = orgs
+        self.label_seq = [self.org2label[o] for o in self.value_seq]
         
         
     def inspect(self):
@@ -92,6 +99,10 @@ class MajorOrganisations(RoleHeuristic):
         
 class RolesfromGraphMeasure(RoleHeuristic):
     clustering_coeff = networkx.cluster.clustering
+    
+    def __repr__(self):
+        return "RolesfromGraphMeasure"
+        
     def __init__(self, kg, n_roles, graph_measure, getter_func=lambda x: x):
         G = networkx.DiGraph()
         G.add_edges_from(kg.tuples())

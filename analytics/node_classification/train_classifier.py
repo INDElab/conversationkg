@@ -20,7 +20,7 @@ num_nodes = len(kg.entities())
 num_rels = len(kg.predicates())
 
 
-with open(kg_name + ".ind2label.json") as handle:
+with open(kg_name + ".RolesfromGraphMeasure.ind2label.json") as handle:
     ind2cls = {int(i): c for i, c in json.load(handle).items()}
 
 
@@ -40,23 +40,17 @@ assert num_classes == len(set(ind2cls.values())),\
 
 
 test = 0.9
-
-#test_idx = np.random.choice(len(kg.translated), size=int(len(kg.translated)*test),
-#                            replace=False)
-#
-#train_idx = np.asarray([i for i in range(len(kg.translated)) if not i in test_idx])
-#
-#
-#train_T = [kg.translated[i] for i in train_idx]
-#test_T = [kg.translated[i] for i in test_idx]
-
-
-
-
-
 test_idx = np.random.choice(num_nodes, size=int(num_nodes*test),
                             replace=False)
 train_idx = np.asarray([i for i in range(num_nodes) if not i in test_idx])
+
+
+
+#%%
+
+
+#relevant_idx = np.where(classes < num_classes-2)[0]
+#rest_idx = np.asarray([i for i in range(num_nodes) if not i in relevant_idx])
 
 
 #%%
@@ -88,11 +82,45 @@ eval_epochs = range(0, epochs, 10)
 
 #%%
 
+from time import time
+
+def evaluate(model):
+    model.eval()
+    with torch.no_grad():
+        preds = model()
+        train_preds, test_preds = preds[train_idx, :], preds[test_idx, :]
+        train_true, test_true = classes[train_idx], classes[test_idx]
+    
+        train_metrics[criterion].append(
+                criterion(train_preds, train_true).item()
+                )
+        train_metrics[accuracy_score].append(
+                    accuracy_score(train_true, train_preds.argmax(1))
+                )        
+        train_metrics[mean_pred_prob].append(
+                    mean_pred_prob(train_preds.softmax(0), test_true)
+                )
+        
+        eval_metrics[criterion].append(
+                criterion(test_preds, test_true).item()
+            )
+        eval_metrics[accuracy_score].append(
+                accuracy_score(test_true, test_preds.argmax(1))
+            )
+        eval_metrics[mean_pred_prob].append(
+                mean_pred_prob(test_preds.softmax(0), test_true)
+            )
+
+    model.train()
+    
+
+
+t = time()
+tt = 0
 
 
 pbar = tqdm(range(epochs), desc=str(np.inf))
 for epoch in pbar:
-    nc.train()
     optimiser.zero_grad()
     
     preds = nc()[train_idx, :]
@@ -104,27 +132,12 @@ for epoch in pbar:
     optimiser.step()
         
     if epoch in eval_epochs:
-        train_acc = accuracy_score(classes[train_idx], preds.argmax(1))
-        train_mean_p_hat = mean_pred_prob(preds.softmax(0), classes[test_idx])
-
-        train_metrics[criterion].append(loss.item())
-        train_metrics[accuracy_score].append(train_acc)        
-        train_metrics[mean_pred_prob].append(train_mean_p_hat)
+        tt2 = time()
+        evaluate(nc)
+        tt += time() - tt2
         
         
-        
-        
-        test_preds = nc()[test_idx, :]
-        test_acc = accuracy_score(classes[test_idx], test_preds.argmax(1))
-        mean_p_hat = mean_pred_prob(nc()[test_idx, :].softmax(0), classes[test_idx])
-        test_xent = criterion(test_preds, classes[test_idx]).item()
-        
-        eval_metrics[criterion].append(test_xent)
-        eval_metrics[accuracy_score].append(test_acc)
-        eval_metrics[mean_pred_prob].append(mean_p_hat)
-        
-        
-        
+t = time() - t
 
 #%%
 import seaborn as sns

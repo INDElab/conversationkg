@@ -10,6 +10,8 @@ from declarations.entities import Person
 from declarations.topics import TopicModel
 import numpy.random as rand
 
+lowercased_name = lambda p: p.instance_label.lower()
+
 
 #%% 1. load data and construct corpus, apply topic modeling
 
@@ -45,7 +47,6 @@ textkg = TextKG(corpus)
 #textkg.translate()
 
 
-lowercased_name = lambda p: p.instance_label.lower()
 
 
 #%% 2.1 create IntersectKG by intersecting the Persons in EmailKG and TextKG
@@ -136,27 +137,34 @@ intersectkg2 = KG.restore(intersect_name)
 
 #%% 3. instantiate RoleHeuristic 
 
-from roles_new import MajorOrganisations, RolesfromGraphMeasure
 
-mo = MajorOrganisations(emailkg, getter_func=lowercased_name)
+#%% 3.1 load already saved KG
 
-mo_labels = mo.label(intersectkg, getter_func=lowercased_name, to_dict=True)
+mailing_list = "ietf-http-wg"
+kg_name = f"KGs/{mailing_list}/emailkg"
+emailkg = KG.restore(kg_name)
+intersect_name = f"KGs/{mailing_list}/intersectkg"
+intersectkg = KG.restore(intersect_name)
+
+#%%
 
 
-#roles = RolesfromGraphMeasure(emailkg, 4, RolesfromGraphMeasure.clustering_coeff,
-#                              getter_func=lowercased_name)
+from roles import MajorOrganisations, RolesfromGraphMeasure
+
+#mo = MajorOrganisations(emailkg, getter_func=lowercased_name)
 #
-#role_labels = roles.label(intersectkg, getter_func=lowercased_name)
+#mo_labels = mo.label(intersectkg, getter_func=lowercased_name, to_dict=True)
 
 
-entity2label = {intersectkg.entity2ind[e]: i for e, i in mo_labels.items()}
+roles = RolesfromGraphMeasure(emailkg, 4, RolesfromGraphMeasure.clustering_coeff,
+                              getter_func=lowercased_name)
+
+role_labels = roles.label(intersectkg, getter_func=lowercased_name, to_dict=True)
 
 
-with open(intersect_name + ".ind2label.json", "w") as handle:
+entity2label = {intersectkg.entity2ind[e]: int(i) for e, i in role_labels.items()}
+
+
+with open(f"{intersect_name}.{roles}.ind2label.json", "w") as handle:
     json.dump(entity2label, handle)
-
-
-
-
-
 
