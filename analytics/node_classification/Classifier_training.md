@@ -36,6 +36,3 @@
   coefficient in the addition 2.0
 
 ## Try
-
-
-
