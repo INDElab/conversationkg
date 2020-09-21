@@ -41,6 +41,6 @@
 
 # TextKG
 
-- besides the "scaffolding" structure metnioned above (see [All KGs](# All KGs) TextKG
+- besides the "scaffolding" structure metnioned above (see [All KGs](#all-kgs) TextKG
 
 
