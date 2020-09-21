@@ -33,9 +33,14 @@
 
 
 ## Procedural Notes
+  - any interlocutor (whether sender or receiver or both) is in the part_of relation with the conversation entity
+  - the interlocutors' organisations are also in the part_of relation with the conversation entity
   - Address entities are obtained from Person entities' address attributes
   - Organisation entities are obtained from Address entities' domains (part of address after @)
 
 
 # TextKG
+
+- besides the "scaffolding" structure metnioned above (see [All KGs](# All KGs) TextKG
+
 
