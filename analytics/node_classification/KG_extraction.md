@@ -28,7 +28,7 @@
 
 
 ## (Vertices, Edges)
-  - entities: Person (with both name and address attributes), Address, Organisation (obtained from Address domain)
+  - entities: Person (with both name and address attributes), Address, Organisation
   - relations: part_of (person1 part_of conv1), evidences (person1 evidences address1/org1), talked_to (person1/org1 talked_to person2/org2)
 
 
@@ -41,6 +41,24 @@
 
 # TextKG
 
-- besides the "scaffolding" structure metnioned above (see [All KGs](#all-kgs) TextKG
+  - besides the "scaffolding" structure metnioned above (see [All KGs](#all-kgs)), the TextKG is obtained purely from IE methods; that is, all information contained in TextKG originates from emails' bodies
+  
+  - 
 
 
+## (Vertices, Edges)
+
+  - entities: Person (only name attribute), Topics
+  - relations: about (conv1 about topic1), mentions (email1 mentions person1), talked_to (person1 talked_to person2)
+
+## Procedural Notes
+
+  - the Person entities in EmailKG are discovered from emails' text bodies by Stanford's NER system (entities tagged PERSON) -- for this reason, the Person entities have only name attributes and even for those often only first names, alternate spellings, etc. => entity resolution would be in order
+  
+  - for each pair of Person entities, person1 and person2, discovered by the NER we add the relation (person1 talked_to person2), postulating that person1 is the email's sender and person2 its receiver => this overly simple heuristic could be improved upon to further simplify downstream tasks
+
+  - topic modelling:
+    - we use LDA with a uniformly initialised topic prior
+    - using a grid search, we select a number of topics that minimises perplexity on the set of document
+    - fitting the topic and word distributions of LDA is done on the entire email corpus
+    - when constructing TextKG, both emails (via their bodies) and conversations (word counts of conversation's emails are simply added) are assigned to topics
