@@ -2,7 +2,7 @@
 
 
 
-## Network Parameters
+# Network Parameters
 
 ### embedding size
   number of dimensions of the entity embedding space <br>
@@ -14,14 +14,14 @@
   more layers = more learning power: 2 layers
 
 
-## Training Parameters
+# Training Parameters
 
-### number of epochs
+## number of epochs
   the number of iterations over the training data set before convergence/overfitting is reached <br>
   500 typically leads to significant convergence
   
   
-### loss
+## loss
   cross entropy (reduces to `-log P(c|x)` w. `c` the true class of example `x`) <br>
   no tuneable parameters, except weights, see below
   
@@ -31,8 +31,18 @@
   the resulting vector is re-normalised to be a distribution
   
 
-### regularisation
+## regularisation
   L2 norm (equiv. to Euclidean distance from the origin) on the node embeddings, added to the raw loss <br>
-  coefficient in the addition 2.0
+  coefficient when added to the raw loss
+  
+  
+## optimiser
+  Adam
 
-## Try
+### optimiser learning rate
+  
+
+
+### optimiser weight decay
+
+  
