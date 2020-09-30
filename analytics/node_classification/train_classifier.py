@@ -1,201 +1,184 @@
-from torch_RGCN.models import EmbeddingNodeClassifier
+# -*- coding: utf-8 -*-
 
 import torch
 import numpy as np
 from tqdm import tqdm
-import json
 
 from KGs import KG
 
-from sklearn.metrics import accuracy_score
+
+from train_utils import load_and_get_data, train_test_split,\
+                        setup_training, train_classifier, L2_regularisation,\
+                        grid_search
+
+from train_utils import my_accuracy, my_macro_f1, mean_predicted_prob
+
+
+#%% LOAD DATA
+
+mailing_list = "public-credentials"  # "ietf-http-wg"
+kg_name = f"KGs/{mailing_list}/textkg"
+heuristic = "RolesfromGraphMeasure"
+
+kg, classes, num_nodes, num_rels, num_classes = load_and_get_data(kg_name, heuristic)
+
+
+#classes = torch.tensor(np.random.randint(num_classes, size=classes.size(0)))
+
+#%% TEST WITH LABEL IS_PERSON
+
+
+#relevant_inds 
+
+relevant_num_classes = 2
+
+relevant_inds = np.arange(classes.size(0))
+
+
+from KGs import OnlyNamePerson
+
+classes = torch.tensor([(1 if type(e) is OnlyNamePerson else 0)
+                    for e in sorted(kg.entities(), key=lambda e: kg.entity2ind[e])
+                ], dtype=torch.long)
+
+
+
+train_inds, test_inds = train_test_split(relevant_inds)
+
+
+
+#%% GET RELEVANT CLASSIFICATION INDICES
+
+relevant_num_classes = num_classes - 2
+relevant_inds = np.where(classes < relevant_num_classes)[0]
+
+train_inds, test_inds = train_test_split(relevant_inds)
+
+
+#%% DEFINE TRAINING PARAMETER DICT
+
+
+#    _, cs = classes[real_classes_idx].unique(return_counts=True)
+#    n_cls = 3
+#    major_prob = cs.max().true_divide(cs.sum())
+#    weights = torch.tensor([major_prob/n_cls]*n_cls + [1-major_prob, 0.])
+#    weights = torch.tensor([100]*n_cls + [1, 0]).true_divide(2*n_cls+1).float()
+
+
+#weights = torch.tensor([3, 1]).float().softmax(0)
+#
+#params = {
+#    "embedding_size": [4, 8, 16],
+#     "num_layers": [2],
+#     "epochs": [100],
+#     "loss": [torch.nn.CrossEntropyLoss],
+#     "loss_weights": [weights],
+#     "regulariser": [L2_regularisation],
+#     "regulariser_coeff": [0.5, 1., 5., 10.],
+#     "optimiser": [torch.optim.Adam, torch.optim.AdamW, toch.optim.Adamax, torch.optim.SGD],
+#     "optimiser_learning_rate": [1., 1e-2, 1e-4],
+#     "optimiser_weight_decay": [0.0] # , 1.0, 2.0]
+#     }
+
+
+from collections import Counter
+class_counts = Counter(classes[train_inds].tolist())
+
+weights = np.asarray([class_counts[l]/classes[train_inds].size(0) for l in sorted(class_counts)])
+#weights = (1/weights)/((1/weights).sum())
+weights = (1-weights)/(classes[train_inds].unique().size(0)-1)
+assert weights.sum() == 1.
+
+params = {
+    "embedding_size": [4],
+     "num_layers": [2],
+     "epochs": [200],
+     "loss": [torch.nn.CrossEntropyLoss],
+#     "loss_weights": [torch.tensor([p, 1-p]).float() for p in np.arange(0.9, 0.96, 0.01)],
+     "loss_weights": [torch.tensor(weights).float()],
+     "regulariser": [L2_regularisation],
+     "regulariser_coeff": [0.],
+     "optimiser": [torch.optim.AdamW],
+     "optimiser_learning_rate": [1e-2],
+     "optimiser_weight_decay": [0.0] # , 1.0, 2.0]
+     }
+
+
+
+
+#params = {
+#    "embedding_size": 2,
+#     "num_layers": 2,
+#     "epochs": 500,
+#     "loss": torch.nn.CrossEntropyLoss,
+#     "loss_weights": weights,
+#     "regulariser": L2_regularisation,
+#     "regulariser_coeff": 1.,
+#     "optimiser": torch.optim.Adam,
+#     "optimiser_learning_rate": 1e-3,
+#     "optimiser_weight_decay": 1.0
+#        }
 
 
 #%%
 
-mailing_list = "ietf-http-wg"
-kg_name = f"KGs/{mailing_list}/intersectkg"
-kg = KG.restore(kg_name)
-
-num_nodes = len(kg.entities())
-num_rels = len(kg.predicates())
 
 
-with open(kg_name + ".RolesfromGraphMeasure.ind2label.json") as handle:
-    ind2cls = {int(i): c for i, c in json.load(handle).items()}
+gs = grid_search(params, max_iter=1)
 
 
+results = []
 
-classes = torch.tensor([
-           ind2cls[kg.entity2ind[e]] for e in sorted(kg.entities(), key=lambda e: kg.entity2ind[e])
-        ], dtype=torch.long)
+for param_d in gs:
 
-
-num_classes = (classes.max() + 1).item()
-assert num_classes == len(set(ind2cls.values())),\
-         f"Appar. some classes were not observed! {num_classes}, {set(ind2cls.values())}"
-
-
-#%%
-
-
-
-test = 0.9
-test_idx = np.random.choice(num_nodes, size=int(num_nodes*test),
-                            replace=False)
-train_idx = np.asarray([i for i in range(num_nodes) if not i in test_idx])
-
-
-
-#%%
-
-
-#relevant_idx = np.where(classes < num_classes-2)[0]
-#rest_idx = np.asarray([i for i in range(num_nodes) if not i in relevant_idx])
-
-
-#%%
-
-nc = EmbeddingNodeClassifier(kg.translated,
-                    nnodes=num_nodes, 
-                    nrel=num_rels, 
-                    nclass=num_classes,
-                    nemb=4)
-
-
-optimiser = torch.optim.Adam(nc.parameters())
-criterion = torch.nn.CrossEntropyLoss()
-mean_pred_prob = lambda preds, true_inds: np.mean([row[c].item() for row, c in zip(preds, true_inds)])
-
-
-train_preds = []
-losses = []
-train_metrics = {criterion:[], 
-                accuracy_score:[],
-                mean_pred_prob:[]}
-eval_metrics = {criterion:[], 
-                accuracy_score:[],
-                mean_pred_prob:[]}
-
-epochs = 500
-eval_epochs = range(0, epochs, 10)
-
-
-#%%
-
-from time import time
-
-def evaluate(model):
-    model.eval()
-    with torch.no_grad():
-        preds = model()
-        train_preds, test_preds = preds[train_idx, :], preds[test_idx, :]
-        train_true, test_true = classes[train_idx], classes[test_idx]
+    print(param_d, "\n\n")
     
-        train_metrics[criterion].append(
-                criterion(train_preds, train_true).item()
-                )
-        train_metrics[accuracy_score].append(
-                    accuracy_score(train_true, train_preds.argmax(1))
-                )        
-        train_metrics[mean_pred_prob].append(
-                    mean_pred_prob(train_preds.softmax(0), test_true)
-                )
-        
-        eval_metrics[criterion].append(
-                criterion(test_preds, test_true).item()
-            )
-        eval_metrics[accuracy_score].append(
-                accuracy_score(test_true, test_preds.argmax(1))
-            )
-        eval_metrics[mean_pred_prob].append(
-                mean_pred_prob(test_preds.softmax(0), test_true)
-            )
-
-    model.train()
-    
+    model, optim, criterion = setup_training(kg.translated, num_nodes, num_rels, relevant_num_classes,
+                              **param_d)
 
 
-t = time()
-tt = 0
+    metric_tracker = train_classifier(model, optim, criterion, 
+                                      classes, train_inds, test_inds,
+                                      **param_d)
 
 
-pbar = tqdm(range(epochs), desc=str(np.inf))
-for epoch in pbar:
-    optimiser.zero_grad()
-    
-    preds = nc()[train_idx, :]
-        
-    loss = criterion(preds, classes[train_idx])
-    pbar.set_description(str(round(loss.item(), 5)))
-        
-    loss.backward()
-    optimiser.step()
-        
-    if epoch in eval_epochs:
-        tt2 = time()
-        evaluate(nc)
-        tt += time() - tt2
-        
-        
-t = time() - t
-
-#%%
-import seaborn as sns
-import matplotlib.pyplot as plt
-
-rng = list(range(len(eval_metrics[criterion])))
-sns.scatterplot(rng, train_metrics[criterion], label="train")
-sns.scatterplot(rng, eval_metrics[criterion], label="test")
-plt.title(f"Loss: {criterion}")
-plt.show()
-
-
-sns.scatterplot(rng, train_metrics[accuracy_score], label="train")
-sns.scatterplot(rng, eval_metrics[accuracy_score], label="test")
-plt.title(f"Accuracy")
-plt.show()
-
-
-sns.scatterplot(rng, train_metrics[mean_pred_prob], label="train")
-sns.scatterplot(rng, eval_metrics[mean_pred_prob], label="test")
-plt.title(f"Mean Predicted Probability of True Label")
-plt.ylim((0.0, 0.001))
-plt.show()
-
-
+    results.append((param_d, metric_tracker))
 
 
 #%%
 
-embeddings = nc.node_embeddings.detach().numpy()
 
-with open("embeddings.tsv", "w") as handle:
-    for v in embeddings:
-        handle.write("\t".join(map(str, v)))
-        handle.write("\n")
+param_dicts, metrics = list(zip(*results))
 
 
 
-from declarations.entities import Person
+for p, m in results:
+    print("lr:", p["optimiser_learning_rate"])
+    print("loss_weights:", p["loss_weights"])
+    for f in m.eval_vals.keys():
+        print(f.__str__(), max(m.eval_vals[f]))
+#        print("_"*10 + "\n\n")
+    
+    m.plot_metrics()
+    print("_"*10 + "\n\n")
 
 
-#with open(kg_name + ".label2entity.json") as handle:
-#    cls2entity = {int(i): s for i, s in json.load(handle).items()}
+
+#%%
+    
+from train_utils import get_baseline
 
 
-with open("meta.tsv", "w") as handle:
-    handle.write("is_person\tnode_class\tinstance_label\n")
-    for e in sorted(kg.entities(), key=lambda e: kg.entity2ind[e]):
-        is_person = type(e) is Person
-        node_class = ind2cls[kg.entity2ind[e]]
-        
-#        o = cls2entity[node_class]
+baseline_model = get_baseline(class_sequence=classes[train_inds])
 
-#        o = e.organisation.instance_label if is_person else "None"
-        l = e.instance_label if is_person else str(e)
-        
-        l = l.replace("\n", " ")
-        
-        handle.write("\t".join((str(is_person), str(node_class), l)))
-        handle.write("\n")
+ent_seq = np.arange(num_nodes)
 
+mean_vals = {f: np.mean([f(baseline_model(ent_seq)[test_inds], classes[test_inds])
+                            for _ in range(500)])
+             for f in (my_accuracy, my_macro_f1, mean_predicted_prob)}
+
+    
+
+
+for f in mean_vals.keys():
+    print(f.__str__(), mean_vals[f])

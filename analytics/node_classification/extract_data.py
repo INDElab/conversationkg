@@ -10,12 +10,15 @@ from declarations.entities import Person
 from declarations.topics import TopicModel
 import numpy.random as rand
 
-lowercased_name = lambda p: p.instance_label.lower()
+#lowercased_name = lambda p: p.instance_label.lower()
+#
+#lowercased_name = lambda p: p
 
 
 #%% 1. load data and construct corpus, apply topic modeling
 
-mailing_list = "public-credentials"
+
+mailing_list = "public-credentials"  # "ietf-http-wg"
 
 with open(f"email_data/{mailing_list}/all.json") as handle:
     mail_dicts = json.load(handle)
@@ -23,16 +26,12 @@ with open(f"email_data/{mailing_list}/all.json") as handle:
 
 convos = [(subj_str, mail_ls) for period, subj_d in mail_dicts.items() 
                 for subj_str, mail_ls in subj_d.items()]
-
 convos_short = rand.permutation(convos)[:-1]
 
 conversations = [Conversation.from_email_dicts(*tup) for tup in tqdm(convos_short)]
-
 corpus = EmailCorpus.from_conversations(conversations, vectorise_default=True)
 
-
-lda = TopicModel(corpus, 7, max_iter=500)
-
+lda = TopicModel(corpus, 7, max_iter=5)
 lda.assign_topics_to_conversations()
 lda.assign_topics_to_emails()
 
@@ -48,73 +47,25 @@ textkg = TextKG(corpus)
 
 
 
+#%%
+
+from KGs import OnlyNamePerson
+
+len({p.instance_label.lower() for p in textkg.entities(lambda x: type(x) is OnlyNamePerson)} &\
+ {p.instance_label.lower() for p in emailkg.entities(lambda x: type(x) is OnlyNamePerson)})
+
+
+
 
 #%% 2.1 create IntersectKG by intersecting the Persons in EmailKG and TextKG
 
-def intersect_persons(emailkg, textkg, getter_func=lambda x: x):
-    is_person = lambda x: type(x) is Person
-    emailkg_names = {getter_func(x) for x in emailkg.entities(is_person)}
-    
-    def keep(s, o, name_set):
-        if not (is_person(s) or is_person(o)):
-            return True
-        
-        if is_person(s) and is_person(o):
-            if getter_func(s) in name_set or getter_func(o) in name_set:
-                return True
-        
-        if is_person(s):
-            if getter_func(s) in name_set:
-                return True
-        
-        if is_person(o):
-            if getter_func(o) in name_set:
-                return True
-        return False
-    
-    new_triples = []
-    for s, p, o in textkg.triples:
-        
-        if keep(s, o, emailkg_names):
-            new_triples.append((s, p, o))
-    
-    return KG(new_triples)
 
-
-
-
-#intersectkg = KG.intersect_persons(emailkg, textkg, 
-#                                   getter_func=lambda p: p.instance_label.lower())
-
-
-intersectkg = intersect_persons(emailkg, textkg, getter_func=lowercased_name)
+#intersectkg = KG.intersect_persons(emailkg, textkg, getter_func=lowercased_name)
 
 
 #%% 2.2 translate KGs in a unified manner
 
-class Translator:
-    @staticmethod
-    def unified_translation(*kgs, attach=False):
-
-        uni_e2i, uni_p2i = {}, {}
-
-        for kg in kgs:
-#            print(bool(uni_e2i), bool(uni_p2i))
-            translated, uni_e2i, uni_p2i = kg.translate(uni_e2i, uni_p2i, attach=False)
-#            print("from loop", uni_p2i)
-            if attach:
-                kg.translated = translated
-
-        if attach:
-            for kg in kgs:
-                kg.entity2ind = uni_e2i
-                kg.pred2ind = uni_p2i
-        else:
-            return uni_e2i, uni_p2i
-
-
-
-Translator.unified_translation(intersectkg, textkg, emailkg, attach=True)
+KG.unified_translation(textkg, emailkg, attach=True)
 
 
 #%% 2.3 store and restore KGs
@@ -129,9 +80,9 @@ textkg.store(folder_name + "/textkg")
 textkg2 = TextKG.restore(folder_name + "/textkg")
 
 
-intersect_name = folder_name + "/intersectkg"
-intersectkg.store(intersect_name)
-intersectkg2 = KG.restore(intersect_name)
+#intersect_name = folder_name + "/intersectkg"
+#intersectkg.store(intersect_name)
+#intersectkg2 = KG.restore(intersect_name)
 
 
 
@@ -140,31 +91,40 @@ intersectkg2 = KG.restore(intersect_name)
 
 #%% 3.1 load already saved KG
 
-mailing_list = "ietf-http-wg"
-kg_name = f"KGs/{mailing_list}/emailkg"
-emailkg = KG.restore(kg_name)
-intersect_name = f"KGs/{mailing_list}/intersectkg"
-intersectkg = KG.restore(intersect_name)
+mailing_list = "public-credentials"
+kg_path = f"KGs/{mailing_list}"
+emailkg = KG.restore(f"{kg_path}/emailkg")
+textkg = TextKG.restore(f"{kg_path}/textkg")
+#intersect_name = f"KGs/{mailing_list}/intersectkg"
+#intersectkg = KG.restore(intersect_name)
 
 #%%
 
 
-from roles import MajorOrganisations, RolesfromGraphMeasure
+from roles import MajorOrganisations, RolesfromGraphMeasure,\
+                SendersorReceivers, Senders, ConfirmedPerson
 
-#mo = MajorOrganisations(emailkg, getter_func=lowercased_name)
-#
-#mo_labels = mo.label(intersectkg, getter_func=lowercased_name, to_dict=True)
+#roles = MajorOrganisations(emailkg, getter_func=lowercased_name)
 
+#roles = SendersorReceivers(emailkg, sender=False, receiver=True, getter_func=lowercased_name)
 
-roles = RolesfromGraphMeasure(emailkg, 4, RolesfromGraphMeasure.clustering_coeff,
-                              getter_func=lowercased_name)
-
-role_labels = roles.label(intersectkg, getter_func=lowercased_name, to_dict=True)
+#roles = RolesfromGraphMeasure(emailkg, 3, RolesfromGraphMeasure.clustering_coeff)  # , getter_func=lowercased_name)
 
 
-entity2label = {intersectkg.entity2ind[e]: int(i) for e, i in role_labels.items()}
+roles = ConfirmedPerson(emailkg)  # , getter_func=lowercased_name)
+
+#roles = Senders(emailkg, getter_func=lowercased_name)
 
 
-with open(f"{intersect_name}.{roles}.ind2label.json", "w") as handle:
-    json.dump(entity2label, handle)
+role_labels = roles.label(textkg, to_dict=True)
+
+
+ind2label = {textkg.entity2ind[e]: int(i) for e, i in role_labels.items()}
+
+
+with open(f"KGs/{mailing_list}/textkg.{roles}.ind2label.json", "w") as handle:
+    json.dump(ind2label, handle)
+
+
+
 

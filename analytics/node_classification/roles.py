@@ -1,32 +1,46 @@
 # -*- coding: utf-8 -*-
 
-from declarations.entities import Person
-
+import networkx
 from collections import Counter
+
+import numpy as np
+from sklearn.cluster import KMeans
 
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-import numpy as np
+from declarations.entities import Person
+from KGs import OnlyNamePerson
 
-import networkx
-from sklearn.cluster import KMeans
+
+#class RoleMapping(dict):
+#    def __getitem__(self, item):
+#        if not 
+
 
 
 class RoleHeuristic:
-    def __init__(self, kg):
-        pass
+    def __init__(self, kg, getter_func):
+        self.getter_func = getter_func
     
     
     
-    def label(self, kg, getter_func=lambda x: x, to_dict=False):
+#    @staticmethod
+#    def make_total(mapping):
+#        
+    
+    
+    def label(self, kg, getter_func=None, to_dict=False):
+        if not getter_func: 
+            getter_func = self.getter_func
+            
         labels = []
         
         unclassified_person_label = max(self.entity2label.values()) + 1
         nonperson_label = unclassified_person_label + 1
         
         for e in kg.entities():
-            if type(e) is Person:
+            if type(e) is OnlyNamePerson:
                 if getter_func(e) in self.entity2label:
                     labels.append(self.entity2label[getter_func(e)])
                 else:
@@ -46,8 +60,69 @@ class RoleHeuristic:
         plt.title("Distribution over assigned classes")
         plt.show()
 
+
+
+class ConfirmedPerson(RoleHeuristic):
+    def __repr__(self):
+        return "ConfirmedPerson"
     
+    def __init__(self, kg, getter_func=lambda x:x):
+        persons = kg.entities(lambda p: type(p) is OnlyNamePerson)
+        self.entity2label = {getter_func(p):0 for p in persons}
+        
+        
+        
+        super().__init__(kg, getter_func)
+
+
+
+
+
+
+class Senders(RoleHeuristic):
+    def __repr__(self):
+        return "Senders"
     
+    def __init__(self, kg, getter_func=lambda x:x):        
+        persons = kg.entities(lambda p: type(p) is OnlyNamePerson)
+        
+        senders = {s for s, p, o in kg.triples if p =="talked_to"}    
+
+        self.entity2label = {getter_func(p): (1 if p in senders else 0)
+                                for p in persons }
+        
+    
+        super().__init__(kg, getter_func)
+                
+        
+class SendersorReceivers(RoleHeuristic):
+    def __repr__(self):
+        return "SendersorReceivers"
+    
+    def __init__(self, kg, sender=False, receiver=False, getter_func=lambda x: x):
+#        assert sender_or_receiver in {"sender", "receiver", "both"}
+        
+        assert sender or receiver
+        
+        persons = kg.entities(lambda p: type(p) is OnlyNamePerson)
+        
+        self.entity2label = {}
+        for s, p, o in kg.triples:
+            if p == "talked_to":
+                if sender:
+                    self.entity2label[getter_func(s)] = 1
+                if receiver:
+                    self.entity2label[getter_func(o)] = 1
+                
+        for p in persons:
+            if not getter_func(p) in self.entity2label:
+                self.entity2label[getter_func(p)] = 0        
+                
+                
+        super().__init__(kg, getter_func)
+        
+        
+        
 class MajorOrganisations(RoleHeuristic):
     def __repr__(self):
         return "MajorOrganisations"
@@ -55,7 +130,7 @@ class MajorOrganisations(RoleHeuristic):
     
     def __init__(self, kg, most_common=5, getter_func=lambda x: x):
         
-        persons = kg.entities(lambda p: type(p) is Person)
+        persons = kg.entities(lambda p: type(p) is OnlyNamePerson)
         
         orgs = [p.organisation for p in persons]
         
@@ -71,6 +146,9 @@ class MajorOrganisations(RoleHeuristic):
         
         self.value_seq = orgs
         self.label_seq = [self.org2label[o] for o in self.value_seq]
+        
+        super().__init__(kg, getter_func)
+
         
         
     def inspect(self):
@@ -94,7 +172,6 @@ class MajorOrganisations(RoleHeuristic):
 #        mails = [n.instance_label if self.label_mapping[n] else "REST" for n in mails]
 #        sns.countplot(mails)
         
-#%%
         
         
 class RolesfromGraphMeasure(RoleHeuristic):
@@ -107,7 +184,7 @@ class RolesfromGraphMeasure(RoleHeuristic):
         G = networkx.DiGraph()
         G.add_edges_from(kg.tuples())
         
-        d_items = sorted(graph_measure(G, kg.entities(lambda x: type(x) is Person)).items(),
+        d_items = sorted(graph_measure(G, kg.entities(lambda x: type(x) is OnlyNamePerson)).items(),
                          key=lambda t: t[1])
         persons, self.values = list(zip(*d_items))
         
@@ -119,6 +196,8 @@ class RolesfromGraphMeasure(RoleHeuristic):
 #        self.label2class = 
         
         self.entity2label = {getter_func(p): l for p, l in zip(persons, self.labels)}
+        
+        super().__init__(kg, getter_func)
         
         
     def inspect(self):
@@ -147,7 +226,3 @@ class RolesfromGraphMeasure(RoleHeuristic):
         
         
         return values_per_class, class_dist
-        
-        
-        
-        
