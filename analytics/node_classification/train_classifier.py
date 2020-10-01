@@ -105,6 +105,23 @@ params = {
 
 
 
+params = {
+    "embedding_size": [8, 16, 32],
+     "num_layers": [2],
+     "epochs": [1000],
+     "loss": [torch.nn.CrossEntropyLoss],
+#     "loss_weights": [torch.tensor([p, 1-p]).float() for p in np.arange(0.9, 0.96, 0.01)],
+     "loss_weights": [None],
+     "regulariser": [L2_regularisation],
+     "regulariser_coeff": [2.0],
+     "optimiser": [torch.optim.Adam],
+     "optimiser_learning_rate": [1e-3],
+     "optimiser_weight_decay": [0.1] # , 1.0, 2.0]
+     }
+
+
+
+
 
 #params = {
 #    "embedding_size": 2,
@@ -122,16 +139,14 @@ params = {
 
 #%%
 
-
-
-gs = grid_search(params, max_iter=10)
+gs = grid_search(params, max_iter=3)
 
 
 results = []
 
 for param_d in gs:
 
-    print(param_d, "\n\n")
+    print("\n\n\n", param_d)
     
     model, optim, criterion = setup_training(kg.translated, num_nodes, num_rels, relevant_num_classes,
                               **param_d)
@@ -152,6 +167,8 @@ param_dicts, metrics = list(zip(*results))
 for p, m in results:
     print("lr:", p["optimiser_learning_rate"])
     print("loss_weights:", p["loss_weights"])
+    
+    print(p)
     for f in m.eval_vals.keys():
         print(f.__str__(), max(m.eval_vals[f]))
 #        print("_"*10 + "\n\n")
@@ -179,3 +196,49 @@ mean_vals = {f: np.mean([f(baseline_model(ent_seq)[test_inds], classes[test_inds
 
 for f in mean_vals.keys():
     print(f.__str__(), mean_vals[f])
+
+
+
+
+
+
+#%%
+    
+
+TODO:
+    
+ - adapt TextKG:
+     - add more NER types (orgs, locations, ...) -> connect people to them
+     
+     
+     
+ - adapt labelling:
+     - fuzzy string matching
+     - 
+     
+     
+ - try simpler models: 
+     - matrix factorization
+     - label propagation
+     - RDF2Vec
+     
+ 
+ 
+Brian:
+    
+    - pipeline to get EmailKG => thats our approach to transform email data 
+      into a representation that we can answer ML questions over (e.g. clustering into topics)
+      -> important info: JSON-format of email corpus that the KG extraction works on
+    
+    - mention: approach works for multi-lingual settings because it is to a large part language-independent
+    
+    
+    
+    
+    
+talk Wed around 5
+
+
+
+
+

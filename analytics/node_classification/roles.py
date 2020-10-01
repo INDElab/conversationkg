@@ -29,7 +29,6 @@ class RoleHeuristic:
 #    def make_total(mapping):
 #        
     
-    
     def label(self, kg, getter_func=None, to_dict=False):
         if not getter_func: 
             getter_func = self.getter_func

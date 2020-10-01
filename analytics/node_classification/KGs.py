@@ -380,12 +380,7 @@ class TextKG(KG):
                             triples.append((person, "talked_to", person2))
         
         return KG.from_email_corpus(email_corpus, triples)
-    
-    
-    
-    
-    
-    
+
     
 #%%
         
