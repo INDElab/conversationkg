@@ -34,3 +34,11 @@ HDP are not implemented in sklearn and sklearn and gensim require different repr
 
    - [x] [sklearn.decomposition.LatentDirichletAllocation](https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.LatentDirichletAllocation.html): classic LDA, uniform topic prior
    - [ ] [gensim.models.HdpModel](https://radimrehurek.com/gensim/models/hdpmodel.html): Hierarchical Dirichlet Process which generalises LDA in that the number of topics is also inferred
+
+
+
+
+# TODO
+
+
+ - replace [CountVectorizer](https://scikit-learn.org/stable/modules/generated/sklearn.feature_extraction.text.CountVectorizer.html) with a [tf-idf vectoriser](https://scikit-learn.org/stable/modules/generated/sklearn.feature_extraction.text.TfidfVectorizer.html#sklearn.feature_extraction.text.TfidfVectorizer) 
