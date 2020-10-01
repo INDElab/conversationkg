@@ -1,3 +1,25 @@
+# Node Classification - A Testbed for the EmailKG/TextKG Approach
+
+## Reminder: EmailKG and TextKG
+
+
+
+## Node Classification 
+
+
+
+### Roles in the Conversations
+
+In brief: We use simple, deterministic heuristics 
+
+
+
+### Modelling Task
+
+Formally, node classification can be described as learning a function $f$ from a graph $G=(V,E)$ into a probability distribution over node classes given nodes, i.e. for each class $c \in C$ and node $e \in E$ $P(c | e)$. 
+
+
+
 
 
 # Implementation Choices
@@ -126,9 +148,6 @@ Having introduced two types KGs on the basis of the W3C Mailing List Acrchives, 
 This process results in a graph, the IntersectionKG in the form of subject-predicate-object triples, and an assignment of nodes of the relevant type to classes.
 
 
-### Modelling Task
-
-From a mathematical perspective, we are interested in learning a function $f$ from a graph (in the form of a set of triples) into a probability distribution over classes given each individual entity in that graph. 
 
 
 
