@@ -18,7 +18,7 @@ import numpy.random as rand
 #%% 1. load data and construct corpus, apply topic modeling
 
 
-mailing_list = "public-credentials"  # "ietf-http-wg"
+mailing_list = "ietf-http-wg"
 
 with open(f"email_data/{mailing_list}/all.json") as handle:
     mail_dicts = json.load(handle)
@@ -31,7 +31,7 @@ convos_short = rand.permutation(convos)[:-1]
 conversations = [Conversation.from_email_dicts(*tup) for tup in tqdm(convos_short)]
 corpus = EmailCorpus.from_conversations(conversations, vectorise_default=True)
 
-lda = TopicModel(corpus, 7, max_iter=5)
+lda = TopicModel(corpus, 7, max_iter=500)
 lda.assign_topics_to_conversations()
 lda.assign_topics_to_emails()
 

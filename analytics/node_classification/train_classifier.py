@@ -18,7 +18,7 @@ from train_utils import my_accuracy, my_macro_f1, mean_predicted_prob
 
 mailing_list = "public-credentials"  # "ietf-http-wg"
 kg_name = f"KGs/{mailing_list}/textkg"
-heuristic = "RolesfromGraphMeasure"
+heuristic = "ConfirmedPerson"
 
 kg, classes, num_nodes, num_rels, num_classes = load_and_get_data(kg_name, heuristic)
 
@@ -49,7 +49,7 @@ train_inds, test_inds = train_test_split(relevant_inds)
 
 #%% GET RELEVANT CLASSIFICATION INDICES
 
-relevant_num_classes = num_classes - 2
+relevant_num_classes = num_classes - 1
 relevant_inds = np.where(classes < relevant_num_classes)[0]
 
 train_inds, test_inds = train_test_split(relevant_inds)
@@ -90,17 +90,17 @@ weights = (1-weights)/(classes[train_inds].unique().size(0)-1)
 assert weights.sum() == 1.
 
 params = {
-    "embedding_size": [4],
+    "embedding_size": [8],
      "num_layers": [2],
-     "epochs": [200],
+     "epochs": [500],
      "loss": [torch.nn.CrossEntropyLoss],
 #     "loss_weights": [torch.tensor([p, 1-p]).float() for p in np.arange(0.9, 0.96, 0.01)],
-     "loss_weights": [torch.tensor(weights).float()],
+     "loss_weights": [None, torch.tensor(weights).float()],
      "regulariser": [L2_regularisation],
-     "regulariser_coeff": [0.],
-     "optimiser": [torch.optim.AdamW],
-     "optimiser_learning_rate": [1e-2],
-     "optimiser_weight_decay": [0.0] # , 1.0, 2.0]
+     "regulariser_coeff": [0.1, 1.0],
+     "optimiser": [torch.optim.Adam],
+     "optimiser_learning_rate": [1e-1, 1e-2, 1e-3],
+     "optimiser_weight_decay": [0.1, 1.0] # , 1.0, 2.0]
      }
 
 
@@ -124,7 +124,7 @@ params = {
 
 
 
-gs = grid_search(params, max_iter=1)
+gs = grid_search(params, max_iter=10)
 
 
 results = []
@@ -136,11 +136,9 @@ for param_d in gs:
     model, optim, criterion = setup_training(kg.translated, num_nodes, num_rels, relevant_num_classes,
                               **param_d)
 
-
     metric_tracker = train_classifier(model, optim, criterion, 
                                       classes, train_inds, test_inds,
                                       **param_d)
-
 
     results.append((param_d, metric_tracker))
 
@@ -149,7 +147,6 @@ for param_d in gs:
 
 
 param_dicts, metrics = list(zip(*results))
-
 
 
 for p, m in results:
