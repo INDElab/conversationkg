@@ -2,6 +2,8 @@
 
 ## Reminder: EmailKG and TextKG
 
+In brief: 
+
 
 
 ## Node Classification 
