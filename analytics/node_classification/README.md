@@ -1,25 +1,26 @@
 # Node Classification - A Testbed for the EmailKG/TextKG Approach
 
-## Reminder: EmailKG and TextKG
+## Reminder: EmailKG vs TextKG
 
-In brief: 
+A crucial ingredient in using KGs, and the large majority of ML, is of course ground truth, a set of verified data to measure performance against. To overcome the difficulty of sourcing ground truth for conversational KGs, we realise that the email corpus includes meta-data of email servers' transactions and that this information is arguably verified. This argument allows us to extract KGs on different levels of the conversations and hence different levels of verification of the information in them. In brief: 
 
   1. EmailKG represents the ground truth of email conversations; it contains the emails' meta-information, such as sender and receiver information, and additionally any information that can be extracted with high certainty, such as mentioned links or addresses
   
   2. TextKG contains only information that can be obtained from the conversations' content itself, i.e. without reference to the metadata; any information that can be extracted from the emails' bodies, e.g. by ML, may be added to the TextKG
   
   
-See [the full description](
-
+See [the full description](https://github.com/pgroth/conversationkg/edit/master/analytics/node_classification/.mds/KG_extraction.md) for more motivation and details of the precise structure EmailKG and TextKG. 
 
 
 ## Node Classification 
+
+Node classification is (1) a common task in KG-based ML which implies well-developed state-of-the-art, (2) can be argued to be a close proxy for role detection, (3) ... 
 
 
 
 ### Roles in the Conversations
 
-In brief: We use simple, deterministic heuristics 
+In brief: We use simple, deterministic heuristics to assign the nodes of the EmailKG to classes -- classes that are meant to capture aspects of roles in our corpus of email conversations. 
 
 
 
@@ -35,8 +36,7 @@ Formally, node classification can be described as learning a function $f$ from a
 
 ## EmailKG
 
-- next to the metadata information, EMailKG  is also enriched with information form the emails' bodies, such as topic modelling, NER and link extraction; in this sense
-  EmailKG is the more complete source of information (compared to TextKG) on the email corpus since it combines the metadata and the information extracted from bodies
+- ~~ next to the metadata information, EMailKG  is also enriched with information form the emails' bodies, such as topic modelling, NER and link extraction; in this sense EmailKG is the more complete source of information (compared to TextKG) on the email corpus since it combines the metadata and the information extracted from bodies ~~
 
 ## TextKG
 
@@ -90,12 +90,12 @@ Formally, node classification can be described as learning a function $f$ from a
 
 ## EmailKG
 
-  - ~~next to the metadata information, EmailKG is also enriched with information form the emails' bodies, such as topic modelling, NER and link extraction; in this sense EmailKG is the more complete source of information (compared to TextKG) on the email corpus since it combines the metadata and the information extracted from bodies~~
+  - ~~next to the metadata information, EmailKG is also enriched with information form the emails' bodies, such as topic modelling, NER and link extraction; in this sense EmailKG is the more complete source of information (compared to TextKG) on the email corpus since it combines the metadata and the information extracted from bodies~~ -> not true anymore
 
 ## TextKG
-  - even though the TextKG is supposed to only contain information form the emails' bodies themselves (no metadata information), we retain information about which emails belong to the same conversation and which conversation took place before which; we keep this information since it may provide important scaffolding for the subgraphs we care about (e.g. Conversations are only connected among each other by the before relation) CHECK
+  - ~~even though the TextKG is supposed to only contain information form the emails' bodies themselves (no metadata information), we retain information about which emails belong to the same conversation and which conversation took place before which; we keep this information since it may provide important scaffolding for the subgraphs we care about (e.g. Conversations are only connected among each other by the before relation) CHECK~~ -> contained in `KG_extration.md`
 
-  - we use Stanford's NER algorithm to extract mentions of persons from an email's body (tag PERSON)
+  - ~~we use Stanford's NER algorithm to extract mentions of persons from an email's body (tag PERSON)~~
 
 ## Intersecting EmailKG and TextKG
 
