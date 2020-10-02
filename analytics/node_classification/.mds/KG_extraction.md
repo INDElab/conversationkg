@@ -41,10 +41,8 @@
 
 # TextKG
 
-  - besides the "scaffolding" structure metnioned above (see [All KGs](#all-kgs)), the TextKG is obtained purely from IE methods; that is, all information contained in TextKG originates from emails' bodies
+  - besides the "scaffolding" structure mentioned above (see [All KGs](#all-kgs)), the TextKG is obtained purely from IE methods; that is, all information contained in TextKG originates from emails' bodies
   
-  - 
-
 
 ## (Vertices, Edges)
 
@@ -53,7 +51,7 @@
 
 ## Procedural Notes
 
-  - the Person entities in EmailKG are discovered from emails' text bodies by Stanford's NER system (entities tagged PERSON) -- for this reason, the Person entities have only name attributes and even for those often only first names, alternate spellings, etc. => entity resolution would be in order
+  - the Person entities in EmailKG are discovered from emails' text bodies by spacy's NER system (entities tagged PERSON) -- for this reason, the Person entities have only name attributes and even for those often only first names, alternate spellings, etc. => entity resolution would be in order
   
   - for each pair of Person entities, person1 and person2, discovered by the NER we add the relation (person1 talked_to person2), postulating that person1 is the email's sender and person2 its receiver => this overly simple heuristic could be improved upon to further simplify downstream tasks
 
