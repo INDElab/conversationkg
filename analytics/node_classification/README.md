@@ -4,6 +4,13 @@
 
 In brief: 
 
+  1. EmailKG represents the ground truth of email conversations; it contains the emails' meta-information, such as sender and receiver information, and additionally any information that can be extracted with high certainty, such as mentioned links or addresses
+  
+  2. TextKG contains only information that can be obtained from the conversations' content itself, i.e. without reference to the metadata; any information that can be extracted from the emails' bodies, e.g. by ML, may be added to the TextKG
+  
+  
+See [the full description](
+
 
 
 ## Node Classification 
