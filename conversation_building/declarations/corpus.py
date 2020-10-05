@@ -64,12 +64,13 @@ class EmailCorpus(tuple, metaclass=Universe):
                 yield email
                 
                 
-    def vectorise(self, **kwargs):
-        default_args = dict(max_df=0.5, min_df=0.1, max_features=self.n_emails)
+    def vectorise(self, vectoriser_algorithm=CountVectorizer, **kwargs):
+#        default_args = dict(max_df=0.5, min_df=0.1, max_features=self.n_emails)
+        default_args = dict(max_df=0.7, min_df=2)
         
         default_args.update(kwargs)
         
-        self.vectoriser = CountVectorizer(**default_args)
+        self.vectoriser = vectoriser_algorithm(**default_args)
         
         self.vectorised = self.vectoriser.fit_transform([
                 email.body.normalised for email in self.iter_emails()
