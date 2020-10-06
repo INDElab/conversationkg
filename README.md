@@ -21,23 +21,23 @@ The scraped W3C mailing lists are stored in JSON and the current implementation 
      {'Use-Case: Deaths': 
          [ 
              {'body': '\nAppearing at the infamous annual Def Con <https://www.defcon.org/> IT\nsecurity conference in Las Vegas this week, Mr Rock demonstrated gaping\nflaws that have surfaced in the rush to go digital\n<https://4a5b508b5f92124e39ff-ccd8d0b92a93a9c1ab1bc91ad6c9bfdb.ssl.cf4.rackcdn.com/2015/01/150122-Births-Deaths-Marriages-Records-To-Go-Online.pdf>\nwith\nthe process of registering births and deaths in Australia.\n\nRead more:\nhttp://www.theage.com.au/digital-life/consumer-security/meet-chris-rock-the-man-with-the-power-to-kill-off-any-australian-20150809-giuuxd.html\n<http://www.theage.com.au/digital-life/consumer-security/meet-chris-rock-the-man-with-the-power-to-kill-off-any-australian-20150809-giuuxd.html?utm_campaign=echobox&utm_medium=Social&utm_source=Facebook#ixzz3iIqYrCHc>\n',
-             'author': 'Timothy Holborn (timothy.holborn@gmail.com)',
-             'subject_from_meta': 'Use-Case: Deaths',
-             'date': '2015-08-09',
-             'isoreceived': '20150809080538',
-             'isosent': '20150809080430',
-             'sent': 'Sun, 9 Aug 2015 18:04:30 +1000',
-             'name': 'Timothy Holborn',
-             'email': 'timothy.holborn@gmail.com',
-             'subject': 'Use-Case: Deaths',
-             'id': 'CAM1Sok0TpowLbun83N+_QRyd14amti3ME0uPTRtodtnNGx87-Q@mail.gmail.com',
-             'charset': 'UTF-8',
-             'inreplyto': None,
-             'from': 'Timothy Holborn <timothy.holborn@gmail.com>',
-             'date_from_body': 'Sun, 9 Aug 2015 18:04:30 +1000',
-             'to': 'W3C Credentials Community Group <public-credentials@w3.org>',
-             'id_from_body': None,
-             'original_path': ['public-credentials', '2015Aug', 'Use-Case: Deaths', '0021.html']
+              'author': 'Timothy Holborn (timothy.holborn@gmail.com)',
+              'subject_from_meta': 'Use-Case: Deaths',
+              'date': '2015-08-09',
+              'isoreceived': '20150809080538',
+              'isosent': '20150809080430',
+              'sent': 'Sun, 9 Aug 2015 18:04:30 +1000',
+              'name': 'Timothy Holborn',
+              'email': 'timothy.holborn@gmail.com',
+              'subject': 'Use-Case: Deaths',
+              'id': 'CAM1Sok0TpowLbun83N+_QRyd14amti3ME0uPTRtodtnNGx87-Q@mail.gmail.com',
+              'charset': 'UTF-8',
+              'inreplyto': None,
+              'from': 'Timothy Holborn <timothy.holborn@gmail.com>',
+              'date_from_body': 'Sun, 9 Aug 2015 18:04:30 +1000',
+              'to': 'W3C Credentials Community Group <public-credentials@w3.org>',
+              'id_from_body': None,
+              'original_path': ['public-credentials', '2015Aug', 'Use-Case: Deaths', '0021.html']
             }
         ]
     }
