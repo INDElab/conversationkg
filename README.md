@@ -14,12 +14,13 @@ Guide to directories (See READMEs in each for more information)
 
 ### Required Format
 
-The scraped W3C mailing lists are stored in JSON and the current implementation of `conversation_building.declarations.corpus.Corpus` expects the following format:
+The scraped W3C mailing lists are stored as JSON dict objects and the current implementation of `conversation_building.declarations.corpus.Corpus` expects such a format. Below is an example of the `public-credentials` mailing list, namely the first email of the first conversation (subject `Use-Case: Deaths`) of the first period (`2015Aug`, i.e. August 2015):
 
 ```
+public_credentials = 
 {'2015Aug': 
      {'Use-Case: Deaths': 
-         [ 
+         [  
              {'body': '\nAppearing at the infamous annual Def Con <https://www.defcon.org/> IT\nsecurity conference in Las Vegas this week, Mr Rock demonstrated gaping\nflaws that have surfaced in the rush to go digital\n<https://4a5b508b5f92124e39ff-ccd8d0b92a93a9c1ab1bc91ad6c9bfdb.ssl.cf4.rackcdn.com/2015/01/150122-Births-Deaths-Marriages-Records-To-Go-Online.pdf>\nwith\nthe process of registering births and deaths in Australia.\n\nRead more:\nhttp://www.theage.com.au/digital-life/consumer-security/meet-chris-rock-the-man-with-the-power-to-kill-off-any-australian-20150809-giuuxd.html\n<http://www.theage.com.au/digital-life/consumer-security/meet-chris-rock-the-man-with-the-power-to-kill-off-any-australian-20150809-giuuxd.html?utm_campaign=echobox&utm_medium=Social&utm_source=Facebook#ixzz3iIqYrCHc>\n',
               'author': 'Timothy Holborn (timothy.holborn@gmail.com)',
               'subject_from_meta': 'Use-Case: Deaths',
