@@ -14,7 +14,7 @@ Guide to directories (See READMEs in each for more information)
 
 ### Required Format
 
-The scraped W3C mailing lists are stored as JSON dict objects and the current implementation of `conversation_building.declarations.corpus.Corpus` expects such a format. Below is an example of the `public-credentials` mailing list, namely the first email of the first conversation (subject `Use-Case: Deaths`) of the first period (`2015Aug`, i.e. August 2015):
+The scraped W3C mailing lists are stored as JSON dict objects and the current implementation of `conversation_building.declarations.corpus.EmailCorpus` expects such a format. Below is an example of the `public-credentials` mailing list, namely the first email of the first conversation (subject `Use-Case: Deaths`) of the first period (`2015Aug`, i.e. August 2015):
 
 ```
 public_credentials = 
@@ -45,4 +45,13 @@ public_credentials =
 }
               
 ```
+Notice that some of the meta-data entries duplicate information, such as `author` and `from`; `conversation_building.declarations.emails` defines how such duplicated information is resolved.
+
+
+
+
+
+### 1. Instantiate EmailCorpus Object
+
+An EmailCorpus object takes as main input a list of Conversation objects which are in turn 
 
