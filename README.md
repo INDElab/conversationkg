@@ -75,6 +75,20 @@ Notice that the period structure is omitted when instantiating the Conversation 
 
 ### Extracting a KG
 
-Currently (this will change), the code to extract a KG from an EmailCorpus object resides in `analytics.node_classification.KGs` and there are two types of KG, the EmailKG and TextKG; see [the analytics README](https://github.com/pgroth/conversationkg/blob/master/analytics) and the [KG extraction README](https://github.com/pgroth/conversationkg/blob/master/analytics/node_classification/.mds/KG_extraction.md)
+Currently (this will change), the code to extract a KG from an EmailCorpus object resides in `analytics.node_classification.KGs` and there are two types of KG, the EmailKG and TextKG; see [the analytics README](https://github.com/pgroth/conversationkg/blob/master/analytics) and the [KG extraction README](https://github.com/pgroth/conversationkg/blob/master/analytics/node_classification/.mds/KG_extraction.md) for motivation and details of the two types of KGs.
+
+Given an EmailCorpus object, instantiating either type of KG is as simple as
+
+```
+from KGs import EmailKG, TextKG
+
+emailkg = EmailKG(corpus)
+
+textkg = TextKG(corpus)
+
+```
+
+
+
 
 
