@@ -17,7 +17,7 @@ Guide to directories (See READMEs in each for more information)
 The scraped W3C mailing lists are stored as JSON dict objects and the current implementation of `conversation_building.declarations.corpus.EmailCorpus` expects such a format. Below is an example of the `public-credentials` mailing list, namely the first email of the first conversation (subject `Use-Case: Deaths`) of the first period (`2015Aug`, i.e. August 2015):
 
 ```
-public_credentials = 
+public_credentials = """
 {'2015Aug': 
      {'Use-Case: Deaths': 
          [  
@@ -43,15 +43,32 @@ public_credentials =
         ]
     }
 }
-              
+"""            
 ```
 Notice that some of the meta-data entries duplicate information, such as `author` and `from`; `conversation_building.declarations.emails` defines how such duplicated information is resolved.
 
 
 
-
-
 ### 1. Instantiate EmailCorpus Object
 
-An EmailCorpus object takes as main input a list of Conversation objects which are in turn 
+An EmailCorpus object takes as main input a list of Conversation objects which are in turn tuples of the conversation's subject and a list of Email objects. Email objects are instantiated from dicts in the form of the above example. Thus
+
+```
+import json
+from declarations.corpus import EmailCorpus, Conversation
+from declarations.emails import Email
+
+period_2015Aug = json.loads(public_credentials)["2015Aug"]
+
+email = Email.from_email_dict(["Use-Case: Deaths"][0])
+
+conversation = Conversation(("Use-Case: Deaths", [email]))
+# OR VIA SHORTCUT
+conversation = Conversation.from_email_dicts(("Use-Case: Deaths", period_2015Aug["Use-Case: Deaths"]))
+
+corpus = EmailCorpus.from_conversations([conversation])
+
+```
+
+Notice that the period structure is omitted when instantiating the Conversation and EmailCorpus objects. 
 
