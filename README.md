@@ -12,7 +12,7 @@ Guide to directories (See READMEs in each for more information)
 
 ## Guide to Extracting a Conversational KG from a Corpus
 
-### Required Format
+### 0. Required Format
 
 The scraped W3C mailing lists are stored as JSON dict objects and the current implementation of `conversation_building.declarations.corpus.EmailCorpus` expects such a format. Below is an example of the `public-credentials` mailing list, namely the first email of the first conversation (subject `Use-Case: Deaths`) of the first period (`2015Aug`, i.e. August 2015):
 
@@ -73,7 +73,7 @@ corpus = EmailCorpus.from_conversations([conversation])
 Notice that the period structure is omitted when instantiating the Conversation and EmailCorpus objects, that is email data from a different source need not be structured into periods.
 
 
-### Extracting a KG
+### 2. Extracting a KG
 
 Currently (this will change), the code to extract a KG from an EmailCorpus object resides in `analytics.node_classification.KGs` and there are two types of KG, the EmailKG and TextKG; see [the analytics README](https://github.com/pgroth/conversationkg/blob/master/analytics) and the [KG extraction README](https://github.com/pgroth/conversationkg/blob/master/analytics/node_classification/.mds/KG_extraction.md) for motivation and details of the two types of KGs.
 
