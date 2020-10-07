@@ -45,13 +45,13 @@ public_credentials = """
 }
 """            
 ```
-Notice that some of the meta-data entries duplicate information, such as `author` and `from`; `conversation_building.declarations.emails` defines how such duplicated information is resolved.
+Notice that some of the meta-data entries duplicate information, such as `author` and `from`; `conversation_building.declarations.emails` defines how such duplicated information is resolved. All keys in the meta-data need to be present for parsing but can may empty (`""`) values. However, some meta-data information is necessary for certain functionality when extracting the KG; for instance, the `"sent"` meta-data entry is used to obtain temporal ordering on both conversations and emails inside those in the email corpus.
 
 
 
-### 1. Instantiate EmailCorpus Object
+### 1. Instantiate an EmailCorpus Object
 
-An EmailCorpus object takes as main input a list of Conversation objects which are in turn tuples of the conversation's subject and a list of Email objects. Email objects are instantiated from dicts in the form of the above example. Thus
+As an intermediate step between the raw email data and an actual KG, we read the above JSON format into a object-oriented hierarchy of classes. This step makes KG extraction easy and modular and additionally serves to perform required or desired pre-processing steps, such as determining data volumes, meta-data resolution or named-entity recognition. The class hierarchy is roughly as follows: An EmailCorpus object takes as input a list of Conversation objects which are in turn tuples of the conversation's subject and a list of Email objects. Email objects are instantiated from dicts in the form of the above example. Thus:
 
 ```
 import json
@@ -70,5 +70,11 @@ corpus = EmailCorpus.from_conversations([conversation])
 
 ```
 
-Notice that the period structure is omitted when instantiating the Conversation and EmailCorpus objects. 
+Notice that the period structure is omitted when instantiating the Conversation and EmailCorpus objects, that is email data from a different source need not be structured into periods.
+
+
+### Extracting a KG
+
+Currently (this will change), the code to extract a KG from an EmailCorpus object resides in `analytics.node_classification.KGs` and there are two types of KG, the EmailKG and TextKG; see [the analytics README](https://github.com/pgroth/conversationkg/blob/master/analytics) and the [KG extraction README](https://github.com/pgroth/conversationkg/blob/master/analytics/node_classification/.mds/KG_extraction.md)
+
 
