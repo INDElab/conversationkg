@@ -14,6 +14,7 @@ from declarations.ledger import Universe
 
 
 class EmailCorpus(tuple, metaclass=Universe):
+    # TODO: switch factory from_conversations and __new__ around in terms of function
     @classmethod
     def from_conversations(cls, conversations, vectorise_default=False):
         self = super().__new__(cls, sorted(conversations))
@@ -66,7 +67,7 @@ class EmailCorpus(tuple, metaclass=Universe):
                 
     def vectorise(self, vectoriser_algorithm=CountVectorizer, **kwargs):
 #        default_args = dict(max_df=0.5, min_df=0.1, max_features=self.n_emails)
-        default_args = dict(max_df=0.7, min_df=2)
+        default_args = dict(max_df=0.7, min_df=5)
         
         default_args.update(kwargs)
         
@@ -141,7 +142,7 @@ class EmailCorpus(tuple, metaclass=Universe):
 class Conversation(tuple, metaclass=Universe):
     @classmethod
     def from_email_dicts(cls, subject, email_dicts, **kwargs):
-        return cls(subject, (Email.from_mail_dict(mail_dict) for mail_dict in email_dicts), **kwargs)
+        return cls(subject, (Email.from_email_dict(mail_dict) for mail_dict in email_dicts), **kwargs)
     
     def __new__(cls, subject, emails, **kwargs):
         self = super().__new__(cls, sorted(emails))
@@ -149,7 +150,7 @@ class Conversation(tuple, metaclass=Universe):
             Universe.observe(email, self, "evidenced_by")
         return self
         
-    # necessary to implement when overriding __new__ and using pickle (such as multiprocessing)
+    # necessary to implement when overriding __new__ and using pickle (such as for multiprocessing)
     def __getnewargs__(self):
         return self.subject, [e for e in self]
 

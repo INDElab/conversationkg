@@ -14,6 +14,9 @@ from declarations.ledger import Universe
 url_re = re.compile(r"http[s]?:\/\/(?:[a-zA-Z]|[0-9]|[$-_@.&+~]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+")
 address_pattern = re.compile(r'[\w\.-]+@[\w\.-]+')
 
+import spacy
+nlp = spacy.load("en_core_web_md")
+
 
 
 # MERGING
@@ -50,7 +53,7 @@ def parse_time_sent(s):
 
 class Email(metaclass=Universe):
     @classmethod
-    def from_mail_dict(cls, mail_dict, **kwargs):
+    def from_email_dict(cls, mail_dict, **kwargs):
         return cls(EmailBody(mail_dict["body"]),
                    Person(*merge_reported_authors(mail_dict["author"],
                                              mail_dict["from"],
@@ -63,7 +66,7 @@ class Email(metaclass=Universe):
                     merge_reported_ids(mail_dict["id"],
                                      mail_dict["id_from_body"]),
                     mail_dict["subject"],
-                    []) # observers               
+                    []) # observers, i.e. persons in CC               
                     
         
     def __init__(self, body, sender, receiver, time, email_id, subject, observers, **kwargs):
@@ -166,7 +169,11 @@ class EmailBody(str, metaclass=Universe):
         self.addresses = addresses if addresses else tuple(self.extract_addresses())
         self.code_snippets = []
         
-        self.entities = entities
+        
+        if entities:
+            self.entities = entities
+        else:
+            self.entities = self.discover_entities()
         
         for entity in self.entities:
             Universe.observe(entity, self, "mentioned_in")
@@ -187,6 +194,12 @@ class EmailBody(str, metaclass=Universe):
             address = Address(addr)
             Universe.observe(address, self, "mentioned_in")
             yield address
+            
+    def discover_entities(self):
+        ents = nlp(str(self)).ents   
+        ents = [str(e).strip() for e in ents]
+        return ents
+    
     
     def to_json(self, dumps=False):
         d = {"class": self.__class__.__name__,
