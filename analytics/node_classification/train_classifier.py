@@ -232,13 +232,3 @@ Brian:
     
     - mention: approach works for multi-lingual settings because it is to a large part language-independent
     
-    
-    
-    
-    
-talk Wed around 5
-
-
-
-
-

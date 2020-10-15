@@ -86,8 +86,7 @@ def setup_training(triples, num_nodes, num_rels, num_classes,
     optimiser = optimiser(nc.parameters(), lr=optimiser_learning_rate, 
                           weight_decay=optimiser_weight_decay)
         
-    criterion = loss
-    criterion = criterion(weight=loss_weights)
+    criterion = loss(weight=loss_weights)
     
     
     return nc, optimiser, criterion

@@ -20,35 +20,65 @@ from KGs import OnlyNamePerson
 
 
 class RoleHeuristic:
-    def __init__(self, kg, getter_func):
-        self.getter_func = getter_func
-    
-    
+    def __init__(self, kg):
+        pass
     
 #    @staticmethod
 #    def make_total(mapping):
 #        
+        
     
-    def label(self, kg, getter_func=None, to_dict=False):
-        if not getter_func: 
-            getter_func = self.getter_func
-            
+    def get_label_approx(self, entity):
+        approx_matches = [self.entity2label[other_e] for other_e in self.entity2label
+                          if entity == other_e]
+        
+        if approx_matches:
+            return np.random.choice(approx_matches)
+        else:
+            return None
+        
+        
+    def get_label_fast(self, entity):
+        if entity in self.entity2label:
+            return self.entity2label[entity]
+        else:
+            return None
+        
+
+
+
+    def label(self, kg, matching_is_approx=False, to_dict=False):            
         labels = []
         
         unclassified_person_label = max(self.entity2label.values()) + 1
         nonperson_label = unclassified_person_label + 1
         
+        get_label = self.get_label_approx if matching_is_approx else self.get_label_fast
+        
+        
         for e in kg.entities():
             if type(e) is OnlyNamePerson:
-                if getter_func(e) in self.entity2label:
-                    labels.append(self.entity2label[getter_func(e)])
+                label = get_label(e)
+                if label is not None:
+                    labels.append(label)
                 else:
                     labels.append(unclassified_person_label)
             else:
                 labels.append(nonperson_label)
+                
         if to_dict:
             return dict(zip(kg.entities(), labels))
         return labels
+    
+    #        for e in kg.entities():
+#            if type(e) is OnlyNamePerson:
+#                if e in self.entity2label:
+#                    labels.append(self.entity2label[e])
+#                else:
+#                    labels.append(unclassified_person_label)
+#            else:
+#                labels.append(nonperson_label)
+#                
     
     
     
@@ -71,7 +101,7 @@ class ConfirmedPerson(RoleHeuristic):
         
         
         
-        super().__init__(kg, getter_func)
+        super().__init__(kg)
 
 
 
@@ -127,7 +157,7 @@ class MajorOrganisations(RoleHeuristic):
         return "MajorOrganisations"
     
     
-    def __init__(self, kg, most_common=5, getter_func=lambda x: x):
+    def __init__(self, kg, most_common=5):
         
         persons = kg.entities(lambda p: type(p) is OnlyNamePerson)
         
@@ -141,12 +171,12 @@ class MajorOrganisations(RoleHeuristic):
 
         self.org2label.update({o: 0 for o, _ in org_counts.most_common()[most_common:]})
         
-        self.entity2label = {getter_func(p):self.org2label[p.organisation] for p in persons}
+        self.entity2label = {p:self.org2label[p.organisation] for p in persons}
         
         self.value_seq = orgs
         self.label_seq = [self.org2label[o] for o in self.value_seq]
         
-        super().__init__(kg, getter_func)
+        super().__init__(kg)
 
         
         
@@ -179,7 +209,7 @@ class RolesfromGraphMeasure(RoleHeuristic):
     def __repr__(self):
         return "RolesfromGraphMeasure"
         
-    def __init__(self, kg, n_roles, graph_measure, getter_func=lambda x: x):
+    def __init__(self, kg, n_roles, graph_measure):
         G = networkx.DiGraph()
         G.add_edges_from(kg.tuples())
         
@@ -194,9 +224,9 @@ class RolesfromGraphMeasure(RoleHeuristic):
 #        grouped = 
 #        self.label2class = 
         
-        self.entity2label = {getter_func(p): l for p, l in zip(persons, self.labels)}
+        self.entity2label = {p: l for p, l in zip(persons, self.labels)}
         
-        super().__init__(kg, getter_func)
+        super().__init__(kg)
         
         
     def inspect(self):
