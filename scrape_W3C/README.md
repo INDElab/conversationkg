@@ -1,7 +1,7 @@
 # Scraping the W3C Mailing Lists
 
 
-The World Wide Web Consortium (W3C) is a core standardising body of the internet, developing and deciding standards such as HTML and providing support. In their mailing lists, members of the W3C as well as other organisations, private persons and automated mail agents interact, inquire and announce around concepts, standards and events pertaining to the internet. These mailinglists exist since 1997 and are publicly available on the W3C's mailinglist archives, at https://lists.w3.org/Public/Archives. We have scraped and processed these archives and publish them as a corpus of email conversations.
+The World Wide Web Consortium (W3C) is a core standardising body of the internet, developing and deciding standards such as HTML and providing support. In their mailing lists, members of the W3C as well as other organisations, private persons and automated mail agents interact, inquire and announce around concepts, standards and events pertaining to the internet. These mailinglists exist since 1997 and are publicly available on the W3C's mailinglist archives, at https://lists.w3.org/Archives/Public. We have scraped and processed these archives and publish them as a corpus of email conversations.
 
 
 ## The Corpus
