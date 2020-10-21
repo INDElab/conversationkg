@@ -107,7 +107,9 @@ class Email(metaclass=Universe):
         return hash((self.time, self.subject))    
     
     def __repr__(self):
-        return f"Email({str(self.sender)}, {str(self.receiver)}, {self.time.date()})"
+        return f"Email from <{str(self.sender)}> to <{str(self.receiver)}>"
+        
+#        return f"Email({str(self.sender)}, {str(self.receiver)}, {self.time.date()})"
     
     def __str__(self):
         return repr(self)
@@ -196,8 +198,8 @@ class EmailBody(str, metaclass=Universe):
             yield address
             
     def discover_entities(self):
-        ents = nlp(str(self)).ents   
-        ents = [str(e).strip() for e in ents]
+        ents = nlp(str(self)).ents
+        ents = [(str(e).strip(), e.label_) for e in ents]
         return ents
     
     
@@ -206,17 +208,18 @@ class EmailBody(str, metaclass=Universe):
              "self": self.whole, 
              "links": [l.to_json(dumps=False) for l in self.links],
              "addresses":[a for a in self.addresses],
-             "entities":[e.to_json(dumps=False) for e in self.entities]}
+             "entities":[(e, l) for e, l in self.entities]}  # e.to_json(dumps=False)
         
         if dumps: return json.dumps(d)
         return d
         
+    
     @classmethod
     def from_json(cls, json_dict):
         body = json_dict["self"]
         links = [Link.from_json(l) for l in json_dict["links"]]
         addresses = json_dict["addresses"]
-        entities = [EntityInstance.from_json(e_dict) for e_dict in json_dict["entities"]]
+        entities = [(e_str, l) for e_str, l in json_dict["entities"]] 
         
         return cls(body, links, addresses, entities)
     

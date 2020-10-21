@@ -210,7 +210,9 @@ class Organisation(EntityInstance):
         self.domain = domain
         
     def __repr__(self):
-        return f"Org({self.instance_label if self.instance_label else 'NO_NAME'}, {self.domain})"
+        return f"{self.instance_label if self.instance_label else '_'}"
+#       return f"Org({self.instance_label if self.instance_label else 'NO_NAME'}, {self.domain})"
+
     
     def __hash__(self):
         return hash((super().__hash__(), self.instance_label, self.domain))
@@ -254,7 +256,8 @@ class Address(EntityInstance, str):
     
     
     def __repr__(self):
-        return f"Address({self.instance_label})"
+        return f"{self.instance_label}"
+#        return f"Address({self.instance_label})"
 
     def __hash__(self):
         return hash((super().__hash__(), self.instance_label))
@@ -290,7 +293,8 @@ class Link(EntityInstance):
                  instance_label=url)
         
     def __repr__(self):
-        return f"Link({self.instance_label})"
+        return f"{self.instance_label}"
+#        return f"Link({self.instance_label})"
     
     def __hash__(self):
         return hash((super().__hash__(), self.instance_label))

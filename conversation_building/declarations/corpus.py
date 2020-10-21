@@ -182,7 +182,8 @@ class Conversation(tuple, metaclass=Universe):
         return hash((self.start_time, self.end_time, self.subject))
     
     def __repr__(self):
-        return f"{self.subject} ({len(self)} {'emails' if len(self) > 1 else 'email'}; {self.start_time.date()} -- {self.end_time.date()})"
+        return f"Conversation of {len(self)} {'emails' if len(self) > 1 else 'email'} ({self.start_time.date()} - {self.end_time.date()})"
+#        return f"{self.subject} ({len(self)} {'emails' if len(self) > 1 else 'email'}; {self.start_time.date()} -- {self.end_time.date()})"
     
     # for sorting
     def __lt__(self, other):
