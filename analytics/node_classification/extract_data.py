@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
 
-from KGs import KG, EmailKG, TextKG, OnlyNamePerson  # , intersect_persons
+from KGs import KG, EmailKG, TextKG, Person  # , intersect_persons
 
 import json
 from tqdm import tqdm
 
 from declarations.corpus import EmailCorpus, Conversation
-from declarations.entities import Person
 from declarations.topics import TopicModel
 import numpy.random as rand
 
@@ -20,7 +19,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 #%% 1. load data and construct corpus, apply topic modeling
 
 
-mailing_list = "public-credentials"
+mailing_list = "ietf-http-wg"
 
 with open(f"email_data/{mailing_list}/all.json") as handle:
     mail_dicts = json.load(handle)
@@ -45,12 +44,12 @@ lda.assign_topics_to_emails()
 
 #%% 2. extract EmailKG and TextKG
 
-distance_threshold = 0.0
+#distance_threshold = 0.0
 
-emailkg = EmailKG(corpus, distance_threshold=distance_threshold)
+emailkg = EmailKG(corpus) # , distance_threshold=distance_threshold)
 #emailkg.translate()
 
-textkg = TextKG(corpus, distance_threshold=distance_threshold)
+textkg = TextKG(corpus) # , distance_threshold=distance_threshold)
 #textkg.translate()
 
 
@@ -79,11 +78,11 @@ KG.unified_translation(textkg, emailkg, attach=True)
 folder_name = f"KGs/{mailing_list}"
 
 emailkg.store(folder_name + "/emailkg")
-emailkg2 = EmailKG.restore(folder_name + "/emailkg", distance_threshold=distance_threshold)
+emailkg2 = EmailKG.restore(folder_name + "/emailkg")  #, distance_threshold=distance_threshold)
 
 
 textkg.store(folder_name + "/textkg")
-textkg2 = TextKG.restore(folder_name + "/textkg", distance_threshold=distance_threshold)
+textkg2 = TextKG.restore(folder_name + "/textkg")  #, distance_threshold=distance_threshold)
 
 
 #intersect_name = folder_name + "/intersectkg"
