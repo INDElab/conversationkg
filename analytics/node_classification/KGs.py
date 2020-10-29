@@ -2,6 +2,7 @@ import declarations.corpus
 import declarations.topics
 
 from declarations.corpus import EmailCorpus, Conversation
+from declarations.emails import Email
 from declarations.topics import TopicModel
 from declarations.entities import Person as WholePerson
 
@@ -11,6 +12,9 @@ nlp = spacy.load("en_core_web_md")
 from tqdm import tqdm
 import json
 
+import pandas as pd
+import matplotlib
+from collections import Counter
 
 
 import Levenshtein
@@ -243,30 +247,28 @@ class KG:
     def predicates(self):
         return set(p for s, p, o in self.triples)
     
-    def store(self, name):
+    def store(self, name, save_mapping=True):
         with open(f"{name}.json", "w") as handle:
             json.dump(self.translated, handle)
             
         with open(f"{name}.provenances.json", "w") as handle:
             json.dump(self.provenances, handle)
         
-        reversed_d = self.reverse_mapping(self.entity2ind)
-        json_d = {i:e.to_json() for i, e in reversed_d.items()}
-        
-        with open(f"{name}.ind2entity.json", "w") as handle:
-            json.dump(json_d, handle)
-        
-        reverse_d = self.reverse_mapping(self.pred2ind)
-        with open(f"{name}.ind2pred.json", "w") as handle:
-            json.dump(reverse_d, handle)
+        if save_mapping:
+            reversed_d = self.reverse_mapping(self.entity2ind)
+            json_d = {i:e.to_json() for i, e in reversed_d.items()}
+            
+            with open(f"{name}.ind2entity.json", "w") as handle:
+                json.dump(json_d, handle)
+            
+            reverse_d = self.reverse_mapping(self.pred2ind)
+            with open(f"{name}.ind2pred.json", "w") as handle:
+                json.dump(reverse_d, handle)
     
     
     @classmethod
-    def restore(cls, name):
+    def restore(cls, name, load_mapping_of=None):
         def get_class(cls_name):
-#            if cls_name == "Person":
-#                return Person
-            
             for mod in [declarations.corpus, declarations.emails, 
                         declarations.entities, declarations.topics]:
                 try:
@@ -278,7 +280,6 @@ class KG:
         
         
         def json_to_entity(json_dict):
-#            print(json_dict)
             try:
                 json_dict["class"]
             except KeyError:
@@ -290,14 +291,17 @@ class KG:
             return cls.from_json(json_dict)
         
         
-        with open(f"{name}.ind2entity.json") as handle:
+        if load_mapping_of is None:
+            load_mapping_of = name
+        
+        with open(f"{load_mapping_of}.ind2entity.json") as handle:
             loaded_entity_mapping = {int(i): d for i, d in json.load(handle).items()}
             ind2entity = {i:json_to_entity(d) for i, d in loaded_entity_mapping.items()}
         
-        ind2entity = {i: (Person(x) if type(x) is Person else x)
+        ind2entity = {i: (Person(x) if type(x) is WholePerson else x)
                         for i, x in ind2entity.items()}
         
-        with open(f"{name}.ind2pred.json") as handle:
+        with open(f"{load_mapping_of}.ind2pred.json") as handle:
             ind2pred = {int(i): d for i, d in json.load(handle).items()}
         
         
@@ -313,7 +317,7 @@ class KG:
             provenances = json.load(handle)
             
         
-        kg = KG(restored_triples, provenances) # , distance_threshold=distance_threshold)
+        kg = KG(restored_triples, provenances)
         
         kg.translated = loaded
         kg.entity2ind = kg.reverse_mapping(ind2entity)
@@ -337,8 +341,158 @@ class KG:
                 if not type(v) is Person:
                     raise ValueError("Non-bijective mapping!")
         
-        return rev_d  # {v:k for k, v in d.items()}
+        return rev_d
     
+    
+    def get_node_df(self):    
+        records = []
+        
+        
+        sorted_ents = sorted(self.entities(), key=str)
+        for i, e in enumerate(sorted_ents):                
+            node_id = i  # hash(e)
+            node_t = str(e)
+            node_type = type(e).__name__
+            node_u = f"icons/{node_type.lower()}.png"
+            
+            type_ = "LinkChart" if i == 0 else "0"
+                
+            if type(e) in {Conversation, Email}:
+                node_dtopic = e.topic.topic.index
+                node_dtopic_rate = round(e.topic.score, 5)
+            else:
+                node_dtopic = -1
+                node_dtopic_rate = 1.0
+                
+            lat = lng = 0.0
+            
+            
+            records.append(
+                    (
+                          type_, node_type, node_id, node_u, node_t, 
+                          node_dtopic, node_dtopic_rate, lat, lng  
+                    )
+            )
+            
+            
+        return pd.DataFrame.from_records(records, 
+                                         columns= ['type', 
+                                                   'node_type', 
+                                                   'node_id', 
+                                                   'node_u', 
+                                                   'node_t', 
+                                                   'node_dtopic',
+                                                   'node_dtopic_rate', 
+                                                   'lat', 
+                                                   'lng']
+                                         )
+        
+        
+    def get_link_df(self):
+        link_types = {p for s, p, o in self.triples}
+        link_counts = Counter(self.triples)
+        colours = dict(zip(link_types, list(matplotlib.colors.cnames.values())))
+
+        
+        sorted_ents = dict(zip(sorted(self.entities(), key=str),
+                               range(len(self.entities()))))
+        
+        records = []
+        for i, ((s, p, o), prov) in enumerate(zip(self.triples, self.provenances)):
+            linkId = i  # hash((s, p, o))  # s.time.timestamp()
+            end1 = sorted_ents[s]  # hash(s)
+            end2 = sorted_ents[o]  # hash(o)
+            linkcount = link_counts[(s,p,o)]
+            linkcolor = colours[p]
+            linktype = p
+            itemID = prov
+            
+            rec = [linkId, 
+                   end1, 
+                   end2, 
+                   linkcount,
+                   linkcolor,
+                   itemID,
+                   linktype]
+        
+            records.append(rec)
+        
+        return pd.DataFrame.from_records(records, 
+                                         columns=['linkId', 'end1', 'end2', 'linkcount', 'linkcolor', 'itemID', 'linktype'])
+    
+            
+    def to_csv(self, save_path):
+        node_df = self.get_node_df()
+        link_df = self.get_link_df()
+        
+        node_df.to_csv(save_path + ".nodes.csv", 
+                         index=False)
+        link_df.to_csv(save_path + ".links.csv", 
+                         index=False)
+        
+        
+        
+    
+    @staticmethod
+    def _merge_nodes(kg, node_type, distance_threshold):
+        entities = kg.entities(lambda x: type(x) is node_type)
+        merge_with = {}
+        for x in entities:
+            matches = [x2 for x2 in entities
+                       if x.distance_from(x2) <= distance_threshold 
+                          and not x == x2]
+            
+            merge_with[x] = set(matches)
+
+        sorted_d = sorted(merge_with.items(), 
+                          key=lambda it: (len(it[1]), -len(it[0].instance_label)), 
+                          reverse=True)
+
+        merging_f = {}
+        donotmerge = set()
+        alreadymerged = set()
+
+        for x, s in sorted_d:
+            if not x in alreadymerged:
+                for x2 in s:
+                    if not x2 in donotmerge:   
+                        merging_f[x2] = x
+                        donotmerge.add(x)
+                        alreadymerged.add(x2)
+        
+        return merging_f
+    
+        
+    @classmethod
+    def merge_persons_of(cls, kg, distance_threshold):
+        merging_f = cls._merge_nodes(kg, Person, distance_threshold)
+
+        replace = lambda entity: merging_f[entity]\
+                        if entity in merging_f else entity
+        
+        new_triples = []
+
+        for s, p, o in kg.triples:
+            s_, o_ = replace(s), replace(o)
+    
+            if s_ == o_:
+                print(s, p, o)
+            else:
+                new_triples.append((s_, p, o_))
+
+
+        old_provenances = kg.provenances
+        new_kg = cls(new_triples, old_provenances)
+        new_kg.merge_mapping = merging_f
+        
+        return new_kg
+        
+
+                        
+                        
+        
+        
+        
     
 #%%
 #    
@@ -354,92 +508,61 @@ class KG:
 #                       if p.distance_from(p2) <= distance_threshold 
 #                          and not p == p2]
 #            
-#            merge_with[p] = tuple(matches)  # rand.choice(matches)
+#            merge_with[p] = set(matches)  # rand.choice(matches)
 #            
 #        
 #        return merge_with
 #
 #
-#    d = merge_person_nodes(textkg, 0.3)
-
-    
-    
-#%%
-
-#attraction = {p: [] for p in d.keys()}
+#    d = merge_person_nodes(textkg, 0.4)
 #
-#for p, others in d.items():
-#    for p2 in others:
-#        attraction[p2].append(p)
+#    
+#
 #
 #
 ##%%
-#        
-#new_entities = set()
+#    
+#sorted_d = sorted(d.items(), key=lambda it: (len(it[1]), -len(it[0].instance_label)), reverse=True)
+#    
+#merged = {}
+#donotmerge = set()
+#alreadymerged = set()
 #
-#for p, others in tqdm(rand.permutation(list(d.items()))):
-#    
-#    if p in new_entities:
+#
+#for p, s in tqdm(sorted_d):
+#    if p in alreadymerged:
 #        continue
-#    else:
-#        if len(others) == 0:
-#            new_entities.add(p)
-#        else:
-#            new_entities.add(rand.choice(others))
-#    
+##    print(donotmerge)
+#    for p2 in s:
+#        if not p2 in donotmerge:   
+#            print(p, len(s))
+#            merged[p2] = p
+#            donotmerge.add(p) # only one execution necessary
+#            alreadymerged.add(p2)
+#
+#
 #
 #
 ##%%
 #            
-#new_entities2 = set()
-#
-#dist = 1.0
-#
-#persons = textkg.entities(lambda x: type(x) is Person)
-#
-#
-#
-#for p in persons:
-#    if p in new_entities2:
-#        continue
-#    
-#    matches = [p2 for p2 in persons if p.distance_from(p2) <= dist
-#               and not p == p2]
-#    
-#    
-#    print(len(matches))
-#    
-#    if matches:
-#        dist_to_others = sorted(matches, key=lambda p2: p.distance_from(p2))
-#        closest = dist_to_others[0]
-#        
-#        print(p, closest, p.distance_from(closest))
-#        
-#        new_entities2.add(closest)
+#def replace(merger, entity):kg
+#    if entity in merger:
+#        return merger[entity]
 #    else:
-#        new_entities2.add(p)
-#        
-#        
-#    
-#    print()
-#    
-#    
-#    
-##%%
-#import numpy as np
-#    
-#dist_mat = np.asarray(
-#            [[p.distance_from(p2) for p2 in persons] for p in persons]
-#        )
+#        return entity
+#            
+#new_triples = []
 #
-#dist_mat[np.diag_indices(dist_mat.shape[0])] = 1.0
+#for s, p, o in textkg.triples:
+#    s_, o_ = replace(merged, s), replace(merged, o)
 #    
+#    if s_ == o_:
+#        print(s, p, o)
+#        
+#    else:
+#        new_triples.append((s_, p, o_))
 #    
-#best_matches = np.min(dist_mat, axis=-1)        
-
-
-
-
+#
 
     
  #%%   
@@ -547,23 +670,15 @@ class KG:
 #%% NEW: WITH PROVENANCES
 
 class EmailKG(KG):
-    def __new__(cls, email_corpus):  #, distance_threshold=0.0):
+    def __new__(cls, email_corpus):
         triples = []
         
         provenances = []
         
-        for conv in tqdm(email_corpus, desc="Iterating Conversations in EmailKG"):
-#            for p in conv.interlocutors:
-#                triples.append((Person(p), "part_of", conv))
-                    
-            
-#            for o in conv.organisations:
-#                triples.append((o, "part_of", conv))
-#            
-            
+        for conv in tqdm(email_corpus, desc="Iterating Conversations in EmailKG"):            
             for email in conv:
                 sender, receiver = Person(email.sender),\
-                                        Person(email.receiver)  #, distance_threshold=distance_threshold)
+                                        Person(email.receiver)
                 
                 
                 triples.append((sender, "part_of", conv))
@@ -603,7 +718,7 @@ class EmailKG(KG):
         
     
 class TextKG(KG):
-    def __new__(cls, email_corpus):  #, distance_threshold=0.0):
+    def __new__(cls, email_corpus):
         triples = []
         
         provenances = []
@@ -617,10 +732,7 @@ class TextKG(KG):
                 provenances.append(email.email_id)
                 
                 mentioned_people = [Person(WholePerson(str(e), "")) for e, l in email.body.entities if l == "PERSON"]
-                
-#                mentioned_people = [Person(Person(str(e), "None"), distance_threshold=distance_threshold) 
-#                                    for e in nlp(str(email.body)).ents if e.label_ == "PERSON"]
-                
+
                 for person in mentioned_people:
                     triples.append((email, "mentions", person))
                     provenances.append(email.email_id)
@@ -631,9 +743,4 @@ class TextKG(KG):
                             provenances.append(email.email_id)
 
         
-        return KG.from_email_corpus(email_corpus, triples, provenances)  #, distance_threshold)
-
-
-#    @staticmethod
-#    def put_triple(triple, triple_ls, provenance_ls):
-        
+        return KG.from_email_corpus(email_corpus, triples, provenances)

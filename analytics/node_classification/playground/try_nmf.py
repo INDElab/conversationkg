@@ -4,7 +4,7 @@ import numpy as np
 
 import networkx as nx
 
-from KGs import KG, OnlyNamePerson
+from KGs import KG, Person
 import matplotlib.pyplot as plt
 
 
@@ -33,7 +33,7 @@ def load_and_get_data(kg_path, heuristic_name):
     return kg, classes, num_nodes, num_rels, num_classes
 
 
-kg_name = "KGs/public-credentials/textkg"
+kg_name = "KGs/ietf-http-wg/textkg"
 heuristic = "ConfirmedPerson"
 
 

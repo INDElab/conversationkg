@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from KGs import KG, EmailKG, TextKG, Person  # , intersect_persons
+from KGs import KG, EmailKG, TextKG, Person
 
 import json
 from tqdm import tqdm
@@ -10,10 +10,6 @@ from declarations.topics import TopicModel
 import numpy.random as rand
 
 from sklearn.feature_extraction.text import TfidfVectorizer
-
-#lowercased_name = lambda p: p.instance_label.lower()
-#
-#lowercased_name = lambda p: p
 
 
 #%% 1. load data and construct corpus, apply topic modeling
@@ -35,8 +31,7 @@ corpus.vectorise(vectoriser_algorithm=TfidfVectorizer, max_df=0.7, min_df=5)
 
 print(len(corpus.vectoriser.get_feature_names()))
 
-
-lda = TopicModel(corpus, 7, max_iter=5)
+lda = TopicModel(corpus, 7, max_iter=200)
 lda.assign_topics_to_conversations()
 lda.assign_topics_to_emails()
 
@@ -44,33 +39,20 @@ lda.assign_topics_to_emails()
 
 #%% 2. extract EmailKG and TextKG
 
-#distance_threshold = 0.0
+emailkg = EmailKG(corpus)
 
-emailkg = EmailKG(corpus) # , distance_threshold=distance_threshold)
-#emailkg.translate()
-
-textkg = TextKG(corpus) # , distance_threshold=distance_threshold)
-#textkg.translate()
+textkg = TextKG(corpus)
 
 
+#%% 2.1 merge node in TextKG based on string distance
 
-#%%
-
-len({p.instance_label.lower() for p in textkg.entities(lambda x: type(x) is OnlyNamePerson)} &\
- {p.instance_label.lower() for p in emailkg.entities(lambda x: type(x) is OnlyNamePerson)})
+mergedkg = KG.merge_persons_of(textkg, distance_threshold=0.5)
 
 
-
-
-#%% 2.1 create IntersectKG by intersecting the Persons in EmailKG and TextKG
-
-
-#intersectkg = KG.intersect_persons(emailkg, textkg, getter_func=lowercased_name)
-
-
-#%% 2.2 translate KGs in a unified manner
+#%% 2.2 compute unified translation for both KGs
 
 KG.unified_translation(textkg, emailkg, attach=True)
+mergedkg.translate(textkg.entity2ind, textkg.pred2ind, attach=True)
 
 
 #%% 2.3 store and restore KGs
@@ -78,61 +60,62 @@ KG.unified_translation(textkg, emailkg, attach=True)
 folder_name = f"KGs/{mailing_list}"
 
 emailkg.store(folder_name + "/emailkg")
-emailkg2 = EmailKG.restore(folder_name + "/emailkg")  #, distance_threshold=distance_threshold)
+emailkg2 = EmailKG.restore(folder_name + "/emailkg")
 
 
-textkg.store(folder_name + "/textkg")
-textkg2 = TextKG.restore(folder_name + "/textkg")  #, distance_threshold=distance_threshold)
+textkg.store(folder_name + "/textkg", save_mapping=False)
+textkg2 = TextKG.restore(folder_name + "/textkg",
+                         load_mapping_of=folder_name + "/emailkg")
+
+mergedkg.store(folder_name + "/mergedkg", save_mapping=False)
+mergedkg2 = TextKG.restore(folder_name + "/mergedkg",
+                           load_mapping_of=folder_name + "/emailkg")
 
 
-#intersect_name = folder_name + "/intersectkg"
-#intersectkg.store(intersect_name)
-#intersectkg2 = KG.restore(intersect_name)
+#%% 2.4 write out graphs to USAF CSV
+
+emailkg.to_csv(folder_name + "/emailkg")
+textkg.to_csv(folder_name + "/textkg")
 
 
 
-#%% 3. instantiate RoleHeuristic 
 
 
-#%% 3.1 load already saved KG
+
+#%% 3.0 load already saved KG
 
 mailing_list = "ietf-http-wg"
 kg_path = f"KGs/{mailing_list}"
-emailkg = KG.restore(f"{kg_path}/emailkg")# , distance_threshold=distance_threshold)
-textkg = TextKG.restore(f"{kg_path}/textkg") # , distance_threshold=distance_threshold)
-#intersect_name = f"KGs/{mailing_list}/intersectkg"
-#intersectkg = KG.restore(intersect_name)
+emailkg = KG.restore(f"{kg_path}/emailkg")
+textkg = TextKG.restore(f"{kg_path}/textkg")
 
-#%%
-
+#%% 3. instantiate RoleHeuristic 
+    
 
 from roles import MajorOrganisations, RolesfromGraphMeasure,\
-                SendersorReceivers, Senders, ConfirmedPerson
+                SendersOrReceivers, Senders, ConfirmedPerson
 
-#roles = MajorOrganisations(emailkg, getter_func=lowercased_name)
+#roles = MajorOrganisations(emailkg)
 
-#roles = SendersorReceivers(emailkg, sender=False, receiver=True, getter_func=lowercased_name)
+#roles = SendersorReceivers(emailkg, sender=False, receiver=True)
 
-#roles = RolesfromGraphMeasure(emailkg, 3, RolesfromGraphMeasure.clustering_coeff)  # , getter_func=lowercased_name)
+roles = RolesfromGraphMeasure(emailkg, 3, RolesfromGraphMeasure.clustering_coeff)
 
-
-lowercased_name = lambda p: p.instance_label.lower()
-
-
-roles = ConfirmedPerson(emailkg)  #     , getter_func=lowercased_name)
+#roles = ConfirmedPerson(emailkg)
 
 #roles = Senders(emailkg, getter_func=lowercased_name)
 
 
-role_labels = roles.label(textkg, to_dict=True, matching_is_approx=True)
+role_labels = roles.label(mergedkg, to_dict=True)
 
 
 ind2label = {textkg.entity2ind[e]: int(i) for e, i in role_labels.items()}
 
 
-with open(f"KGs/{mailing_list}/textkg.{roles}.ind2label.json", "w") as handle:
+with open(f"KGs/{mailing_list}/mergedkg.{roles}.ind2label.json", "w") as handle:
     json.dump(ind2label, handle)
-    
+
+        
     
     
     
