@@ -107,7 +107,7 @@ class Email(metaclass=Universe):
         return hash((self.time, self.subject))    
     
     def __repr__(self):
-        return f"Email from <{str(self.sender)}> to <{str(self.receiver)}>"
+        return f"Email from <{str(self.sender.address)}> to <{str(self.receiver.address)}>"
         
 #        return f"Email({str(self.sender)}, {str(self.receiver)}, {self.time.date()})"
     
