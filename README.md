@@ -85,9 +85,15 @@ from KGs import EmailKG, TextKG
 emailkg = EmailKG(corpus)
 
 textkg = TextKG(corpus)
-
 ```
 
+### 3. Writing it out to a CSV File
+
+```
+emailkg.to_csv("emailkg")
+
+textkg.to_csv("textkg")
+```
 
 
 
