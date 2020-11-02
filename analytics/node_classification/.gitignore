@@ -1,6 +1,5 @@
 **/.ipynb_checkpoints
 **/__pycache__
-KGs/
+KGs*/
 *.json
-email_data/
-declarations/
+*.csv

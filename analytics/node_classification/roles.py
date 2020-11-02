@@ -9,7 +9,7 @@ from sklearn.cluster import KMeans
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-from KGs import Person
+from conversationkg.kgs import PersonNode
 
 
 class RoleHeuristic:
@@ -40,7 +40,7 @@ class RoleHeuristic:
         
         labels = []
         for e in kg.entities():
-            if type(e) is Person:
+            if type(e) is PersonNode:
                 label = get_label(e)
                 if label is not None:
                     labels.append(label)
@@ -67,7 +67,7 @@ class ConfirmedPerson(RoleHeuristic):
         return "ConfirmedPerson"
     
     def __init__(self, kg):
-        persons = kg.entities(lambda p: type(p) is Person)
+        persons = kg.entities(lambda p: type(p) is PersonNode)
         self.entity2label = {p:0 for p in persons}
         
         self.mapping_meanings = {0: "confirmed"}
@@ -82,7 +82,7 @@ class Senders(RoleHeuristic):
         return "Senders"
     
     def __init__(self, kg):        
-        persons = kg.entities(lambda p: type(p) is Person)
+        persons = kg.entities(lambda p: type(p) is PersonNode)
         
         senders = {s for s, p, o in kg.triples if p == "talked_to"}    
 
@@ -102,7 +102,7 @@ class SendersOrReceivers(RoleHeuristic):
     def __init__(self, kg, senders=False, receivers=False):        
         assert senders or receivers
         
-        persons = kg.entities(lambda p: type(p) is Person)
+        persons = kg.entities(lambda p: type(p) is PersonNode)
         
         self.entity2label = {}
         for s, p, o in kg.triples:
@@ -140,7 +140,7 @@ class MajorOrganisations(RoleHeuristic):
     
     def __init__(self, kg, most_common=5):
         
-        persons = kg.entities(lambda p: type(p) is Person)
+        persons = kg.entities(lambda p: type(p) is PersonNode)
         
         orgs = [p.organisation for p in persons]
         
@@ -196,7 +196,7 @@ class RolesfromGraphMeasure(RoleHeuristic):
         G = networkx.DiGraph()
         G.add_edges_from(kg.tuples())
         
-        d_items = sorted(graph_measure(G, kg.entities(lambda x: type(x) is Person)).items(),
+        d_items = sorted(graph_measure(G, kg.entities(lambda x: type(x) is PersonNode)).items(),
                          key=lambda t: t[1])
         persons, self.values = list(zip(*d_items))
         

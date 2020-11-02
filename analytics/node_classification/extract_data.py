@@ -1,16 +1,14 @@
 # -*- coding: utf-8 -*-
 
-from KGs import KG, EmailKG, TextKG, Person
-
 import json
 from tqdm import tqdm
 
-from declarations.corpus import EmailCorpus, Conversation
-from declarations.topics import TopicModel
 import numpy.random as rand
 
 from sklearn.feature_extraction.text import TfidfVectorizer
 
+from conversationkg.conversations import EmailCorpus, Conversation, TopicModel
+from conversationkg.kgs import KG, EmailKG, TextKG # , Person
 
 #%% 1. load data and construct corpus, apply topic modeling
 
@@ -57,7 +55,7 @@ mergedkg.translate(textkg.entity2ind, textkg.pred2ind, attach=True)
 
 #%% 2.3 store and restore KGs
 
-folder_name = f"KGs/{mailing_list}"
+folder_name = f"KGs_dev/{mailing_list}"
 
 emailkg.store(folder_name + "/emailkg")
 emailkg2 = EmailKG.restore(folder_name + "/emailkg")
@@ -76,10 +74,6 @@ mergedkg2 = TextKG.restore(folder_name + "/mergedkg",
 
 emailkg.to_csv(folder_name + "/emailkg")
 textkg.to_csv(folder_name + "/textkg")
-
-
-
-
 
 
 #%% 3.0 load already saved KG
