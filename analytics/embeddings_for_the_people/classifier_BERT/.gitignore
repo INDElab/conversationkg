@@ -1,0 +1,10 @@
+__pycache__
+/*.pkl
+/*.tsv
+results/
+!results/images
+data/*.gz
+data/*.pkl
+!data/train_and_test_inds.pkl
+!data/train_inds.pkl
+!data/test_inds.pkl
