@@ -33,11 +33,26 @@ Extracting and building knowledge graphs from dialogue and analysing them.
    
  - [analytics](https://github.com/pgroth/conversationkg/blob/master/analytics) - machine learning experiments to 
    
- - [email_data_compressed](https://github.com/pgroth/conversationkg/blob/master/email_data_compressed) - 
+ - [email_data_compressed](https://github.com/pgroth/conversationkg/blob/master/email_data_compressed) - example mailinglists taken from the W3C archives, compressed and added to the repository for development and exemplification
  
  
  
 ## Instructions for Use
+
+### Installation
+
+Requires Python>=3.6 and Python pip. No virtual environment needed (and not tested), creates a local site-packages installation.
+
+Steps:
+ 1. clone this repository (e.g. by running `git clone https://github.com/pgroth/conversationkg.git` in a command-line interface)
+ 2. navigate to the cloned repository and run `python -m pip install .` 
+
+### Importing & 
+
+`import conversationkg`
+
+`from conversationkg.conversations import EmailCorpus, Conversation, Email` etc.; the members of the class-hierarchy are listed in `conversationkg.conversations.members`
+
 
 
 ### 0. Required Format
