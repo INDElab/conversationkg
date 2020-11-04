@@ -10,20 +10,30 @@ from .topics import TopicInstance
 from .ledger import Universe
 
 
-
 class EmailCorpus(tuple, metaclass=Universe):
-    # TODO: switch factory from_conversations and __new__ around in terms of function
     @classmethod
-    def from_conversations(cls, conversations, vectorise_default=False):
+    def from_email_dicts(cls, email_dicts, vectorise_default=False):
+        conversations = (Conversation.from_email_dicts(subj, mail_dicts) 
+                            for subj, mail_dicts in tqdm(email_dicts))
+        return cls(conversations)
+
+
+    def __new__(cls, conversations, vectorise_default=False):
         self = super().__new__(cls, sorted(conversations))
-        self.__init__(None, vectorise_default=vectorise_default)
-        return self
-    
-    def __new__(cls, raw_conversations, vectorise_default=False):
-        self = super().__new__(cls, sorted(Conversation(subj, mail_dicts) 
-                                       for subj, mail_dicts in tqdm(raw_conversations)))
-        return self
-        
+        return self        
+
+#class EmailCorpus(tuple, metaclass=Universe):
+#    # TODO: switch factory from_conversations and __new__ around in terms of function
+#    @classmethod
+#    def from_conversations(cls, conversations, vectorise_default=False):
+#        self = super().__new__(cls, sorted(conversations))
+#        self.__init__(None, vectorise_default=vectorise_default)
+#        return self
+#    
+#    def __new__(cls, raw_conversations, vectorise_default=False):
+#        self = super().__new__(cls, sorted(Conversation(subj, mail_dicts) 
+#                                       for subj, mail_dicts in tqdm(raw_conversations)))
+#        return self
         
     def __init__(self, raw_conversations, vectorise_default=False):
         for conv in self:
@@ -215,3 +225,33 @@ class Conversation(tuple, metaclass=Universe):
             conv.topic = TopicInstance.from_json(json_dict["topic"])
             
         return conv
+
+
+
+
+
+
+#%%
+        
+    
+#class X(tuple):
+#    @classmethod
+#    def fac(cls, a):
+#        print("starting fac")
+#        asq = [x**2 for x in a]
+#        x = cls(asq)
+#        print("exiting fac")
+#        return x
+#        
+#        
+#        
+#    def __new__(cls, a):
+#        print("starting __new__")
+#        self = super().__new__(cls, sorted(a))
+#        print("exiting __new__")
+#        return self
+#    
+#    def __init__(self, a):
+#        print("starting init")
+#        self.l = len(a)
+#        print("exiting init")

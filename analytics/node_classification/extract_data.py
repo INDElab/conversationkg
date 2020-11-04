@@ -10,8 +10,37 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from conversationkg.conversations import EmailCorpus, Conversation, TopicModel
 from conversationkg.kgs import KG, EmailKG, TextKG # , Person
 
+from conversationkg import sample_data_raw
+
 #%% 1. load data and construct corpus, apply topic modeling
 
+mailing_list = "ietf-http-wg"
+
+#with open(f"email_data/{mailing_list}/all.json") as handle:
+#    mail_dicts = json.load(handle)
+
+
+mail_dicts = sample_data_raw(mailing_list)
+
+
+convos = [(subj_str, mail_ls) for period, subj_d in mail_dicts.items() 
+                for subj_str, mail_ls in subj_d.items()]
+convos_short = rand.permutation(convos)[:100]
+
+
+corpus = EmailCorpus.from_email_dicts(convos_short)
+corpus.vectorise(vectoriser_algorithm=TfidfVectorizer, max_df=0.7, min_df=5)
+
+print(len(corpus.vectoriser.get_feature_names()))
+
+lda = TopicModel(corpus, 7, max_iter=200)
+lda.assign_topics_to_conversations()
+lda.assign_topics_to_emails()
+
+
+
+
+#%%
 
 mailing_list = "ietf-http-wg"
 
