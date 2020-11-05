@@ -30,10 +30,10 @@ Extracting and building knowledge graphs from dialogue and analysing them.
 ### Contents
 
  - [conversationkg](https://github.com/pgroth/conversationkg/blob/master/conversationkg) - an installable package to parse mailing list archives
-   into a conversation-based data structure and to build knowledges graphs from that data structure; this package is the core of this repository.
+   into a conversation-based data structure and to build knowledges graphs from that data structure; this package is the core of this repository
    
  - [scrape_W3C](https://github.com/pgroth/conversationkg/blob/master/scrape_w3c) - scripts to scrape the 
-   [W3C mailing list archives](https://lists.w3.org/Archives/Public/) into a JSON-based corpus
+   [W3C mailing list archives](https://lists.w3.org/Archives/Public/) into a corpus of JSON files
    
  - [analytics](https://github.com/pgroth/conversationkg/blob/master/analytics) - machine learning experiments to 
    
@@ -45,7 +45,7 @@ Extracting and building knowledge graphs from dialogue and analysing them.
 
 ### Installation
 
-Requires Python>=3.6 and Python pip. No virtual environment needed (and not tested), creates a local site-packages installation.
+Requires Python>=3.6 and Python pip. No virtual environment needed (and not tested), creates a local site-packages installation by default.
 
 Steps:
  1. clone this repository (e.g. by running `git clone https://github.com/pgroth/conversationkg.git` in a command-line interface)
