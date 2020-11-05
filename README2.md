@@ -5,12 +5,14 @@ Extracting and building knowledge graphs from dialogue and analysing them.
 ### Goals and Features
 
 - we are interested in:
-  - identifying roles, affiliations and other properties of the interlocutors of dialogues
-  - 
-- our goals are:
-  - building efficient and intuitive representations of conversational exchanges
-  - 
-
+  - the social networks of and hierarchies among the interlocutors of email conversations - who is connected to whom and by what relationships
+  - identifying roles, affiliations and other inherent properties of the interlocutors of dialogues
+  - intentions and decision-making processes between interlocutors
+  - central 'documents' (links, files, etc) that are being mentioned and shared across dialogues
+  
+- our goals include:
+  - building efficient and intuitive representations of conversational exchanges, specifically in the reprensentational framework of knowledge graphs
+  - gauging how closely these respresentations cover the ground truth
 
 - to address these goals, his repository features:
   - scripts to scrape the _entire_ W3C mailing list archives from scratch (just under 2 Mio emails)
