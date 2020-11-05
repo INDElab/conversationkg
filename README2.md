@@ -10,19 +10,21 @@ Extracting and building knowledge graphs from dialogue and analysing them.
   - intentions and decision-making processes between interlocutors
   - central 'documents' (links, files, etc) that are being mentioned and shared across dialogues
   
-- our goals include:
-  - building efficient and intuitive representations of conversational exchanges, specifically in the reprensentational framework of knowledge graphs
-  - gauging how closely these respresentations cover the ground truth
+- our goals are to:
+  - build efficient and intuitive representations of conversational exchanges, specifically in the reprensentational framework of knowledge graphs
+  - gauge how closely these respresentations cover the ground truth
+  - obtain and build a representative data set and processing tools, to facilitate not only our own research but also future research into similar directions
+  - 
 
-- to address these goals, his repository features:
-  - scripts to scrape the _entire_ W3C mailing list archives from scratch (just under 2 Mio emails)
-  - class hierarchies to parse mailing list archives (in the format of the W3C) into a converation-centred data structure
+- to address these goals, this repository features:
+  - scripts to scrape the entire W3C mailing list archives from scratch (just under 2 Mio emails)
+  - hierarchies of classes to parse mailing list archives (in the format of the W3C) into a converation-centred data structure
   - functions to obtain two kinds of knowledge graphs from mailing list data:
-    1. a knowledge graph built from emails' meta-data 
-    2. a knowledge graph extracted in a 'true' information extraction fashion from emails' text
-  - experiments with machine learning-based algorithms to:
-    - node classification
-    - embedding-based
+    1. a knowledge graph built from emails' meta-data (which is meant to represent (parts of) the ground truth of email-based conversations)
+    2. a knowledge graph extracted in a 'true' information extraction fashion from emails' text (as 
+  - experiments with machine learning-based algorithms on:
+    - node classification, i.e. learning to discover the inherent roles and affiliations of the conversations' interlocutors 
+    - entity resolution based on textual embeddings obtained from emails' bodies
 
 
 ### Contents
