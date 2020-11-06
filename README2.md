@@ -2,7 +2,7 @@
 
 Extracting and building knowledge graphs from dialogue and analysing them.
 
-### Goals and Features
+### 1. Goals and Features
 
 - we are interested in:
   - the social networks of and hierarchies among the interlocutors of email conversations - who is connected to whom and by what relationships
@@ -27,7 +27,7 @@ Extracting and building knowledge graphs from dialogue and analysing them.
     - entity resolution based on textual embeddings obtained from emails' bodies
 
 
-### Contents
+### 2. Contents
 
  - [conversationkg](https://github.com/pgroth/conversationkg/blob/master/conversationkg) - an installable package to parse mailing list archives
    into a conversation-based data structure and to build knowledges graphs from that data structure; this package is the core of this repository
@@ -41,7 +41,27 @@ Extracting and building knowledge graphs from dialogue and analysing them.
  
  
  
-## Instructions for Use
+## 3. Instructions for Use
+
+### Requirements & Dependencies
+
+
+ Parsing
+ - email parsing tools:
+ 
+ 
+ KGs
+ 
+ - (neo4j)
+ 
+ 
+ ML Experiments
+ - `transformers` Python package by HuggingFace
+ - (torch-RGCN)
+ 
+
+
+
 
 ### Installation
 
@@ -50,12 +70,31 @@ Requires Python>=3.6 and Python pip. No virtual environment needed (and not test
 Steps:
  1. clone this repository (e.g. by running `git clone https://github.com/pgroth/conversationkg.git` in a command-line interface)
  2. navigate to the cloned repository and run `python -m pip install .` 
+ 
+Note: The installation copies and extracts the contents of [email_data_compressed](https://github.com/pgroth/conversationkg/blob/master/email_data_compressed) into the package, which will occopy up to a GB of memory. The mailinglist data in [email_data_compressed](https://github.com/pgroth/conversationkg/blob/master/email_data_compressed) can subsequently be loaded as part of the package and should make development with this data easier.
 
-### Importing & 
+### Using the Installed Package
 
+The contents of the package can be imported and used as follows:
+
+Importing the pacakage:
 `import conversationkg`
 
-`from conversationkg.conversations import EmailCorpus, Conversation, Email` etc.; the members of the class-hierarchy are listed in `conversationkg.conversations.members`
+Importing and running the classes with parse into a hierarchy; all classes of that hierarchy are listed in `conversationkg.conversations.members`
+
+```
+from conversationkg.conversations import EmailCorpus
+corpus = EmailCorpus(json_email_dicts)
+```
+
+
+
+4. 
+
+
+
+
+
 
 
 
