@@ -15,35 +15,35 @@ class EmailKG(KG):
                 
                 
                 triples.append((sender, "part_of", conv))
-                provenances.append(email.email_id)
+                provenances.append(email.message_id)
                 triples.append((receiver, "part_of", conv))
-                provenances.append(email.email_id)
+                provenances.append(email.message_id)
                 
                 
                 triples.append((sender, "talked_to", receiver))
-                provenances.append(email.email_id)
+                provenances.append(email.message_id)
                 
-                triples.append((sender, "evidences", sender.address))
-                provenances.append(email.email_id)                
-                triples.append((receiver, "evidences", receiver.address))
-                provenances.append(email.email_id)                
+#                triples.append((sender, "evidences", sender.address))
+#                provenances.append(email.message_id)                
+#                triples.append((receiver, "evidences", receiver.address))
+#                provenances.append(email.message_id)                
                 
 
                 triples.append((sender.organisation, "part_of", conv))
-                provenances.append(email.email_id)                
+                provenances.append(email.message_id)                
                 triples.append((receiver.organisation, "part_of", conv))
-                provenances.append(email.email_id)
+                provenances.append(email.message_id)
 
                 triples.append((sender.organisation, 
                                      "talked_to", receiver.organisation))
-                provenances.append(email.email_id)
+                provenances.append(email.message_id)
                 triples.append((sender, "evidences",
                                      sender.organisation))
-                provenances.append(email.email_id)
+                provenances.append(email.message_id)
 
                 triples.append((receiver, "evidences",
                                      receiver.organisation))
-                provenances.append(email.email_id)
+                provenances.append(email.message_id)
 
         
         return KG.from_email_corpus(email_corpus, triples, provenances)

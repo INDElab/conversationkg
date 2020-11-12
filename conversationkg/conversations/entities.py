@@ -313,3 +313,26 @@ class Link(EntityInstance):
         entity_params = json_dict["entity"]
         link = cls(url, **entity_params)
         return link
+    
+    
+class KeyWord(EntityInstance, str):
+    def __new__(cls, phrase, **entity_params):
+        self = super().__new__(cls, phrase)
+        return self
+    
+    def __init__(self, phrase, **entity_params):
+        pass
+    
+    def __eq__(self, other):
+        return super().__eq__(self, other)
+    
+    
+    def __hash__(self):
+        return super().__hash__(self)
+    
+    
+    def to_json(self, dumps=False):
+        
+    
+    
+    

@@ -1,5 +1,9 @@
+import warnings
 from tqdm import tqdm
 import json
+
+from itertools import groupby
+from collections import defaultdict
 
 import numpy as np
 import scipy
@@ -10,32 +14,89 @@ from .topics import TopicInstance
 from .ledger import Universe
 
 
+
+def group_by_subject_line(emails, strip={"Re: "}, **kwargs):
+    def edit_subject(subj):
+        s = subj
+        for prefix in strip:
+            s= s.lstrip(prefix)
+        return s
+    key = lambda e: edit_subject(e.subject)
+    for subj, email_iter in groupby(sorted(emails, key=key), key):
+        yield subj, list(email_iter)
+
+def group_by_id(emails, **kwargs):
+    # collect all emails' successor emails
+    # NOTE: (1) an email which is not a successor is the successor of None
+    # (2) implicitly, some emails will not exist as keys in the mapping, these are
+    #  those emails which have not successors
+    emails_by_id = {e.message_id:e for e in emails}
+    successors = defaultdict(list)
+    for e in emails:
+        if e.inreplyto_id:
+            if e.inreplyto_id in emails_by_id:
+                predecessor_e = emails_by_id[e.inreplyto_id]
+                successors[predecessor_e].append(e)
+            else:
+                successors[None].append(e)
+        else:
+            successors[None].append(e)
+    
+    
+    def get_subject_line(ls_of_emails):
+    #    subjs = [e.subject for e in ls_of_emails]
+        initial_subj = ls_of_emails[0].subject  # majority_vote = max(set(subjs), key=subjs.count)
+        return initial_subj
+        
+    def collect_recursive(e, conv_so_far):
+        # email has no reply, so conversation over, yield finished conversation
+        if not e in successors:
+            complete_conv = conv_so_far + [e]
+            subj = get_subject_line(complete_conv)
+            yield (subj, complete_conv)
+        
+        successor_mails = successors[e]
+        
+        # go through the next emails in the conversation and repeat recursively
+        for next_e in successor_mails:
+            copy = list(conv_so_far + [e])   
+            yield from list(collect_recursive(next_e, copy))
+            
+    
+    for starter in successors[None]:
+        convo_tuples = list(collect_recursive(starter, []))
+        yield from convo_tuples
+        
+
+
 class EmailCorpus(tuple, metaclass=Universe):
+    @classmethod
+    def from_ungrouped_email_dicts(cls, 
+                                   email_dicts, 
+                                   grouping_function=group_by_id, 
+                                   vectorise_default=False, 
+                                   **grouping_function_args):
+        
+        emails = tqdm(map(Email.from_email_dict, email_dicts), total=len(email_dicts))
+        
+        grouped_emails = grouping_function(emails, **grouping_function_args)
+        
+        conversations = (Conversation(subj, email_ls) for subj, email_ls in grouped_emails)
+        return cls(conversations, vectorise_default=vectorise_default)
+    
     @classmethod
     def from_email_dicts(cls, email_dicts, vectorise_default=False):
         conversations = (Conversation.from_email_dicts(subj, mail_dicts) 
                             for subj, mail_dicts in tqdm(email_dicts))
-        return cls(conversations)
-
+        return cls(conversations, vectorise_default=vectorise_default)
 
     def __new__(cls, conversations, vectorise_default=False):
+#        if len(conversations) < 1:
+#            raise ValueError("Empty list of conversations given!")
         self = super().__new__(cls, sorted(conversations))
         return self        
-
-#class EmailCorpus(tuple, metaclass=Universe):
-#    # TODO: switch factory from_conversations and __new__ around in terms of function
-#    @classmethod
-#    def from_conversations(cls, conversations, vectorise_default=False):
-#        self = super().__new__(cls, sorted(conversations))
-#        self.__init__(None, vectorise_default=vectorise_default)
-#        return self
-#    
-#    def __new__(cls, raw_conversations, vectorise_default=False):
-#        self = super().__new__(cls, sorted(Conversation(subj, mail_dicts) 
-#                                       for subj, mail_dicts in tqdm(raw_conversations)))
-#        return self
         
-    def __init__(self, raw_conversations, vectorise_default=False):
+    def __init__(self, conversations, vectorise_default=False):        
         for conv in self:
             Universe.observe(conv, self, "evidenced_by")
             
@@ -44,24 +105,28 @@ class EmailCorpus(tuple, metaclass=Universe):
         self.interlocutors = set(p for c in self for p in c.interlocutors)
         self.organisations = set(o for c in self for o in c.organisations)
         
-        self.start_time = next(c.start_time for c in self if c.start_time.year > 1)
-        self.end_time = max(c.end_time for c in self)
+        if len(self) > 1:
+            self.start_time = next(c.start_time for c in self if c.start_time.year > 1)
+            self.end_time = max(c.end_time for c in self)
+        else:
+            self.start_time, self.end_time = self[0].start_time, self[0].end_time
         
         if vectorise_default:
             self.vectorise()
         else:
-            self.vectorised, self.vectoriser = None, None    
+            self.vectorised = self.vectoriser = None
+    
     
     def __getitem__(self, key):
         conv_slice = super().__getitem__(key)
+        # user is asking for a single conversation
         if isinstance(key, int):
             return conv_slice
+        # else: key is a slice(), i.e. user is asking for a subcorpus
         
-        subcorpus = EmailCorpus.from_conversations(
-                    conv_slice, vectorise_default=False
-                )
+        subcorpus = EmailCorpus(conv_slice, vectorise_default=False)
         
-        if subcorpus.vectorised:
+        if self.vectorised is not None:
             subcorpus.vectorised = self.vectorised[key, ]
             subcorpus.vectoriser = self.vectoriser
         return subcorpus
@@ -109,7 +174,7 @@ class EmailCorpus(tuple, metaclass=Universe):
             vectoriser_params = None
         else:
             if self.vectorised.size*self.vectorised.dtype.itemsize > 100e6:
-                print("WARNING: The matrix holding the vectroised emails "
+                warnings.warn("WARNING: The matrix holding the vectroised emails "
                       "may be larger than 100mb! Omitting from JSON representation!")
                 vectorised_to_save = "corpus_vectorised.npz"
             else:
@@ -225,33 +290,24 @@ class Conversation(tuple, metaclass=Universe):
             conv.topic = TopicInstance.from_json(json_dict["topic"])
             
         return conv
-
-
-
-
-
-
+    
+    
+    
+    
+    
 #%%
         
     
-#class X(tuple):
-#    @classmethod
-#    def fac(cls, a):
-#        print("starting fac")
-#        asq = [x**2 for x in a]
-#        x = cls(asq)
-#        print("exiting fac")
-#        return x
-#        
-#        
-#        
-#    def __new__(cls, a):
-#        print("starting __new__")
-#        self = super().__new__(cls, sorted(a))
-#        print("exiting __new__")
+#class S(tuple):
+#    
+#    def __new__(cls, ls):
+#        self = super().__new__(cls, sorted(ls))
 #        return self
 #    
-#    def __init__(self, a):
-#        print("starting init")
-#        self.l = len(a)
-#        print("exiting init")
+#    def __init__(self, ls):
+#        self.l = len(self)
+#        self.x = 13
+#        
+#        
+##    def __g
+#        

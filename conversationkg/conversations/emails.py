@@ -1,5 +1,5 @@
+import warnings
 import json
-
 import re
 
 import datetime
@@ -11,14 +11,15 @@ from email.utils import parseaddr
 import spacy
 nlp = spacy.load("en_core_web_md")
 
-from .entities import EntityInstance, Person, Link, Address
+from nltk_rake import Rake
+rake = Rake()
+
+from .entities import EntityInstance, Person, Link, Address, KeyWord
 from .topics import TopicInstance
 from .ledger import Universe
 
 url_re = re.compile(r"http[s]?:\/\/(?:[a-zA-Z]|[0-9]|[$-_@.&+~]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+")
 address_pattern = re.compile(r'[\w\.-]+@[\w\.-]+')
-
-
 
 
 # MERGING
@@ -67,17 +68,20 @@ class Email(metaclass=Universe):
                                         mail_dict["isosent"])),
                     merge_reported_ids(mail_dict["id"],
                                      mail_dict["id_from_body"]),
+                    mail_dict["inreplyto"],
                     mail_dict["subject"],
                     []) # observers, i.e. persons in CC               
                     
         
-    def __init__(self, body, sender, receiver, time, email_id, subject, observers, **kwargs):
+    def __init__(self, body, sender, receiver, time, message_id, inreplyto_id, subject, observers, **kwargs):
+        self.message_id = message_id
+        self.inreplyto_id = inreplyto_id
+        
         self.body = body
         self.sender = sender
         self.receiver = receiver
         
         self.time = time
-        self.email_id = email_id
         self.subject = subject
         self.observers = observers
         
@@ -140,11 +144,12 @@ class Email(metaclass=Universe):
         sender = Person.from_json(json_dict["sender"])
         receiver = Person.from_json(json_dict["receiver"])
         time = parse_time_sent(json_dict["time"])
-        email_id = json_dict["email_id"]
+        message_id = json_dict["message_id"]
+        inreplyto_id = json_dict["inreplyto_id"]
         subject = json_dict["subject"]
         observers = [Person.from_json(p_dict) for p_dict in json_dict["observers"]]
         
-        email = cls(body, sender, receiver, time, email_id, subject, observers)
+        email = cls(body, sender, receiver, time, message_id, inreplyto_id, subject, observers)
         
         if "topic" in json_dict:
             email.topic = TopicInstance.from_json(json_dict["topic"])
@@ -155,18 +160,16 @@ class Email(metaclass=Universe):
         
 class EmailBody(str, metaclass=Universe):
     def __new__(cls, body_str, 
-                 links=None, addresses=None, entities=None, **kwargs):
-        body, signature, quoted = EmailBody.discern_quoted(body_str)
-        self = super().__new__(cls, body)
-        self.signature = signature
-        self.quoted = quoted
-        
-        self.whole = body_str
+                 links=None, addresses=None, entities=None, **kwargs):        
+        self = super().__new__(cls, body_str)
         return self
         
     
     def __init__(self, body_str, 
                  links=None, addresses=None, entities=[], **kwargs):
+        
+        self.body, self.signature, self.quoted = EmailBody.discern_quoted(body_str)
+
         self.normalised = self.normalise()
                 
         self.links = links if links else tuple(self.extract_links())
@@ -200,14 +203,25 @@ class EmailBody(str, metaclass=Universe):
             yield address
             
     def discover_entities(self):
-        ents = nlp(str(self)).ents
+        s = str(self.normalised)
+        if len(s) > nlp.max_length:
+            warnings.warn(f"Email body of {len(self)} characters exceeds spacy's maximum"
+                            "of {nlp.max_length}! Clipping the body to the maximum length and proceeding.")
+            
+            s = s[:nlp.max_length]
+        
+        ents = nlp(s).ents
         ents = [(str(e).strip(), e.label_) for e in ents]
         return ents
     
+    def discover_keywords(self):
+        rake.extract_keywords_from_text(self.normalised)
+        kws = rake.get_ranked_phrases_with_scores()
+        return [KeyWord(phrase) for score, phrase in kws if score > 1.0]
     
     def to_json(self, dumps=False):
         d = {"class": self.__class__.__name__,
-             "self": self.whole, 
+             "self": str(self), 
              "links": [l.to_json(dumps=False) for l in self.links],
              "addresses":[a for a in self.addresses],
              "entities":[(e, l) for e, l in self.entities]}  # e.to_json(dumps=False)
@@ -220,7 +234,7 @@ class EmailBody(str, metaclass=Universe):
     def from_json(cls, json_dict):
         body = json_dict["self"]
         links = [Link.from_json(l) for l in json_dict["links"]]
-        addresses = json_dict["addresses"]
+        addresses = [Address(a) for a in json_dict["addresses"]]
         entities = [(e_str, l) for e_str, l in json_dict["entities"]] 
         
         return cls(body, links, addresses, entities)
@@ -243,23 +257,6 @@ class EmailBody(str, metaclass=Universe):
                 reply += fragment.content
                 
         return (reply, signature, quoted)
-    
-#    def discern_quoted:
-#        from Levenshtein import distance as levenshtein
-#        
-#        i = 3
-#        latest = convos[i][-1]
-#
-#        for l in latest.body.split("\n"):
-#            if not l.strip():
-#                continue
-#            print(":", l)
-#            
-#            for e_ in convos[1][:-1]:
-#                quoted = [l_ for l_ in e_.body.split("\n") if levenshtein(l, l_) < (min(len(l), len(l_))/2)]
-#                
-#                print(quoted)
-#                
-#            print("\n---")
-
-    
+        
+        
+        
