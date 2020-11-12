@@ -2,34 +2,38 @@
 
 Extracting and building knowledge graphs from dialogue and analysing them.
 
-### Goals and Features
+### 1. Goals and Features
 
 - we are interested in:
-  - identifying roles, affiliations and other properties of the interlocutors of dialogues
-  - 
-- our goals are:
-  - building efficient and intuitive representations of conversational exchanges
+  - the social networks of and hierarchies among the interlocutors of email conversations - who is connected to whom and by what relationships
+  - identifying roles, affiliations and other inherent properties of the interlocutors of dialogues
+  - intentions and decision-making processes between interlocutors
+  - central 'documents' (links, files, etc) that are being mentioned and shared across dialogues
+  
+- our goals are to:
+  - build efficient and intuitive representations of conversational exchanges, specifically in the reprensentational framework of knowledge graphs
+  - gauge how closely these respresentations cover the ground truth
+  - obtain and build a representative data set and processing tools, to facilitate not only our own research but also future research into similar directions
   - 
 
-
-- to address these goals, his repository features:
-  - scripts to scrape the _entire_ W3C mailing list archives from scratch (just under 2 Mio emails)
-  - class hierarchies to parse mailing list archives (in the format of the W3C) into a converation-centred data structure
+- to address these goals, this repository features:
+  - scripts to scrape the entire W3C mailing list archives from scratch (just under 2 Mio emails)
+  - hierarchies of classes to parse mailing list archives (in the format of the W3C) into a converation-centred data structure
   - functions to obtain two kinds of knowledge graphs from mailing list data:
-    1. a knowledge graph built from emails' meta-data 
-    2. a knowledge graph extracted in a 'true' information extraction fashion from emails' text
-  - experiments with machine learning-based algorithms to:
-    - node classification
-    - embedding-based
+    1. a knowledge graph built from emails' meta-data (which is meant to represent (parts of) the ground truth of email-based conversations)
+    2. a knowledge graph extracted in a 'true' information extraction fashion from emails' text (as 
+  - experiments with machine learning-based algorithms on:
+    - node classification, i.e. learning to discover the inherent roles and affiliations of the conversations' interlocutors 
+    - entity resolution based on textual embeddings obtained from emails' bodies
 
 
-### Contents
+### 2. Contents
 
  - [conversationkg](https://github.com/pgroth/conversationkg/blob/master/conversationkg) - an installable package to parse mailing list archives
-   into a conversation-based data structure and to build knowledges graphs from that data structure; this package is the core of this repository.
+   into a conversation-based data structure and to build knowledges graphs from that data structure; this package is the core of this repository
    
  - [scrape_W3C](https://github.com/pgroth/conversationkg/blob/master/scrape_w3c) - scripts to scrape the 
-   [W3C mailing list archives](https://lists.w3.org/Archives/Public/) into a JSON-based corpus
+   [W3C mailing list archives](https://lists.w3.org/Archives/Public/) into a corpus of JSON files
    
  - [analytics](https://github.com/pgroth/conversationkg/blob/master/analytics) - machine learning experiments to 
    
@@ -37,21 +41,60 @@ Extracting and building knowledge graphs from dialogue and analysing them.
  
  
  
-## Instructions for Use
+## 3. Instructions for Use
+
+### Requirements & Dependencies
+
+
+ Parsing
+ - email parsing tools:
+ 
+ 
+ KGs
+ 
+ - (neo4j)
+ 
+ 
+ ML Experiments
+ - `transformers` Python package by HuggingFace
+ - (torch-RGCN)
+ 
+
+
+
 
 ### Installation
 
-Requires Python>=3.6 and Python pip. No virtual environment needed (and not tested), creates a local site-packages installation.
+Requires Python>=3.6 and Python pip. No virtual environment needed (and not tested), creates a local site-packages installation by default.
 
 Steps:
  1. clone this repository (e.g. by running `git clone https://github.com/pgroth/conversationkg.git` in a command-line interface)
  2. navigate to the cloned repository and run `python -m pip install .` 
+ 
+Note: The installation copies and extracts the contents of [email_data_compressed](https://github.com/pgroth/conversationkg/blob/master/email_data_compressed) into the package, which will occopy up to a GB of memory. The mailinglist data in [email_data_compressed](https://github.com/pgroth/conversationkg/blob/master/email_data_compressed) can subsequently be loaded as part of the package and should make development with this data easier.
 
-### Importing & 
+### Using the Installed Package
 
+The contents of the package can be imported and used as follows:
+
+Importing the pacakage:
 `import conversationkg`
 
-`from conversationkg.conversations import EmailCorpus, Conversation, Email` etc.; the members of the class-hierarchy are listed in `conversationkg.conversations.members`
+Importing and running the classes with parse into a hierarchy; all classes of that hierarchy are listed in `conversationkg.conversations.members`
+
+```
+from conversationkg.conversations import EmailCorpus
+corpus = EmailCorpus(json_email_dicts)
+```
+
+
+
+4. 
+
+
+
+
+
 
 
 
