@@ -301,9 +301,7 @@ class Link(EntityInstance):
     
     def to_json(self, dumps=False):
         d = super().to_json(dumps=False)
-        
         d["class"] = "Link"
-        
         if dumps: return json.dumps(d)
         return d
     
@@ -317,22 +315,68 @@ class Link(EntityInstance):
     
 class KeyWord(EntityInstance, str):
     def __new__(cls, phrase, **entity_params):
-        self = super().__new__(cls, phrase)
+        self = str.__new__(cls, phrase)
         return self
     
     def __init__(self, phrase, **entity_params):
-        pass
+        EntityInstance.__init__(self, **entity_params)
+        
     
     def __eq__(self, other):
-        return super().__eq__(self, other)
+        return str.__eq__(self, other)
     
     
     def __hash__(self):
-        return super().__hash__(self)
+        return str.__hash__(self)
     
     
     def to_json(self, dumps=False):
+        d = EntityInstance.to_json(self, dumps=False)
+        d["class"] = "KeyWord"
+        d["self"] = str(self)
         
+        if dumps: return json.dumps(d)
+        return d
+    
+    @classmethod
+    def from_json(cls, json_dict):
+        keyword = json_dict["self"]
+        entity_params = json_dict["entity"]
+        address = cls(keyword, **entity_params)
+        return address
+
+
+#%%
+        
+        
+class Base:
+    def __init__(self, x):
+        self.x = x
+        
+    def __eq__(self, other):
+        print("called eq")
+        return False
+        
+
+class Sub(Base, str):
+    
+    def __new__(cls, s):
+        self = super().__new__(cls, s)
+        return self
+    
+    
+    def __init__(self, s):
+        Base.__init__(self, len(s))
+        
+        self.y = 13
+        
+        
+    def __eq__(self, other):
+        return str.__eq__(self, other)
+    
+    
+    
+    
     
     
     

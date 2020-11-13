@@ -4,6 +4,7 @@ import json
 from sklearn.decomposition import LatentDirichletAllocation
 
 from .ledger import Universe
+from .entities import KeyWord
 
 #from gensim.corpora.dictionary import Dictionary
 #from gensim.sklearn_api import HdpTransformer
@@ -14,9 +15,10 @@ from .ledger import Universe
 
 class TopicModel:
     def __init__(self, email_corpus, n_topics, **kwargs):
-        self.model_args = dict(n_components=n_topics, max_iter=200, learning_method='batch',
-                            learning_offset=5000.,random_state=0, verbose=2, n_jobs=-1)
+        self.model_args = dict(n_components=n_topics, max_iter=100, learning_method='batch',
+                            learning_offset=10.,random_state=0, verbose=2, n_jobs=-1)
         self.model_args.update(kwargs)
+        self.model_args.update(dict(evaluate_every=self.model_args["max_iter"]//10))
         
         self.model = LatentDirichletAllocation(**self.model_args)
         
@@ -95,7 +97,7 @@ class Topic:
         
     
     def top_words(self, n):
-        return self.sorted_words[:n]
+        return [KeyWord(w) for w in self.sorted_words[:n]]
     
     def __repr__(self):
         return f"Topic({self.index}; " + f"{self.top_words(5)}"[1:]
@@ -126,8 +128,8 @@ class Topic:
 
 class TopicInstance:    
     def __init__(self, topic, confidence):
-        self.index = topic.index
         self.topic = topic
+        self.index = topic.index
         self.score = confidence
         
     def __repr__(self):

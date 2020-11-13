@@ -219,6 +219,8 @@ class EmailBody(str, metaclass=Universe):
         kws = rake.get_ranked_phrases_with_scores()
         return [KeyWord(phrase) for score, phrase in kws if score > 1.0]
     
+
+    
     def to_json(self, dumps=False):
         d = {"class": self.__class__.__name__,
              "self": str(self), 

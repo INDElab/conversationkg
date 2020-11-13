@@ -10,6 +10,7 @@ import scipy
 from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
 
 from .emails import Email
+from .entities import KeyWord
 from .topics import TopicInstance
 from .ledger import Universe
 
