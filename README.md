@@ -72,6 +72,19 @@ corpus = EmailCorpus.from_conversations([conversation])
 
 Notice that the period structure is omitted when instantiating the Conversation and EmailCorpus objects, that is email data from a different source need not be structured into periods.
 
+### 1.1 Perform TopicModelling
+
+```
+ from topics import TopicModel
+ 
+ lda = TopicModel(corpus)
+ 
+ lda.assign_topics_to_emails()
+ lda.assign_topics_to_conversations()
+ 
+
+```
+
 
 ### 2. Extracting a KG
 
