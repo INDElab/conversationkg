@@ -92,9 +92,9 @@ class EmailCorpus(tuple, metaclass=Universe):
         return cls(conversations, vectorise_default=vectorise_default)
 
     def __new__(cls, conversations, vectorise_default=False):
-#        if len(conversations) < 1:
-#            raise ValueError("Empty list of conversations given!")
         self = super().__new__(cls, sorted(conversations))
+        if len(self) < 1:
+            raise ValueError("Empty list of conversations given!")
         return self        
         
     def __init__(self, conversations, vectorise_default=False):        
@@ -236,15 +236,15 @@ class Conversation(tuple, metaclass=Universe):
         
         self.interlocutors = set(p for m in self for p in (m.sender, m.receiver))
         self.organisations = set(o for m in self for o in m.organisations) 
+        self.observers = set(p for m in self for p in m.observers) # people in CC
         
-        self.observers = None # will hold people in CC
-
-        self.documents= set(d for m in self 
+        self.attachments = set(a for m in self for a in m.attachments)
+        self.documents = set(d for m in self 
                             for doc_ls in (m.body.links, m.body.addresses, m.body.code_snippets)
                             for d in doc_ls)
 
-    
-        self.topic = None
+        self.first_observed_at = self.start_time
+#        self.topic = None
     
     def __eq__(self, other):
         if not (type(self) == type(other) == Conversation):

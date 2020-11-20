@@ -11,10 +11,10 @@ from email.utils import parseaddr
 import spacy
 nlp = spacy.load("en_core_web_md")
 
-from nltk_rake import Rake
+from rake_nltk import Rake
 rake = Rake()
 
-from .entities import EntityInstance, Person, Link, Address, KeyWord
+from .entities import Person, Link, Address, KeyWord
 from .topics import TopicInstance
 from .ledger import Universe
 
@@ -33,7 +33,7 @@ def merge_reported_ids(id_, id_from_body):
     return id_
 
 
-#PARSING
+# PARSING
 def parse_name_address(person_str):
     return parseaddr(person_str)
 
@@ -56,7 +56,7 @@ def parse_time_sent(s):
 
 class Email(metaclass=Universe):
     @classmethod
-    def from_email_dict(cls, mail_dict, **kwargs):
+    def from_email_dict(cls, mail_dict, **unused_kwargs):
         return cls(EmailBody(mail_dict["body"]),
                    Person(*merge_reported_authors(mail_dict["author"],
                                              mail_dict["from"],
@@ -70,10 +70,13 @@ class Email(metaclass=Universe):
                                      mail_dict["id_from_body"]),
                     mail_dict["inreplyto"],
                     mail_dict["subject"],
+                    [], # attachments
                     []) # observers, i.e. persons in CC               
                     
         
-    def __init__(self, body, sender, receiver, time, message_id, inreplyto_id, subject, observers, **kwargs):
+    def __init__(self, body, sender, receiver, time, 
+                 message_id, inreplyto_id, 
+                 subject, observers, attachments, **unused_kwargs):
         self.message_id = message_id
         self.inreplyto_id = inreplyto_id
         
@@ -85,10 +88,14 @@ class Email(metaclass=Universe):
         self.subject = subject
         self.observers = observers
         
+        self.attachments = attachments
+        
         self.organisations = (self.sender.organisation,
                               self.receiver.organisation)
         
-        self.topic = None
+        self.first_observed_at = self.time
+        
+#        self.topic = None
         
         Universe.observe(body, self, "evidenced_by")
         Universe.observe(sender, self, "evidenced_by")
@@ -209,7 +216,6 @@ class EmailBody(str, metaclass=Universe):
                             "of {nlp.max_length}! Clipping the body to the maximum length and proceeding.")
             
             s = s[:nlp.max_length]
-        
         ents = nlp(s).ents
         ents = [(str(e).strip(), e.label_) for e in ents]
         return ents
@@ -218,8 +224,6 @@ class EmailBody(str, metaclass=Universe):
         rake.extract_keywords_from_text(self.normalised)
         kws = rake.get_ranked_phrases_with_scores()
         return [KeyWord(phrase) for score, phrase in kws if score > 1.0]
-    
-
     
     def to_json(self, dumps=False):
         d = {"class": self.__class__.__name__,
@@ -259,6 +263,5 @@ class EmailBody(str, metaclass=Universe):
                 reply += fragment.content
                 
         return (reply, signature, quoted)
-        
         
         

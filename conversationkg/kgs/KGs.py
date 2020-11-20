@@ -29,15 +29,17 @@ class Person(WholePerson):
     def __init__(self, person):  #, distance_threshold=0.0):
         self.__dict__ = person.__dict__
         
-        self.instance_label = self.instance_label.lower()
-#        self.thr = distance_threshold
+        self.name = self.name.lower()
 
     def __repr__(self):
-        return f"{self.instance_label if self.instance_label else '_'}"
+        return f"PersonNode({str(self)})"
         
+    def __str__(self):
+        return f"{self.name if self.name else '_'}"
+
     
     def distance_from(self, other):
-        my_name, your_name = self.instance_label, other.instance_label
+        my_name, your_name = self.name, other.name
         
         if max(len(my_name), len(your_name)) == 0:
             return 0.
@@ -49,13 +51,13 @@ class Person(WholePerson):
     
     def __hash__(self):
 #        raise NotImplementedError
-        return hash(self.instance_label)
+        return hash(self.name)
         
    
     def __eq__(self, other):
         if not (type(self) == type(other)):
             return False
-        return self.instance_label == other.instance_label
+        return self.name == other.name
 
 
 def put(d, x, i):
@@ -68,7 +70,7 @@ def put_based_on_eq(d, x, i):
     if not type(x) is Person:
         return put(d, x, i)
     
-    print(x.instance_label, end=", ")
+    print(x.name, end=", ")
 
     approx_matches = [other_x for other_x in d if x == other_x]
     
@@ -262,6 +264,10 @@ class KG:
         
         return rev_d
     
+    def to_csv(self, save_path):
+        raise DeprecationWarning("Deprecated; Use:\nfrom kgs.writers import CSVWriter\n"
+                                 "CSVWriter(kg).to_csv(save_path)")
+    
     
 #    def get_node_df(self):    
 #        records = []
@@ -364,7 +370,7 @@ class KG:
             merge_with[x] = set(matches)
 
         sorted_d = sorted(merge_with.items(), 
-                          key=lambda it: (len(it[1]), -len(it[0].instance_label)), 
+                          key=lambda it: (len(it[1]), -len(it[0].name)), 
                           reverse=True)
 
         merging_f = {}

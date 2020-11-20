@@ -156,12 +156,12 @@ def before(tx, event1, event2):
 
 #%% FROM conversationkg_backup/conversation_building/construct_graph.py
     
-from neo4j import GraphDatabase
+#from neo4j import GraphDatabase
 #from neo4j_defs2 import put_conversation, put_email, put_entity, put_topic
 #from neo4j_defs2 import connect_conversation, connect_email, connect_person
 #from neo4j_defs2 import before
 
-driver = GraphDatabase.driver("bolt://localhost:7687", auth=("neo4j", "pwd"), encrypted=False)
+#driver = GraphDatabase.driver("bolt://localhost:7687", auth=("neo4j", "pwd"), encrypted=False)
 
 
 def clear(tx):
@@ -189,35 +189,35 @@ def consists_of(tx, conversation):
         h=hash(conversation), h1=hash(email))
 
     
-with driver.session() as session:
-    session.write_transaction(clear)
-    
-    
-    put_iter(put_conversation, corpus)
-    
-    put_iter(put_email, list(corpus.iter_emails()))
-    
-    put_iter(put_entity, EntityUniverse.entities.values())
-    
-    put_iter(put_topic, lda.topics)
-
-    
-    connect_iter(connect_conversation, corpus)
-    
-    connect_iter(connect_email, list(corpus.iter_emails()))
-
-    connect_iter(connect_person, 
-                 filter(lambda x: isinstance(x, Person), EntityUniverse.entities.values()))
-
-
-    for conv1, conv2 in zip(corpus, corpus[1:]):
-        session.write_transaction(before, conv1, conv2)
-        
-        
-    for conv in tqdm(corpus, desc="before emails"):
-        session.write_transaction(consists_of, conv)
-        for e1, e2 in zip(conv, conv[1:]):
-            session.write_transaction(before, e1, e2)    
+#with driver.session() as session:
+#    session.write_transaction(clear)
+#    
+#    
+#    put_iter(put_conversation, corpus)
+#    
+#    put_iter(put_email, list(corpus.iter_emails()))
+#    
+#    put_iter(put_entity, EntityUniverse.entities.values())
+#    
+#    put_iter(put_topic, lda.topics)
+#
+#    
+#    connect_iter(connect_conversation, corpus)
+#    
+#    connect_iter(connect_email, list(corpus.iter_emails()))
+#
+#    connect_iter(connect_person, 
+#                 filter(lambda x: isinstance(x, Person), EntityUniverse.entities.values()))
+#
+#
+#    for conv1, conv2 in zip(corpus, corpus[1:]):
+#        session.write_transaction(before, conv1, conv2)
+#        
+#        
+#    for conv in tqdm(corpus, desc="before emails"):
+#        session.write_transaction(consists_of, conv)
+#        for e1, e2 in zip(conv, conv[1:]):
+#            session.write_transaction(before, e1, e2)    
 
 
 
@@ -230,10 +230,10 @@ with driver.session() as session:
 # -*- coding: utf-8 -*-
 
 
-import spacy
-nlp = spacy.load("en")
-
-from neo4j import GraphDatabase
+#import spacy
+#nlp = spacy.load("en")
+#
+#from neo4j import GraphDatabase
 
 
 class GraphBuilder:

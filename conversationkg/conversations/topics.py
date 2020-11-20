@@ -17,6 +17,7 @@ class TopicModel:
     def __init__(self, email_corpus, n_topics, **kwargs):
         self.model_args = dict(n_components=n_topics, max_iter=100, learning_method='batch',
                             learning_offset=10.,random_state=0, verbose=2, n_jobs=-1)
+        
         self.model_args.update(kwargs)
         self.model_args.update(dict(evaluate_every=self.model_args["max_iter"]//10))
         
@@ -30,7 +31,6 @@ class TopicModel:
         self.topics = [Topic(i, dist, 
                              email_corpus.vectoriser.get_feature_names()) 
                         for i, dist in enumerate(normalised)]
-        
         
         
     def assign_topics_to_emails(self, email_corpus=None):
@@ -99,8 +99,11 @@ class Topic:
     def top_words(self, n):
         return [KeyWord(w) for w in self.sorted_words[:n]]
     
+    def __str__(self):
+        return f"Topic {self.index}: " +  f"{self.top_words(5)}"[1:-1]
+    
     def __repr__(self):
-        return f"Topic({self.index}; " + f"{self.top_words(5)}"[1:]
+        return f"Topic({self.index}, {self.word_dist[:5]}, {self.words[:5]})"
     
     def __hash__(self):
         return hash((self.index, self.word_dist.tostring()))
@@ -111,14 +114,11 @@ class Topic:
         return self.index == other.index and np.array_equal(self.word_dist, other.word_dist)
     
     
-    def to_json(self, dumps=False):
-        d = {"class": self.__class__.__name__,
-             "index": self.index,
-             "words": self.words,
-             "word_dist": self.word_dist.tolist()}
-        
-        if dumps: return json.dumps(d)
-        return d
+    def to_json(self):
+        return {"class": self.__class__.__name__,
+                "index": self.index,
+                "words": self.words,
+                "word_dist": self.word_dist.tolist()}
     
     @classmethod
     def from_json(cls, json_dict):
@@ -132,8 +132,11 @@ class TopicInstance:
         self.index = topic.index
         self.score = confidence
         
-    def __repr__(self):
+    def __str__(self):
         return f"Prob[{self.topic}] = {self.score:0.3f}"
+    
+    def __repr__(self):
+        return f"TopicInstance({self.topic}, {self.confidence})"
     
     def __eq__(self, other):
         if isinstance(other, Topic):
@@ -146,11 +149,9 @@ class TopicInstance:
     def __hash__(self):
         return hash(self.topic)
     
-    
-    def to_json(self, dumps=False):
+    def to_json(self):
         d = {"class":self.__class__.__name__, "score":self.score}
         d["topic"] = self.topic.to_json(dumps=False)
-        if dumps: return json.dumps(d)
         return d
     
     @classmethod

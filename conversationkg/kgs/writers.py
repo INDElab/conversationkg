@@ -9,17 +9,17 @@ import pandas as pd
 
 
 class CSVWriter:
-    
     def __init__(self, kg):
         self.kg = kg
         self.entities = kg.entities()
-
+        self.triples = kg.triples
+        self.provenances = kg.provenances
         
     def get_node_df(self):    
         records = []
         
         
-        sorted_ents = sorted(self.entities, key=str)
+        sorted_ents = sorted(self.entities, key=lambda x: (str(type(x)), str(x)))
         for i, e in enumerate(sorted_ents):                
             node_id = i  # hash(e)
             node_t = str(e)
