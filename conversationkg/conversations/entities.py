@@ -4,6 +4,8 @@ from .ledger import Universe
 
 from urllib.parse import urlparse
 
+import numpy as np
+
 
 #%%
 
@@ -185,26 +187,91 @@ class KeyWord(StringEntity, str):
 
 
 
+class Topic(Entity):
+    def __init__(self, index, word_dist, words=None):
+        self.index = index
+        self.word_dist = np.asarray(word_dist)
+        self.word_dist.flags.writeable = False
+        self.words = words if words else range(self.word_dist.size)
+        self.sorted_words = tuple(self.words[i] for i in self.word_dist.argsort())
+        
+        super().__init__(str(index))
+        
+        
+    def top_words(self, n, include_probs=False):
+        if include_probs:
+            return [(self.word_dist[i], KeyWord(self.words[i])) 
+                    for i in self.word_dist.argsort()[:n]]
+        return [KeyWord(w) for w in self.sorted_words[:n]]
+    
+    def __str__(self):
+        return f"Topic {self.index}: " + f"{list(map(str, self.top_words(5)))}"[1:-1]
+    
+    def __repr__(self):
+        probs, words = list(zip(*self.top_words(5, include_probs=True)))
+        return f"Topic({self.index}, {probs}, {words})"
+    
+    def __hash__(self):
+        return hash((self.index, self.word_dist.tostring()))
+    
+    def __eq__(self, other):
+        if not isinstance(other, Topic):
+            return False
+        return self.index == other.index and np.array_equal(self.word_dist, other.word_dist)
+    
+    
+    def to_json(self):
+        return {"class": self.__class__.__name__,
+                "index": self.index,
+                "words": self.words,
+                "word_dist": self.word_dist.tolist()}
+    
+    @classmethod
+    def from_json(cls, json_dict):
+        params = [json_dict[k] for k in ["index", "word_dist", "words"]]
+        return cls(*params)
 
-    # redundant -> this is what happens behind the scenes anyway     
-#    def __eq__(self, other):
-#        return super().__eq__(other)  # and str.__eq__(other)
+
+class TopicInstance:  
+    def __init__(self, topic, confidence):
+        self.topic = topic
+        self.index = topic.index
+        self.score = confidence
+        
+    def __str__(self):
+        return f"Prob[{self.topic}] = {self.score:0.3f}"
     
-    # also redundant
-#    def __hash__(self):
-#        return hash(super().__hash__())
+    def __repr__(self):
+        return f"TopicInstance({repr(self.topic)}, {self.score})"
+    
+    def __eq__(self, other):
+        if isinstance(other, Topic):
+            return self.topic == other
+        elif isinstance(other, TopicInstance):
+            return self.topic == other.topic
+        else:
+            return False
+        
+    def __hash__(self):
+        return hash(self.topic)
+    
+    def to_json(self):
+        d = {"class":self.__class__.__name__, "score":self.score}
+        d["topic"] = self.topic.to_json(dumps=False)
+        return d
+    
+    @classmethod
+    def from_json(cls, json_dict):
+        topic = Topic.from_json(json_dict["topic"])
+        score = json_dict["score"]
+        return cls(topic, score)
+    
+
+
+    
+
+    
+#class DynamicEntity(metaclass=EntityUniverse):
     
     
-#    def __repr__(self):
-#        return f"{self.__class__.__name__}({str(self)})"
-#    
-#    def __str__(self):
-#        return f"{str.__str__(self)}"
-    
-#    def to_json(self):
-#        d = super().to_json()
-#        return d
-#    
-#    @classmethod
-#    def from_json(cls, json_dict):
-#        return cls(json_dict["name"])
+        

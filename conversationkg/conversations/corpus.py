@@ -7,13 +7,10 @@ from collections import defaultdict
 
 import numpy as np
 import scipy
-from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
 
 from .emails import Email
-from .entities import KeyWord
-from .topics import TopicInstance
+from .entities import TopicInstance
 from .ledger import Universe
-
 
 
 def group_by_subject_line(emails, strip={"Re: "}, **kwargs):
@@ -68,14 +65,17 @@ def group_by_id(emails, **kwargs):
         convo_tuples = list(collect_recursive(starter, []))
         yield from convo_tuples
         
+        
+        
 
+                
 
 class EmailCorpus(tuple, metaclass=Universe):
+    
     @classmethod
     def from_ungrouped_email_dicts(cls, 
                                    email_dicts, 
                                    grouping_function=group_by_id, 
-                                   vectorise_default=False, 
                                    **grouping_function_args):
         
         emails = tqdm(map(Email.from_email_dict, email_dicts), total=len(email_dicts))
@@ -83,7 +83,7 @@ class EmailCorpus(tuple, metaclass=Universe):
         grouped_emails = grouping_function(emails, **grouping_function_args)
         
         conversations = (Conversation(subj, email_ls) for subj, email_ls in grouped_emails)
-        return cls(conversations, vectorise_default=vectorise_default)
+        return cls(conversations)
     
     @classmethod
     def from_email_dicts(cls, email_dicts, vectorise_default=False):
@@ -91,13 +91,13 @@ class EmailCorpus(tuple, metaclass=Universe):
                             for subj, mail_dicts in tqdm(email_dicts))
         return cls(conversations, vectorise_default=vectorise_default)
 
-    def __new__(cls, conversations, vectorise_default=False):
+    def __new__(cls, conversations):
         self = super().__new__(cls, sorted(conversations))
         if len(self) < 1:
             raise ValueError("Empty list of conversations given!")
         return self        
         
-    def __init__(self, conversations, vectorise_default=False):        
+    def __init__(self, conversations):        
         for conv in self:
             Universe.observe(conv, self, "evidenced_by")
             
@@ -112,11 +112,6 @@ class EmailCorpus(tuple, metaclass=Universe):
         else:
             self.start_time, self.end_time = self[0].start_time, self[0].end_time
         
-        if vectorise_default:
-            self.vectorise()
-        else:
-            self.vectorised = self.vectoriser = None
-    
     
     def __getitem__(self, key):
         conv_slice = super().__getitem__(key)
@@ -125,42 +120,31 @@ class EmailCorpus(tuple, metaclass=Universe):
             return conv_slice
         # else: key is a slice(), i.e. user is asking for a subcorpus
         
-        subcorpus = EmailCorpus(conv_slice, vectorise_default=False)
+        subcorpus = EmailCorpus(conv_slice)
+        
+        
+        email_inds = list(range(sum(len(c) for c in conv_slice)))
+        
         
         if self.vectorised is not None:
-            subcorpus.vectorised = self.vectorised[key, ]
-            subcorpus.vectoriser = self.vectoriser
+            subcorpus.vectorised = self.vectorised[email_inds, ]
+            subcorpus.conversations_vectorised = self.conversations_vectorised[key, ]
+            subcorpus.vectorised_vocabulary = self.vectorised_vocabulary
         return subcorpus
     
     
     def iter_emails(self):
         for conversation in self:
             for email in conversation:
-                yield email
-                
-                
-    def vectorise(self, vectoriser_algorithm=CountVectorizer, **kwargs):
-#        default_args = dict(max_df=0.5, min_df=0.1, max_features=self.n_emails)
-        default_args = dict(max_df=0.7, min_df=5)
-        
-        default_args.update(kwargs)
-        
-        self.vectoriser = vectoriser_algorithm(**default_args)
-        
-        self.vectorised = self.vectoriser.fit_transform([
-                email.body.normalised for email in self.iter_emails()
-                ])
-    
-        for email, vec in zip(self.iter_emails(), self.vectorised):
-            email.body.vectorised = vec
-    
+                yield email    
+                    
         
     def save(self, filename):
-        if self.vectorised.size*self.vectorised.dtype.itemsize > 100e6:
-            print("WARNING: The matrix holding the vectroised emails "
-                  "may be larger than 100mb!"
-                  "Saving separately in scipy-native .npz format!")
-            scipy.sparse.save_npz("corpus_vectorised.npz", self.vectorised)
+#        if self.vectorised.size*self.vectorised.dtype.itemsize > 100e6:
+#            print("WARNING: The matrix holding the vectorised emails "
+#                  "may be larger than 100mb!"
+#                  "Saving separately in scipy-native .npz format!")
+#            scipy.sparse.save_npz("corpus_vectorised.npz", self.vectorised)
         with open(filename, "w", encoding="utf-8") as handle:
             json.dump(self.to_json(), handle)
     
@@ -170,22 +154,23 @@ class EmailCorpus(tuple, metaclass=Universe):
             return cls.from_json(json.load(handle))
 
     def to_json(self, dumps=False):
-        if self.vectorised is None:
-            vectorised_to_save = None
-            vectoriser_params = None
-        else:
-            if self.vectorised.size*self.vectorised.dtype.itemsize > 100e6:
-                warnings.warn("WARNING: The matrix holding the vectroised emails "
-                      "may be larger than 100mb! Omitting from JSON representation!")
-                vectorised_to_save = "corpus_vectorised.npz"
-            else:
-                vectorised_to_save = self.vectorised.toarray().tolist()
-            vectoriser_params = self.vectoriser.get_params()
-            del vectoriser_params["dtype"]
+#        if self.vectorised is None:
+#            vectorised_to_save = None
+#            vectoriser_params = None
+#        else:
+#            if self.vectorised.size*self.vectorised.dtype.itemsize > 100e6:
+#                warnings.warn("WARNING: The matrix holding the vectorised emails "
+#                      "may be larger than 100mb! Omitting from JSON representation!")
+#                vectorised_to_save = "corpus_vectorised.npz"
+#            else:
+#                vectorised_to_save = self.vectorised.toarray().tolist()
+#            vectoriser_params = self.vectoriser.get_params()
+#            del vectoriser_params["dtype"]
         
-        d = {"self": [conv.to_json(dumps=False) for conv in self],
-            "vectorised": vectorised_to_save,
-            "vectoriser_params": vectoriser_params}        
+        d = {"class": self.__class__.__name__,
+            "self": [conv.to_json(dumps=False) for conv in self]}#,
+#            "vectorised": vectorised_to_save,
+#            "vectoriser_params": vectoriser_params}        
         
         if dumps: return json.dumps(d)
         return d
@@ -195,20 +180,20 @@ class EmailCorpus(tuple, metaclass=Universe):
         conversations = [Conversation.from_json(conv_dict) for conv_dict in json_dict["self"]]
         
         
-        vectorised_value = json_dict["vectorised"]
-        if vectorised_value:
-            if isinstance(vectorised_value, str):
-                vectorised = scipy.sparse.load_npz(vectorised_value)
-            else:
-                vectorised = scipy.sparse.csr_matrix(vectorised_value)
-        else:
-            vectorised = None
-            
-        vectoriser_params = json_dict["vectoriser_params"]
+#        vectorised_value = json_dict["vectorised"]
+#        if vectorised_value:
+#            if isinstance(vectorised_value, str):
+#                vectorised = scipy.sparse.load_npz(vectorised_value)
+#            else:
+#                vectorised = scipy.sparse.csr_matrix(vectorised_value)
+#        else:
+#            vectorised = None
+#            
+#        vectoriser_params = json_dict["vectoriser_params"]
         corpus = cls.from_conversations(conversations, vectorise_default=False)
-        corpus.vectorised = vectorised
-        corpus.vectoriser = \
-            CountVectorizer(**vectoriser_params) if vectoriser_params else None
+#        corpus.vectorised = vectorised
+#        corpus.vectoriser = \
+#            CountVectorizer(**vectoriser_params) if vectoriser_params else None
         return corpus        
         
     
@@ -244,7 +229,6 @@ class Conversation(tuple, metaclass=Universe):
                             for d in doc_ls)
 
         self.first_observed_at = self.start_time
-#        self.topic = None
     
     def __eq__(self, other):
         if not (type(self) == type(other) == Conversation):
@@ -293,22 +277,8 @@ class Conversation(tuple, metaclass=Universe):
         return conv
     
     
-    
-    
-    
-#%%
+    def get_email_bodies(self, attr=None, join_str=None):
+        get = lambda e: str(e) if (attr is None) else getattr(e, attr)
+        bodies = [get(e.body) for e in self]
         
-    
-#class S(tuple):
-#    
-#    def __new__(cls, ls):
-#        self = super().__new__(cls, sorted(ls))
-#        return self
-#    
-#    def __init__(self, ls):
-#        self.l = len(self)
-#        self.x = 13
-#        
-#        
-##    def __g
-#        
+        return bodies if (join_str is None) else join_str.join(bodies)

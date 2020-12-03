@@ -3,25 +3,37 @@ print("Testing...")
 from conversationkg import example_mailinglists, load_example_data_as_raw_JSON
 from conversationkg import load_example_data_as_EmailCorpus
 
-from conversationkg.conversations import TopicModel 
+from conversationkg.conversations.factories import TfidfVectorizer, SKLearnLDA, StanzaNER, RakeKeyWordExtractor
 
 # from conversationkg import load_example_data_as_EmailKG, load_example_data_as_TextKG
 from conversationkg.kgs import EmailKG, TextKG
 
 print("SUCCESS: Imports passed")
 
-corpus_args = dict(vectorise_default=True)
-topic_model_args = dict(max_iter=30)
+example_mailinglists = ["ietf-http-wg"]
 
 for mailing_list in example_mailinglists:
     print(f"Current mailing list: {mailing_list}...")
     
-    corpus = load_example_data_as_EmailCorpus(mailing_list, n_conversations=50, **corpus_args)
-    print(f"SUCCESS [{mailing_list}]: Corpus instantiated")
+    corpus = load_example_data_as_EmailCorpus(mailing_list, n_conversations=50)
+    print(f"\nSUCCESS [{mailing_list}]: Corpus instantiated")
 
-    topic_model = TopicModel(corpus, 10, **topic_model_args)
-    topic_model.assign_topics_to_emails()
-    topic_model.assign_topics_to_conversations()
+    vectoriser = TfidfVectorizer(corpus, min_df=5)
+    vectoriser(corpus)
+
+    factories = [
+            SKLearnLDA(corpus, n_topics=5, max_iter=100, learning_method='online'),
+            StanzaNER(),
+            RakeKeyWordExtractor()
+            ]
+    
+    for f in factories:
+        f(corpus)
+
+
+#    topic_model = TopicModel(corpus, 10, **topic_model_args)
+#    topic_model.assign_topics_to_emails()
+#    topic_model.assign_topics_to_conversations()
     print(f"SUCCESS [{mailing_list}]: Topics assigned")
 
     emailkg = EmailKG(corpus)
@@ -32,7 +44,7 @@ for mailing_list in example_mailinglists:
 print(f"SUCCESS")
 
 
-
+#%%
 #
 ##%%
 #

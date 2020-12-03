@@ -14,8 +14,8 @@ nlp = spacy.load("en_core_web_md")
 from rake_nltk import Rake
 rake = Rake()
 
-from .entities import Person, Link, Address, KeyWord
-from .topics import TopicInstance
+from .entities import Person, Link, Address, KeyWord, TopicInstance
+#from .topics import TopicInstance
 from .ledger import Universe
 
 url_re = re.compile(r"http[s]?:\/\/(?:[a-zA-Z]|[0-9]|[$-_@.&+~]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+")
