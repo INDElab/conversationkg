@@ -177,7 +177,6 @@ class NamedEntityFactory(Factory):
 #        super().__init__(self, corpus, preprocessors, postprocessors)
     
     
-    #TODO: Dynamically create subclasses of Entity that match the labels
     @staticmethod
     def string_to_class(entity_list):
         label_class_map = {"PERSON": lambda name: Person(name, ""),
@@ -239,6 +238,18 @@ class KeyWordFactory(Factory):
         self.post = self.combine_processors(self.output_to_class, *postprocessors)
         
 #        super().__init__(self, corpus=None, preprocessors, postprocessors)
+
+
+    def process_conversation(self, conversation):
+        all_keywords = []
+        for email in conversation:
+            email.keywords = list(filter(None,
+                                         self.post(self.get_keywords(self.pre(email.body.normalised)))
+                                ))
+            all_keywords.extend(email.keywords)
+        conversation.keywords = all_keywords
+
+
 
     def __call__(self, corpus):
         for conv in tqdm(corpus, 

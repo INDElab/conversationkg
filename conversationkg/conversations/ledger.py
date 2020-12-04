@@ -3,52 +3,119 @@
 import json
 import importlib
 
-# a.k.a. Ledger, FactUniverse
-class Universe(type):        
-    mentioned_in = dict()
-    evidenced_by = dict()
+
+
+#%%
+
+
+#class Universe(type):
+#    d = {}
+#    
+#    def __call__(cls, *args, **kwargs):
+#        obj = type.__call__(cls, *args, **kwargs)
+#        
+#        if hash(obj) in Universe.d:
+#            print(f"found {obj} in d")
+#            return Universe.d[hash(obj)]
+#        
+#        else:
+#            print(f"{obj} not in d")
+#            Universe.d[hash(obj)] = obj
+#            return obj
+#        
+#        
+#class X(metaclass=Universe):
+#    def __init__(self, x):
+#        self.x = x
+#    
+#    def __hash__(self):
+#        return hash(self.x)
+        
+#%%
+
+
+import datetime
+
+class Universe(type):
+    current_timer = None
+    current_time = datetime.datetime(1, 1, 1)
+    observed = dict()
     
-    nothing_to_register = []
     def __call__(cls, *args, **kwargs):
         obj = type.__call__(cls, *args, **kwargs)
-        
-        if "evidenced_by" in kwargs:
-            witness = kwargs["evidenced_by"]
-            Universe.observe(obj, witness, "evidenced_by")
-            
-        elif "mentioned_in" in kwargs:
-            witness = kwargs["mentioned_in"]
-            Universe.observe(obj, witness, "mentioned_in")
-            
-        else:
-            Universe.nothing_to_register.append(obj)
-
         return obj
     
+#        obj = type.__call__(cls, *args, **kwargs)
+#        
+#        if hasattr(obj, "time"):
+#            Universe.current_timer = obj
+#            Universe.current_time = obj.time
+##            print(f"obj of type {obj.__class__.__name__}")
+#
+#        if hash(obj) in Universe.observed:
+#            return Universe.observed[hash(obj)]
+#        else:
+#            if not hasattr(obj, "time_first_observed"):
+#                obj.time_first_observed = []
+#            obj.time_first_observed.append(Universe.current_time)
+#            Universe.observed[hash(obj)] = obj
+#            return obj
+            
     @classmethod
-    def reset(cls):
-        cls.mentioned_in = dict()
-        cls.evidenced_by = dict()
+    def observe(cls, obj, witness, mode):
+        pass
+
+
+
+
+
+
+# a.k.a. Ledger, FactUniverse
+#class Universe(type):        
+#    mentioned_in = dict()
+#    evidenced_by = dict()
+#    
+#    nothing_to_register = []
+#    def __call__(cls, *args, **kwargs):
+#        obj = type.__call__(cls, *args, **kwargs)
+#        
+#        if "evidenced_by" in kwargs:
+#            witness = kwargs["evidenced_by"]
+#            Universe.observe(obj, witness, "evidenced_by")
+#            
+#        elif "mentioned_in" in kwargs:
+#            witness = kwargs["mentioned_in"]
+#            Universe.observe(obj, witness, "mentioned_in")
+#            
+#        else:
+#            Universe.nothing_to_register.append(obj)
+#
+#        return obj
+#    
+#    @classmethod
+#    def reset(cls):
+#        cls.mentioned_in = dict()
+#        cls.evidenced_by = dict()
+#        
+#    @classmethod 
+#    def observe(cls, obj, witness, mode):    
+##        print(obj, mode)
+#        
+#        mode_dict = getattr(cls, mode)    
+##        obj_cls = type(obj)
+##        witness_cls = type(witness)
+#        k, v = obj, witness
+#        if not k in mode_dict:
+#            mode_dict[k] = []
+#        mode_dict[k].append(v)
         
-    @classmethod 
-    def observe(cls, obj, witness, mode):    
-#        print(obj, mode)
-        
-        mode_dict = getattr(cls, mode)    
-#        obj_cls = type(obj)
-#        witness_cls = type(witness)
-        k, v = obj, witness
-        if not k in mode_dict:
-            mode_dict[k] = []
-        mode_dict[k].append(v)
-        
-    @classmethod
-    def to_json(cls, dumps=False):
-        raise NotImplementedError()
-    
-    @classmethod
-    def from_json(cls, json_dict):
-        raise NotImplementedError()
+#    @classmethod
+#    def to_json(cls, dumps=False):
+#        raise NotImplementedError()
+#    
+#    @classmethod
+#    def from_json(cls, json_dict):
+#        raise NotImplementedError()
         
         
 #%%        

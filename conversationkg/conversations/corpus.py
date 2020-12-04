@@ -67,11 +67,73 @@ def group_by_id(emails, **kwargs):
         
         
         
+class EmailCorpusCollection(list, metaclass=Universe):
+    @classmethod
+    def from_list_of_ungrouped_email_dicts(cls, list_of_email_dict_list, 
+                                           grouping_function=group_by_id,
+                                           **grouping_function_args):
+        
+        corpus_list = [EmailCorpus.from_ungrouped_email_dicts(email_dicts, 
+                                                              grouping_function,
+                                                              **grouping_function_args)
+                        for email_dicts in list_of_email_dict_list]
+        return cls(corpus_list)
+        
+    
+    @classmethod
+    def from_email_dict_list(cls, list_of_email_dict_list):
+        corpus_list = [EmailCorpus.from_email_dicts(email_dicts)
+                        for email_dicts in list_of_email_dict_list]
+        return cls(corpus_list)
+        
+    def __new__(cls, list_of_email_corpora=[]):
+        self = super().__new__(cls, [])
+        return self
+    
+    def __init__(self, list_of_email_corpora):
+        if len(self) < 1:
+            self.names = []
+            self.n_conversations = self.n_emails = 0
+        else:
+            self.names = [getattr(c, "name", None) for c in self]
+            self.n_conversations = sum(map(len, self))
+            self.n_emails = sum(c.n_emails for c in self)
 
+        
+    def apply(self, *factories):
+        progressbar = tqdm(self, desc="Applying factories to corpus")
+        for corpus in progressbar:
+            progressbar.set_description(f"Applying factories to corpus {corpus.name}")
+            yield list(corpus.apply(*factories))
+        
+    def iter_conversations(self):
+        for corpus in self:
+            for conv in corpus:
+                yield conv
+    
+    def iter_emails(self):
+        for conv in self.iter_conversations():
+            for email in conv:
+                yield email              
+                
+    def merge_corpora(self):
+        return EmailCorpus(self.iter_conversations())
+                
+    def __getitem__(self, key):
+        corpus_slice = super().__getitem__(key)
+        # user is asking for a single corpus
+        if isinstance(key, int):
+            return corpus_slice
+        return EmailCorpusCollection(corpus_slice)
+    
+    def append(self, corpus):
+        super().append(corpus)
+        self.names.append(getattr(corpus, "name", None))
+        self.n_conversations += len(corpus)
+        self.n_emails += corpus.n_emails
                 
 
 class EmailCorpus(tuple, metaclass=Universe):
-    
     @classmethod
     def from_ungrouped_email_dicts(cls, 
                                    email_dicts, 
@@ -86,21 +148,24 @@ class EmailCorpus(tuple, metaclass=Universe):
         return cls(conversations)
     
     @classmethod
-    def from_email_dicts(cls, email_dicts, vectorise_default=False):
+    def from_email_dicts(cls, email_dicts):
         conversations = (Conversation.from_email_dicts(subj, mail_dicts) 
                             for subj, mail_dicts in tqdm(email_dicts))
-        return cls(conversations, vectorise_default=vectorise_default)
+        return cls(conversations)
 
-    def __new__(cls, conversations):
+    def __new__(cls, conversations, corpus_name=None):
         self = super().__new__(cls, sorted(conversations))
         if len(self) < 1:
             raise ValueError("Empty list of conversations given!")
         return self        
         
-    def __init__(self, conversations):        
+    def __init__(self, conversations, corpus_name=None):        
         for conv in self:
             Universe.observe(conv, self, "evidenced_by")
-            
+        
+        if corpus_name:
+            self.name = corpus_name
+        
         self.n_emails = sum(len(c) for c in self)
         
         self.interlocutors = set(p for c in self for p in c.interlocutors)
@@ -126,7 +191,7 @@ class EmailCorpus(tuple, metaclass=Universe):
         email_inds = list(range(sum(len(c) for c in conv_slice)))
         
         
-        if self.vectorised is not None:
+        if hasattr(self, "vectorised"):
             subcorpus.vectorised = self.vectorised[email_inds, ]
             subcorpus.conversations_vectorised = self.conversations_vectorised[key, ]
             subcorpus.vectorised_vocabulary = self.vectorised_vocabulary
@@ -137,8 +202,12 @@ class EmailCorpus(tuple, metaclass=Universe):
         for conversation in self:
             for email in conversation:
                 yield email    
-                    
-        
+    
+    
+    def apply(self, *factories):
+        for f in factories: yield f(self)
+    
+    
     def save(self, filename):
 #        if self.vectorised.size*self.vectorised.dtype.itemsize > 100e6:
 #            print("WARNING: The matrix holding the vectorised emails "
@@ -200,10 +269,10 @@ class EmailCorpus(tuple, metaclass=Universe):
     
 class Conversation(tuple, metaclass=Universe):
     @classmethod
-    def from_email_dicts(cls, subject, email_dicts, **kwargs):
-        return cls(subject, (Email.from_email_dict(mail_dict) for mail_dict in email_dicts), **kwargs)
+    def from_email_dicts(cls, subject, email_dicts):
+        return cls(subject, (Email.from_email_dict(mail_dict) for mail_dict in email_dicts))
     
-    def __new__(cls, subject, emails, **kwargs):
+    def __new__(cls, subject, emails):
         self = super().__new__(cls, sorted(emails))
         for email in self:
             Universe.observe(email, self, "evidenced_by")
