@@ -144,21 +144,6 @@ def get_email_body(path, soup):
     return soup.find("pre", id="body").text
 
 
-#def stash(e_dict, path, big_d):
-#    mail_ls, period, subject, _ = path
-#    
-#    if not mail_ls in big_d:
-#        big_d[mail_ls] = {}
-#    
-#    if not period in big_d[mail_ls]:
-#        big_d[mail_ls][period] = {}
-#    
-#    if not subject in big_d[mail_ls][period]:
-#        big_d[mail_ls][period][subject] = []
-#    
-#    big_d[mail_ls][period][subject].append(e_dict)
-
-
 def stash(mail_dict, path, maills_dict):
     mail_ls, period, subject, _ = path
     

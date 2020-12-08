@@ -26,20 +26,20 @@
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">from .corpus import EmailCorpus, Conversation, group_by_subject_line, group_by_id
+<pre><code class="python">from .corpus import EmailCorpusCollection, EmailCorpus, Conversation, group_by_subject_line, group_by_id
 from .emails import Email
-from .entities import EntityUniverse, Person, Organisation, Address, Link
-from .topics import TopicModel, Topic
+from .entities import EntityUniverse, Entity, Person, Organisation, Address, Link, KeyWord, Topic
+#from .topics import TopicModel
 from .ledger import Universe
 
 
 
-members = [
+hierarchy = [
         Universe,
-        EmailCorpus, Conversation, 
+        EmailCorpusCollection, EmailCorpus, Conversation, 
         Email, 
-        EntityUniverse, Person, Organisation, Address, Link,
-        TopicModel, Topic
+        EntityUniverse, Entity, Person, Organisation, Address, Link, KeyWord, Topic
+#        TopicModel, Topic
         ]</code></pre>
 </details>
 </section>
@@ -58,19 +58,11 @@ members = [
 <dd>
 <div class="desc"></div>
 </dd>
-<dt><code class="name"><a title="conversationkg.conversations.entities2" href="entities2.html">conversationkg.conversations.entities2</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="conversationkg.conversations.entity_factories" href="entity_factories.html">conversationkg.conversations.entity_factories</a></code></dt>
+<dt><code class="name"><a title="conversationkg.conversations.factories" href="factories.html">conversationkg.conversations.factories</a></code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
 <dt><code class="name"><a title="conversationkg.conversations.ledger" href="ledger.html">conversationkg.conversations.ledger</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="conversationkg.conversations.topics" href="topics.html">conversationkg.conversations.topics</a></code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
@@ -99,10 +91,8 @@ members = [
 <li><code><a title="conversationkg.conversations.corpus" href="corpus.html">conversationkg.conversations.corpus</a></code></li>
 <li><code><a title="conversationkg.conversations.emails" href="emails.html">conversationkg.conversations.emails</a></code></li>
 <li><code><a title="conversationkg.conversations.entities" href="entities.html">conversationkg.conversations.entities</a></code></li>
-<li><code><a title="conversationkg.conversations.entities2" href="entities2.html">conversationkg.conversations.entities2</a></code></li>
-<li><code><a title="conversationkg.conversations.entity_factories" href="entity_factories.html">conversationkg.conversations.entity_factories</a></code></li>
+<li><code><a title="conversationkg.conversations.factories" href="factories.html">conversationkg.conversations.factories</a></code></li>
 <li><code><a title="conversationkg.conversations.ledger" href="ledger.html">conversationkg.conversations.ledger</a></code></li>
-<li><code><a title="conversationkg.conversations.topics" href="topics.html">conversationkg.conversations.topics</a></code></li>
 </ul>
 </li>
 </ul>

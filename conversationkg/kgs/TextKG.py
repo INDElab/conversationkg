@@ -13,14 +13,15 @@ class TextKG(KG):
         provenances = []
         
         for conv in tqdm(email_corpus, desc="Iterating Conversations in TextKG"):
-#            triples.append((conv, "is_about", conv.topic.topic))
-#            provenances.append(conv[0].message_id)
+            triples.append((conv, "is_about", conv.topic.topic))
+            provenances.append(conv[0].message_id)
             
             for email in conv:
-#                triples.append((email, "is_about", email.topic.topic))
-#                provenances.append(email.message_id)
+                triples.append((email, "is_about", email.topic.topic))
+                provenances.append(email.message_id)
                 
-                mentioned_people = [Person(WholePerson(str(e), "")) for e, l in email.body.entities if l == "PERSON"]
+                mentioned_people = [Person(WholePerson(str(e), "")) for e, l in email.body.entities 
+                                    if l == "PERSON"]
 
                 for person in mentioned_people:
                     triples.append((email, "mentions", person))

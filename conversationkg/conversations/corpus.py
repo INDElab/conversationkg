@@ -1,6 +1,7 @@
 import warnings
 from tqdm import tqdm
 import json
+from joblib import Parallel, delayed
 
 from itertools import groupby
 from collections import defaultdict
@@ -133,31 +134,47 @@ class EmailCorpusCollection(list, metaclass=Universe):
         self.n_emails += corpus.n_emails
                 
 
+
+
 class EmailCorpus(tuple, metaclass=Universe):
+    @staticmethod
+    def parallelise(it, func, n_jobs=-1):
+        delayed_f = delayed(func)
+        return Parallel(n_jobs)(delayed_f(x) for x in it)
+    
+    
     @classmethod
     def from_ungrouped_email_dicts(cls, 
                                    email_dicts, 
+                                   corpus_name=None,
                                    grouping_function=group_by_id, 
                                    **grouping_function_args):
         
-        emails = tqdm(map(Email.from_email_dict, email_dicts), total=len(email_dicts))
+#        emails = tqdm(map(Email.from_email_dict, email_dicts), total=len(email_dicts),
+#                      desc="Iterating emails in EmailCorpus.from_ungrouped_email_dicts")
+        progressbar = tqdm(email_dicts, 
+                           desc="Iterating emails in EmailCorpus.from_ungrouped_email_dicts")
+        emails = cls.parallelise(progressbar, Email.from_email_dict)
         
         grouped_emails = grouping_function(emails, **grouping_function_args)
         
         conversations = (Conversation(subj, email_ls) for subj, email_ls in grouped_emails)
-        return cls(conversations)
+        return cls(conversations, corpus_name)
+    
     
     @classmethod
-    def from_email_dicts(cls, email_dicts):
-        conversations = (Conversation.from_email_dicts(subj, mail_dicts) 
-                            for subj, mail_dicts in tqdm(email_dicts))
-        return cls(conversations)
+    def from_email_dicts(cls, email_dicts, corpus_name=None):
+        progressbar = tqdm(email_dicts, 
+                           desc="Iterating conversations in EmailCorpus.from_email_dicts")
+        f = lambda tup: Conversation.from_email_dicts(*tup)
+        conversations = cls.parallelise(progressbar, f)
+        return cls(conversations, corpus_name)
 
     def __new__(cls, conversations, corpus_name=None):
         self = super().__new__(cls, sorted(conversations))
         if len(self) < 1:
             raise ValueError("Empty list of conversations given!")
-        return self        
+        return self
         
     def __init__(self, conversations, corpus_name=None):        
         for conv in self:

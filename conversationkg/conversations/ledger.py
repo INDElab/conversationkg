@@ -39,10 +39,18 @@ import datetime
 class Universe(type):
     current_timer = None
     current_time = datetime.datetime(1, 1, 1)
+    
+    times = []
+    timers = []
     observed = dict()
     
     def __call__(cls, *args, **kwargs):
         obj = type.__call__(cls, *args, **kwargs)
+        
+        if hasattr(obj, "time"):
+            Universe.times.append(obj.time)
+            Universe.timers.append(obj)
+        
         return obj
     
 #        obj = type.__call__(cls, *args, **kwargs)

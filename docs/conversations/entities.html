@@ -28,10 +28,19 @@
 </summary>
 <pre><code class="python"># -*- coding: utf-8 -*-
 
-import json
+from .ledger import Universe
+
 from urllib.parse import urlparse
 
-from .ledger import Universe
+import numpy as np
+
+
+#%%
+
+#class Universe(type):
+#    def __call__(cls, *args, **kwargs):
+#        obj = type.__call__(cls, *args, **kwargs)
+#        return obj
 
 
 class EntityUniverse(type, metaclass=Universe):
@@ -50,265 +59,147 @@ class EntityUniverse(type, metaclass=Universe):
             EntityUniverse.entities[hash(obj)] = obj
             return obj
     
-    
     @classmethod
     def reset(cls):
         cls.entities = dict()
+        cls.n_duplicates = 0
+        cls.duplicates = set()
         
-#    @classmethod
-#    def to_json(cls, dumps=False):
-#        entities_json = [e.to_json() for e in cls.entities.values()]
-#        if dumps: json.dump(entities_json)
-#        return entities_json
-#    
-#    @classmethod
-#    def from_json(cls, json_dict):
-#        cls.reset()
-#        module = importlib.import_module(&#34;declarations_new.entities&#34;)
-#        for entity_dict in json_dict:
-#            class_ = getattr(module, entity_dict[&#34;class&#34;])
-#            yield class_.from_json(entity_dict)
+        
+        
 
+class Entity(metaclass=EntityUniverse):
+    def __init__(self, name):
+        self.name = name
+#        for name, val in other_properties:
+#            setattr(self, name, val)
 
-class Entity:
-#    arg_names = [&#34;qid&#34;, &#34;label&#34;, &#34;description&#34;, &#34;aliases&#34;, &#34;edges&#34;, &#34;types&#34;]
-    # TODO meaningful default args =&gt; &#34;default entity&#34;?
-    def __init__(self, qid=None, label=None, description=None, aliases=None, edges=None, types=None):
-        self.qid = qid
-        
-        self.label = label
-        self.description = description      
-        self.aliases = aliases
-        
-        self.edges = edges
-        self.types = types
-        
-    def __hash__(self):
-        return hash(self.qid)
-    
     def __eq__(self, other):
-        if not isinstance(other, Entity):
+        if not type(self) == type(other):
             return False
-        return self.qid == other.qid
+        return self.name == other.name
     
+    # hash __class__ to ensure different entity types are discernible by hash
+    def __hash__(self):
+        return hash((self.__class__, self.name)) 
+  
     def __repr__(self):
-        return f&#34;{self.label} ({self.qid})&#34;
-        
+        return f&#34;{self.__class__.__name__}({self.name})&#34;
     
-    def to_json(self, dumps=False):
-        d = {k:v for k, v in self.__dict__.items()}
-        if dumps: return json.dumps(d)
+    def __str__(self):
+        return f&#34;{self.name}&#34;
+    
+    def to_json(self):
+        d = dict(name=self.name)
+        d[&#34;class&#34;] = self.__class__.__name__
+#        d[&#34;class&#34;] = &#34;Entity&#34;
         return d
     
     @classmethod
     def from_json(cls, json_dict):
-        return cls(**json_dict)
-    
-    
-class EntityInstance(metaclass=EntityUniverse):
-    @classmethod
-    def from_tapioca_api(cls, text, result_dict, **kwargs):        
-        start, end = result_dict[&#34;start&#34;], result_dict[&#34;end&#34;]
-        instance_label = text[start:end]
+        if not cls.__name__ == json_dict[&#34;class&#34;]:
+            raise ValueError(f&#34;Passed JSON dict for class {json_dict[&#39;class&#39;]} &#34;
+                             f&#34;to {cls.__name__}&#34;)
         
-        instance_nll = result_dict[&#34;log_likelihood&#34;]
+        return cls(json_dict[&#34;name&#34;])
         
-        best = max(result_dict[&#34;tags&#34;], key=lambda d: d[&#34;score&#34;])
-        keys = [&#34;id&#34;, &#34;label&#34;, &#34;desc&#34;, &#34;aliases&#34;, &#34;edges&#34;, &#34;types&#34;]
-        entity_params = {k.replace(&#34;id&#34;, &#34;qid&#34;).replace(&#34;desc&#34;, &#34;description&#34;): best[k] 
-                                for k in keys}
-        if len(entity_params[&#34;label&#34;]) &gt; 1:
-            raise ValueError(&#34;More than one label!&#34;)
-        entity_params[&#34;label&#34;] = entity_params[&#34;label&#34;][0]
-        best_score, best_page_rank = best[&#34;score&#34;], best[&#34;rank&#34;]      
-        
-        rest = [(d[&#34;id&#34;], d[&#34;score&#34;], d[&#34;rank&#34;]) for d in result_dict[&#34;tags&#34;] if not d == best]        
-        
-        return cls(entity_params, instance_label, instance_nll,
-                   best_score, best_page_rank, rest)
-        
-#        if result_dict[&#34;best_qid&#34;]:
-#            pass
-#        else:
-#            pass
-        
-        
-    # TODO meaningful default args =&gt; &#34;default entity&#34;?
-    def __init__(self, entity_params={}, instance_label=None, 
-                 instance_score=None, score=None, page_rank=None, alternative_entities=None, **kwargs):
-        self.entity = Entity(**entity_params)
-        
-        self.instance_label = instance_label
-        self.instance_score = instance_score
-        self.score = score
-        self.page_rank = page_rank
-        self.alternative_entities = alternative_entities # list of (QID, score)
-                
-    def __repr__(self):
-        return repr(self.entity)
-    
-    
-    def __eq__(self, other):
-        if not isinstance(other, self.__class__):
-            return False
-        return repr(self) == repr(other)
-    
-    def __hash__(self):
-        return hash(self.entity)
         
     
-    def to_json(self, dumps=False):
-        d = {k:v for k, v in self.__dict__.items()}
-#        print(self.__class__, self.instance_label, self.entity)
-        
-#        if isinstance(self.entity, dict):
-#            d[&#34;entity&#34;] = self.entity
-##        else:
-        d[&#34;entity&#34;] = self.entity.to_json(dumps=False)
-        if dumps: return json.dumps(d)
-        return d
-    
-
-    @classmethod
-    def from_json(cls, json_dict):
-        ent = json_dict[&#34;entity&#34;]
-        del json_dict[&#34;entity&#34;]
-        entity_in_context = cls(**json_dict)
-        entity_in_context.entity = Entity.from_json(ent)
-        return entity_in_context
-
-class Person(EntityInstance):
-    def __init__(self, name, address, **entity_params):
-        super().__init__(entity_params)
-        
-#        if not address: 
-#            self.address = None
-#            self.organisation = None
-#        else:
-            
-        self.address = Address(address)        
-        Universe.observe(self.address, self, &#34;evidenced_by&#34;)        
+class Person(Entity):
+    def __init__(self, name, address):            
+        self.address = Address(address)               
         self.organisation = self.address.org_from_address
-        
         
         if not name: name = &#34;&#34;        
         name = name.strip(&#34;&#39;&#34;).strip(&#39;&#34;&#39;).replace(&#34;\n&#34;, &#34; &#34;)
-
-        if name == self.address.instance_label.lower():
-            name = &#34;&#34;
-        self.instance_label = name
+        if name == self.address.name.lower():
+            name = &#34;&#34;        
         
-        
-    def __repr__(self):
-        return f&#34;Person({self.instance_label if self.instance_label else &#39;NO_NAME&#39;}, {self.address})&#34;
-    
-    def __hash__(self):
-        return hash((super().__hash__(), self.instance_label, self.address))
-    
+        super().__init__(name)
     
     def __eq__(self, other):
-        if not (type(self) == type(other) == Person):
-            return False
-        return hash(self) == hash(other)
-    
-    def to_json(self, dumps=False):
-        d = super().to_json(dumps=False)
-        d[&#34;address&#34;] = self.address.instance_label
-        d[&#34;organisation&#34;] = self.organisation.to_json(dumps=False) if self.organisation is not None else None
-        d[&#34;class&#34;] = &#34;Person&#34;
-        if dumps: return json.dumps(d)
-        return d
-        
-    @classmethod
-    def from_json(cls, json_dict):
-        name = json_dict[&#34;instance_label&#34;]
-        address = json_dict[&#34;address&#34;]
-        
-        entity_params = json_dict[&#34;entity&#34;]
-        
-        person = cls(name, address, **entity_params)
-        return person
-        
-    
-class Organisation(EntityInstance):    
-    def __init__(self, name, domain, **entity_params):
-        super().__init__(entity_params=entity_params, 
-             instance_label = name)
-        
-        self.domain = domain
-        
-    def __repr__(self):
-        return f&#34;{self.instance_label if self.instance_label else &#39;_&#39;}&#34;
-#       return f&#34;Org({self.instance_label if self.instance_label else &#39;NO_NAME&#39;}, {self.domain})&#34;
-
+        return super().__eq__(other) and self.address == other.address
     
     def __hash__(self):
-        return hash((super().__hash__(), self.instance_label, self.domain))
+        return hash((super().__hash__(), self.address))
     
-    def to_json(self, dumps=False):
-        d = super().to_json(dumps=False)
-        d[&#34;domain&#34;] = self.domain
-        d[&#34;class&#34;] = &#34;Organisation&#34;
-        
-        if dumps: return json.dumps(d)
+    def __repr__(self):
+        return f&#34;Person({self.name}, {self.address.name})&#34;
+    
+    def __str__(self):
+        return f&#34;{self.name} &lt;{self.address.name}&gt;&#34;
+    
+    def to_json(self):
+        d = super().to_json()
+        d[&#34;address&#34;] = self.address.name
         return d
     
     @classmethod
     def from_json(cls, json_dict):
-        name = json_dict[&#34;instance_label&#34;]
-        domain = json_dict[&#34;domain&#34;]
-        entity_params = json_dict[&#34;entity&#34;]
-        org = cls(name, domain, **entity_params)
-        return org
-    
-    
-class Address(EntityInstance, str):
-    def __new__(cls, address, **entity_params):
-        if not address: return str.__new__(cls, &#34;&#34;)
-        domain = address[address.rfind(&#34;@&#34;)+1:]
-        if not domain: return str.__new__(cls, &#34;&#34;)
-        return str.__new__(cls, address)
-
-    
-    def __init__(self, address, **entity_params):
-        EntityInstance.__init__(self, entity_params=entity_params,
-                    instance_label=address)
+        return cls(json_dict[&#34;name&#34;],
+                   json_dict[&#34;address&#34;])
         
+        
+class Organisation(Entity):
+    def __init__(self, name, domain):
+        self.domain = domain
+        super().__init__(name)
+        
+    def __eq__(self, other):
+        return super().__eq__(other) and self.domain == other.domain
+    
+    def __hash__(self):
+        return hash((super().__hash__(), self.domain))
+        
+    
+    def __repr__(self):
+        return f&#34;Organisation({self.name}, {self.domain})&#34;
+    
+    def __str__(self):
+        return f&#34;{self.name} &lt;{self.domain}&gt;&#34;
+
+    def to_json(self):
+        d = super().to_json()
+        d[&#34;domain&#34;] = self.domain
+        return d
+    
+    @classmethod
+    def from_json(cls, json_dict):
+        return cls(json_dict[&#34;name&#34;],
+                   json_dict[&#34;domain&#34;])
+
+
+
+# could also be called SimpleEntity, 
+# since it really only consists of a name (and is of type str)
+class StringEntity(Entity, str):
+    def __new__(cls, string):
+        return str.__new__(cls, string)
+    
+    def __init__(self, string):
+        Entity.__init__(self, string)
+          
+    
+class Address(StringEntity):
+    def __new__(cls, address):
+        if not address: address = &#34;&#34;
+        domain = address[address.rfind(&#34;@&#34;)+1:]
+        if not domain: address = &#34;&#34;
+        return super().__new__(cls, address)
+
+    def __init__(self, address):
         domain = address[address.rfind(&#34;@&#34;)+1:]
         self.domain = domain
         self.local_part = address[:address.rfind(&#34;@&#34;)]
         
         domain_prefix = domain[:domain.find(&#34;.&#34;)]
         self.org_from_address = Organisation(domain_prefix, domain)
-        Universe.observe(self.org_from_address, self, &#34;mentioned_in&#34;)
-    
-    
-    def __repr__(self):
-        return f&#34;{self.instance_label}&#34;
-#        return f&#34;Address({self.instance_label})&#34;
-
-    def __hash__(self):
-        return hash((super().__hash__(), self.instance_label))
-
-    def to_json(self, dumps=False):
-        d = super().to_json(dumps=False)
-        d[&#34;org_from_address&#34;] = self.org_from_address.to_json(dumps=False)
+        super().__init__(address)
         
-        d[&#34;class&#34;] = &#34;Address&#34;
-        if dumps: return json.dumps(d)
-        return d
-    
-    @classmethod
-    def from_json(cls, json_dict):
-        addr = json_dict[&#34;instance_label&#34;]
-        entity_params = json_dict[&#34;entity&#34;]
-        address = cls(addr, **entity_params)
-        return address
         
-    
-    
-class Link(EntityInstance):
-    def __init__(self, url, **entity_params):        
+
+class Link(StringEntity):
+    def __init__(self, url):
         try:
             parsed = urlparse(url)
             self.domain = parsed.netloc
@@ -316,99 +207,102 @@ class Link(EntityInstance):
         except ValueError:
             self.domain = None
             self.path = None
+        super().__init__(url)
+
         
-        super().__init__(entity_params=entity_params,
-                 instance_label=url)
+class KeyWord(StringEntity, str):
+    pass
+
+
+
+class Topic(Entity):
+    def __init__(self, index, word_dist, words=None):
+        self.index = index
+        self.word_dist = np.asarray(word_dist)
+        self.word_dist.flags.writeable = False
+        self.words = words if words else range(self.word_dist.size)
+        self.sorted_words = tuple(self.words[i] for i in self.word_dist.argsort())
         
+        super().__init__(str(index))
+        
+        
+    def top_words(self, n, include_probs=False):
+        if include_probs:
+            return [(self.word_dist[i], KeyWord(self.words[i])) 
+                    for i in self.word_dist.argsort()[:n]]
+        return [KeyWord(w) for w in self.sorted_words[:n]]
+    
+    def __str__(self):
+        return f&#34;Topic {self.index}: &#34; + f&#34;{list(map(str, self.top_words(5)))}&#34;[1:-1]
+    
     def __repr__(self):
-        return f&#34;{self.instance_label}&#34;
-#        return f&#34;Link({self.instance_label})&#34;
+        probs, words = list(zip(*self.top_words(5, include_probs=True)))
+        return f&#34;Topic({self.index}, {probs}, {words})&#34;
     
     def __hash__(self):
-        return hash((super().__hash__(), self.instance_label))
+        return hash((self.index, self.word_dist.tostring()))
     
-    def to_json(self, dumps=False):
-        d = super().to_json(dumps=False)
-        d[&#34;class&#34;] = &#34;Link&#34;
-        if dumps: return json.dumps(d)
+    def __eq__(self, other):
+        if not isinstance(other, Topic):
+            return False
+        return self.index == other.index and np.array_equal(self.word_dist, other.word_dist)
+    
+    
+    def to_json(self):
+        return {&#34;class&#34;: self.__class__.__name__,
+                &#34;index&#34;: self.index,
+                &#34;words&#34;: self.words,
+                &#34;word_dist&#34;: self.word_dist.tolist()}
+    
+    @classmethod
+    def from_json(cls, json_dict):
+        params = [json_dict[k] for k in [&#34;index&#34;, &#34;word_dist&#34;, &#34;words&#34;]]
+        return cls(*params)
+
+
+class TopicInstance:  
+    def __init__(self, topic, confidence):
+        self.topic = topic
+        self.index = topic.index
+        self.score = confidence
+        
+    def __str__(self):
+        return f&#34;Prob[{self.topic}] = {self.score:0.3f}&#34;
+    
+    def __repr__(self):
+        return f&#34;TopicInstance({repr(self.topic)}, {self.score})&#34;
+    
+    def __eq__(self, other):
+        if isinstance(other, Topic):
+            return self.topic == other
+        elif isinstance(other, TopicInstance):
+            return self.topic == other.topic
+        else:
+            return False
+        
+    def __hash__(self):
+        return hash(self.topic)
+    
+    def to_json(self):
+        d = {&#34;class&#34;:self.__class__.__name__, &#34;score&#34;:self.score}
+        d[&#34;topic&#34;] = self.topic.to_json(dumps=False)
         return d
     
     @classmethod
     def from_json(cls, json_dict):
-        url = json_dict[&#34;instance_label&#34;]
-        entity_params = json_dict[&#34;entity&#34;]
-        link = cls(url, **entity_params)
-        return link
+        topic = Topic.from_json(json_dict[&#34;topic&#34;])
+        score = json_dict[&#34;score&#34;]
+        return cls(topic, score)
     
-    
-class KeyWord(EntityInstance, str):
-    def __new__(cls, phrase, **entity_params):
-        self = str.__new__(cls, phrase)
-        return self
-    
-    def __init__(self, phrase, **entity_params):
-        EntityInstance.__init__(self, **entity_params)
-        
-    
-    def __eq__(self, other):
-        if not type(self) == type(other): return False
-        return str.__eq__(self, other)
-    
-    
-    def __hash__(self):
-        return str.__hash__(self) + hash(self.__class__)
-    
-    
-    def to_json(self, dumps=False):
-        d = EntityInstance.to_json(self, dumps=False)
-        d[&#34;class&#34;] = &#34;KeyWord&#34;
-        d[&#34;self&#34;] = str(self)
-        
-        if dumps: return json.dumps(d)
-        return d
-    
-    @classmethod
-    def from_json(cls, json_dict):
-        keyword = json_dict[&#34;self&#34;]
-        entity_params = json_dict[&#34;entity&#34;]
-        address = cls(keyword, **entity_params)
-        return address
 
 
-#%%
-        
-        
-class Base:
-    def __init__(self, x):
-        self.x = x
-        
-    def __eq__(self, other):
-        print(&#34;called eq&#34;)
-        return False
-        
+    
 
-class Sub(Base, str):
     
-    def __new__(cls, s):
-        self = super().__new__(cls, s)
-        return self
+#class DynamicEntity(metaclass=EntityUniverse):
     
     
-    def __init__(self, s):
-        Base.__init__(self, len(s))
-        
-        self.y = 13
-        
-        
-    def __eq__(self, other):
-        return str.__eq__(self, other)
-    
-    
-    
-    
-    
-    
-    </code></pre>
+        </code></pre>
 </details>
 </section>
 <section>
@@ -422,7 +316,7 @@ class Sub(Base, str):
 <dl>
 <dt id="conversationkg.conversations.entities.Address"><code class="flex name class">
 <span>class <span class="ident">Address</span></span>
-<span>(</span><span>address, **entity_params)</span>
+<span>(</span><span>address)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>str(object='') -&gt; str
@@ -438,122 +332,32 @@ errors defaults to 'strict'.</p></div>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class Address(EntityInstance, str):
-    def __new__(cls, address, **entity_params):
-        if not address: return str.__new__(cls, &#34;&#34;)
+<pre><code class="python">class Address(StringEntity):
+    def __new__(cls, address):
+        if not address: address = &#34;&#34;
         domain = address[address.rfind(&#34;@&#34;)+1:]
-        if not domain: return str.__new__(cls, &#34;&#34;)
-        return str.__new__(cls, address)
+        if not domain: address = &#34;&#34;
+        return super().__new__(cls, address)
 
-    
-    def __init__(self, address, **entity_params):
-        EntityInstance.__init__(self, entity_params=entity_params,
-                    instance_label=address)
-        
+    def __init__(self, address):
         domain = address[address.rfind(&#34;@&#34;)+1:]
         self.domain = domain
         self.local_part = address[:address.rfind(&#34;@&#34;)]
         
         domain_prefix = domain[:domain.find(&#34;.&#34;)]
         self.org_from_address = Organisation(domain_prefix, domain)
-        Universe.observe(self.org_from_address, self, &#34;mentioned_in&#34;)
-    
-    
-    def __repr__(self):
-        return f&#34;{self.instance_label}&#34;
-#        return f&#34;Address({self.instance_label})&#34;
-
-    def __hash__(self):
-        return hash((super().__hash__(), self.instance_label))
-
-    def to_json(self, dumps=False):
-        d = super().to_json(dumps=False)
-        d[&#34;org_from_address&#34;] = self.org_from_address.to_json(dumps=False)
-        
-        d[&#34;class&#34;] = &#34;Address&#34;
-        if dumps: return json.dumps(d)
-        return d
-    
-    @classmethod
-    def from_json(cls, json_dict):
-        addr = json_dict[&#34;instance_label&#34;]
-        entity_params = json_dict[&#34;entity&#34;]
-        address = cls(addr, **entity_params)
-        return address</code></pre>
+        super().__init__(address)</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
-<li><a title="conversationkg.conversations.entities.EntityInstance" href="#conversationkg.conversations.entities.EntityInstance">EntityInstance</a></li>
+<li><a title="conversationkg.conversations.entities.StringEntity" href="#conversationkg.conversations.entities.StringEntity">StringEntity</a></li>
+<li><a title="conversationkg.conversations.entities.Entity" href="#conversationkg.conversations.entities.Entity">Entity</a></li>
 <li>builtins.str</li>
-</ul>
-<h3>Static methods</h3>
-<dl>
-<dt id="conversationkg.conversations.entities.Address.from_json"><code class="name flex">
-<span>def <span class="ident">from_json</span></span>(<span>json_dict)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@classmethod
-def from_json(cls, json_dict):
-    addr = json_dict[&#34;instance_label&#34;]
-    entity_params = json_dict[&#34;entity&#34;]
-    address = cls(addr, **entity_params)
-    return address</code></pre>
-</details>
-</dd>
-</dl>
-<h3>Methods</h3>
-<dl>
-<dt id="conversationkg.conversations.entities.Address.to_json"><code class="name flex">
-<span>def <span class="ident">to_json</span></span>(<span>self, dumps=False)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def to_json(self, dumps=False):
-    d = super().to_json(dumps=False)
-    d[&#34;org_from_address&#34;] = self.org_from_address.to_json(dumps=False)
-    
-    d[&#34;class&#34;] = &#34;Address&#34;
-    if dumps: return json.dumps(d)
-    return d</code></pre>
-</details>
-</dd>
-</dl>
-</dd>
-<dt id="conversationkg.conversations.entities.Base"><code class="flex name class">
-<span>class <span class="ident">Base</span></span>
-<span>(</span><span>x)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">class Base:
-    def __init__(self, x):
-        self.x = x
-        
-    def __eq__(self, other):
-        print(&#34;called eq&#34;)
-        return False</code></pre>
-</details>
-<h3>Subclasses</h3>
-<ul class="hlist">
-<li><a title="conversationkg.conversations.entities.Sub" href="#conversationkg.conversations.entities.Sub">Sub</a></li>
 </ul>
 </dd>
 <dt id="conversationkg.conversations.entities.Entity"><code class="flex name class">
 <span>class <span class="ident">Entity</span></span>
-<span>(</span><span>qid=None, label=None, description=None, aliases=None, edges=None, types=None)</span>
+<span>(</span><span>name)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -561,40 +365,48 @@ def from_json(cls, json_dict):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class Entity:
-#    arg_names = [&#34;qid&#34;, &#34;label&#34;, &#34;description&#34;, &#34;aliases&#34;, &#34;edges&#34;, &#34;types&#34;]
-    # TODO meaningful default args =&gt; &#34;default entity&#34;?
-    def __init__(self, qid=None, label=None, description=None, aliases=None, edges=None, types=None):
-        self.qid = qid
-        
-        self.label = label
-        self.description = description      
-        self.aliases = aliases
-        
-        self.edges = edges
-        self.types = types
-        
-    def __hash__(self):
-        return hash(self.qid)
-    
+<pre><code class="python">class Entity(metaclass=EntityUniverse):
+    def __init__(self, name):
+        self.name = name
+#        for name, val in other_properties:
+#            setattr(self, name, val)
+
     def __eq__(self, other):
-        if not isinstance(other, Entity):
+        if not type(self) == type(other):
             return False
-        return self.qid == other.qid
+        return self.name == other.name
     
+    # hash __class__ to ensure different entity types are discernible by hash
+    def __hash__(self):
+        return hash((self.__class__, self.name)) 
+  
     def __repr__(self):
-        return f&#34;{self.label} ({self.qid})&#34;
-        
+        return f&#34;{self.__class__.__name__}({self.name})&#34;
     
-    def to_json(self, dumps=False):
-        d = {k:v for k, v in self.__dict__.items()}
-        if dumps: return json.dumps(d)
+    def __str__(self):
+        return f&#34;{self.name}&#34;
+    
+    def to_json(self):
+        d = dict(name=self.name)
+        d[&#34;class&#34;] = self.__class__.__name__
+#        d[&#34;class&#34;] = &#34;Entity&#34;
         return d
     
     @classmethod
     def from_json(cls, json_dict):
-        return cls(**json_dict)</code></pre>
+        if not cls.__name__ == json_dict[&#34;class&#34;]:
+            raise ValueError(f&#34;Passed JSON dict for class {json_dict[&#39;class&#39;]} &#34;
+                             f&#34;to {cls.__name__}&#34;)
+        
+        return cls(json_dict[&#34;name&#34;])</code></pre>
 </details>
+<h3>Subclasses</h3>
+<ul class="hlist">
+<li><a title="conversationkg.conversations.entities.Organisation" href="#conversationkg.conversations.entities.Organisation">Organisation</a></li>
+<li><a title="conversationkg.conversations.entities.Person" href="#conversationkg.conversations.entities.Person">Person</a></li>
+<li><a title="conversationkg.conversations.entities.StringEntity" href="#conversationkg.conversations.entities.StringEntity">StringEntity</a></li>
+<li><a title="conversationkg.conversations.entities.Topic" href="#conversationkg.conversations.entities.Topic">Topic</a></li>
+</ul>
 <h3>Static methods</h3>
 <dl>
 <dt id="conversationkg.conversations.entities.Entity.from_json"><code class="name flex">
@@ -608,14 +420,18 @@ def from_json(cls, json_dict):
 </summary>
 <pre><code class="python">@classmethod
 def from_json(cls, json_dict):
-    return cls(**json_dict)</code></pre>
+    if not cls.__name__ == json_dict[&#34;class&#34;]:
+        raise ValueError(f&#34;Passed JSON dict for class {json_dict[&#39;class&#39;]} &#34;
+                         f&#34;to {cls.__name__}&#34;)
+    
+    return cls(json_dict[&#34;name&#34;])</code></pre>
 </details>
 </dd>
 </dl>
 <h3>Methods</h3>
 <dl>
 <dt id="conversationkg.conversations.entities.Entity.to_json"><code class="name flex">
-<span>def <span class="ident">to_json</span></span>(<span>self, dumps=False)</span>
+<span>def <span class="ident">to_json</span></span>(<span>self)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -623,176 +439,10 @@ def from_json(cls, json_dict):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def to_json(self, dumps=False):
-    d = {k:v for k, v in self.__dict__.items()}
-    if dumps: return json.dumps(d)
-    return d</code></pre>
-</details>
-</dd>
-</dl>
-</dd>
-<dt id="conversationkg.conversations.entities.EntityInstance"><code class="flex name class">
-<span>class <span class="ident">EntityInstance</span></span>
-<span>(</span><span>entity_params={}, instance_label=None, instance_score=None, score=None, page_rank=None, alternative_entities=None, **kwargs)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">class EntityInstance(metaclass=EntityUniverse):
-    @classmethod
-    def from_tapioca_api(cls, text, result_dict, **kwargs):        
-        start, end = result_dict[&#34;start&#34;], result_dict[&#34;end&#34;]
-        instance_label = text[start:end]
-        
-        instance_nll = result_dict[&#34;log_likelihood&#34;]
-        
-        best = max(result_dict[&#34;tags&#34;], key=lambda d: d[&#34;score&#34;])
-        keys = [&#34;id&#34;, &#34;label&#34;, &#34;desc&#34;, &#34;aliases&#34;, &#34;edges&#34;, &#34;types&#34;]
-        entity_params = {k.replace(&#34;id&#34;, &#34;qid&#34;).replace(&#34;desc&#34;, &#34;description&#34;): best[k] 
-                                for k in keys}
-        if len(entity_params[&#34;label&#34;]) &gt; 1:
-            raise ValueError(&#34;More than one label!&#34;)
-        entity_params[&#34;label&#34;] = entity_params[&#34;label&#34;][0]
-        best_score, best_page_rank = best[&#34;score&#34;], best[&#34;rank&#34;]      
-        
-        rest = [(d[&#34;id&#34;], d[&#34;score&#34;], d[&#34;rank&#34;]) for d in result_dict[&#34;tags&#34;] if not d == best]        
-        
-        return cls(entity_params, instance_label, instance_nll,
-                   best_score, best_page_rank, rest)
-        
-#        if result_dict[&#34;best_qid&#34;]:
-#            pass
-#        else:
-#            pass
-        
-        
-    # TODO meaningful default args =&gt; &#34;default entity&#34;?
-    def __init__(self, entity_params={}, instance_label=None, 
-                 instance_score=None, score=None, page_rank=None, alternative_entities=None, **kwargs):
-        self.entity = Entity(**entity_params)
-        
-        self.instance_label = instance_label
-        self.instance_score = instance_score
-        self.score = score
-        self.page_rank = page_rank
-        self.alternative_entities = alternative_entities # list of (QID, score)
-                
-    def __repr__(self):
-        return repr(self.entity)
-    
-    
-    def __eq__(self, other):
-        if not isinstance(other, self.__class__):
-            return False
-        return repr(self) == repr(other)
-    
-    def __hash__(self):
-        return hash(self.entity)
-        
-    
-    def to_json(self, dumps=False):
-        d = {k:v for k, v in self.__dict__.items()}
-#        print(self.__class__, self.instance_label, self.entity)
-        
-#        if isinstance(self.entity, dict):
-#            d[&#34;entity&#34;] = self.entity
-##        else:
-        d[&#34;entity&#34;] = self.entity.to_json(dumps=False)
-        if dumps: return json.dumps(d)
-        return d
-    
-
-    @classmethod
-    def from_json(cls, json_dict):
-        ent = json_dict[&#34;entity&#34;]
-        del json_dict[&#34;entity&#34;]
-        entity_in_context = cls(**json_dict)
-        entity_in_context.entity = Entity.from_json(ent)
-        return entity_in_context</code></pre>
-</details>
-<h3>Subclasses</h3>
-<ul class="hlist">
-<li><a title="conversationkg.conversations.entities.Address" href="#conversationkg.conversations.entities.Address">Address</a></li>
-<li><a title="conversationkg.conversations.entities.KeyWord" href="#conversationkg.conversations.entities.KeyWord">KeyWord</a></li>
-<li><a title="conversationkg.conversations.entities.Link" href="#conversationkg.conversations.entities.Link">Link</a></li>
-<li><a title="conversationkg.conversations.entities.Organisation" href="#conversationkg.conversations.entities.Organisation">Organisation</a></li>
-<li><a title="conversationkg.conversations.entities.Person" href="#conversationkg.conversations.entities.Person">Person</a></li>
-</ul>
-<h3>Static methods</h3>
-<dl>
-<dt id="conversationkg.conversations.entities.EntityInstance.from_json"><code class="name flex">
-<span>def <span class="ident">from_json</span></span>(<span>json_dict)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@classmethod
-def from_json(cls, json_dict):
-    ent = json_dict[&#34;entity&#34;]
-    del json_dict[&#34;entity&#34;]
-    entity_in_context = cls(**json_dict)
-    entity_in_context.entity = Entity.from_json(ent)
-    return entity_in_context</code></pre>
-</details>
-</dd>
-<dt id="conversationkg.conversations.entities.EntityInstance.from_tapioca_api"><code class="name flex">
-<span>def <span class="ident">from_tapioca_api</span></span>(<span>text, result_dict, **kwargs)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@classmethod
-def from_tapioca_api(cls, text, result_dict, **kwargs):        
-    start, end = result_dict[&#34;start&#34;], result_dict[&#34;end&#34;]
-    instance_label = text[start:end]
-    
-    instance_nll = result_dict[&#34;log_likelihood&#34;]
-    
-    best = max(result_dict[&#34;tags&#34;], key=lambda d: d[&#34;score&#34;])
-    keys = [&#34;id&#34;, &#34;label&#34;, &#34;desc&#34;, &#34;aliases&#34;, &#34;edges&#34;, &#34;types&#34;]
-    entity_params = {k.replace(&#34;id&#34;, &#34;qid&#34;).replace(&#34;desc&#34;, &#34;description&#34;): best[k] 
-                            for k in keys}
-    if len(entity_params[&#34;label&#34;]) &gt; 1:
-        raise ValueError(&#34;More than one label!&#34;)
-    entity_params[&#34;label&#34;] = entity_params[&#34;label&#34;][0]
-    best_score, best_page_rank = best[&#34;score&#34;], best[&#34;rank&#34;]      
-    
-    rest = [(d[&#34;id&#34;], d[&#34;score&#34;], d[&#34;rank&#34;]) for d in result_dict[&#34;tags&#34;] if not d == best]        
-    
-    return cls(entity_params, instance_label, instance_nll,
-               best_score, best_page_rank, rest)</code></pre>
-</details>
-</dd>
-</dl>
-<h3>Methods</h3>
-<dl>
-<dt id="conversationkg.conversations.entities.EntityInstance.to_json"><code class="name flex">
-<span>def <span class="ident">to_json</span></span>(<span>self, dumps=False)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">    def to_json(self, dumps=False):
-        d = {k:v for k, v in self.__dict__.items()}
-#        print(self.__class__, self.instance_label, self.entity)
-        
-#        if isinstance(self.entity, dict):
-#            d[&#34;entity&#34;] = self.entity
-##        else:
-        d[&#34;entity&#34;] = self.entity.to_json(dumps=False)
-        if dumps: return json.dumps(d)
+<pre><code class="python">    def to_json(self):
+        d = dict(name=self.name)
+        d[&#34;class&#34;] = self.__class__.__name__
+#        d[&#34;class&#34;] = &#34;Entity&#34;
         return d</code></pre>
 </details>
 </dd>
@@ -826,10 +476,11 @@ type(name, bases, dict) -&gt; a new type</p></div>
             EntityUniverse.entities[hash(obj)] = obj
             return obj
     
-    
     @classmethod
     def reset(cls):
-        cls.entities = dict()</code></pre>
+        cls.entities = dict()
+        cls.n_duplicates = 0
+        cls.duplicates = set()</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -863,14 +514,16 @@ type(name, bases, dict) -&gt; a new type</p></div>
 </summary>
 <pre><code class="python">@classmethod
 def reset(cls):
-    cls.entities = dict()</code></pre>
+    cls.entities = dict()
+    cls.n_duplicates = 0
+    cls.duplicates = set()</code></pre>
 </details>
 </dd>
 </dl>
 </dd>
 <dt id="conversationkg.conversations.entities.KeyWord"><code class="flex name class">
 <span>class <span class="ident">KeyWord</span></span>
-<span>(</span><span>phrase, **entity_params)</span>
+<span>(</span><span>string)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>str(object='') -&gt; str
@@ -886,98 +539,36 @@ errors defaults to 'strict'.</p></div>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class KeyWord(EntityInstance, str):
-    def __new__(cls, phrase, **entity_params):
-        self = str.__new__(cls, phrase)
-        return self
-    
-    def __init__(self, phrase, **entity_params):
-        EntityInstance.__init__(self, **entity_params)
-        
-    
-    def __eq__(self, other):
-        if not type(self) == type(other): return False
-        return str.__eq__(self, other)
-    
-    
-    def __hash__(self):
-        return str.__hash__(self) + hash(self.__class__)
-    
-    
-    def to_json(self, dumps=False):
-        d = EntityInstance.to_json(self, dumps=False)
-        d[&#34;class&#34;] = &#34;KeyWord&#34;
-        d[&#34;self&#34;] = str(self)
-        
-        if dumps: return json.dumps(d)
-        return d
-    
-    @classmethod
-    def from_json(cls, json_dict):
-        keyword = json_dict[&#34;self&#34;]
-        entity_params = json_dict[&#34;entity&#34;]
-        address = cls(keyword, **entity_params)
-        return address</code></pre>
+<pre><code class="python">class KeyWord(StringEntity, str):
+    pass</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
-<li><a title="conversationkg.conversations.entities.EntityInstance" href="#conversationkg.conversations.entities.EntityInstance">EntityInstance</a></li>
+<li><a title="conversationkg.conversations.entities.StringEntity" href="#conversationkg.conversations.entities.StringEntity">StringEntity</a></li>
+<li><a title="conversationkg.conversations.entities.Entity" href="#conversationkg.conversations.entities.Entity">Entity</a></li>
 <li>builtins.str</li>
 </ul>
-<h3>Static methods</h3>
-<dl>
-<dt id="conversationkg.conversations.entities.KeyWord.from_json"><code class="name flex">
-<span>def <span class="ident">from_json</span></span>(<span>json_dict)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@classmethod
-def from_json(cls, json_dict):
-    keyword = json_dict[&#34;self&#34;]
-    entity_params = json_dict[&#34;entity&#34;]
-    address = cls(keyword, **entity_params)
-    return address</code></pre>
-</details>
-</dd>
-</dl>
-<h3>Methods</h3>
-<dl>
-<dt id="conversationkg.conversations.entities.KeyWord.to_json"><code class="name flex">
-<span>def <span class="ident">to_json</span></span>(<span>self, dumps=False)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def to_json(self, dumps=False):
-    d = EntityInstance.to_json(self, dumps=False)
-    d[&#34;class&#34;] = &#34;KeyWord&#34;
-    d[&#34;self&#34;] = str(self)
-    
-    if dumps: return json.dumps(d)
-    return d</code></pre>
-</details>
-</dd>
-</dl>
 </dd>
 <dt id="conversationkg.conversations.entities.Link"><code class="flex name class">
 <span>class <span class="ident">Link</span></span>
-<span>(</span><span>url, **entity_params)</span>
+<span>(</span><span>url)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>str(object='') -&gt; str
+str(bytes_or_buffer[, encoding[, errors]]) -&gt; str</p>
+<p>Create a new string object from the given object. If encoding or
+errors is specified, then the object must expose a data buffer
+that will be decoded using the given encoding and error handler.
+Otherwise, returns the result of object.<strong>str</strong>() (if defined)
+or repr(object).
+encoding defaults to sys.getdefaultencoding().
+errors defaults to 'strict'.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class Link(EntityInstance):
-    def __init__(self, url, **entity_params):        
+<pre><code class="python">class Link(StringEntity):
+    def __init__(self, url):
         try:
             parsed = urlparse(url)
             self.domain = parsed.netloc
@@ -985,77 +576,18 @@ def from_json(cls, json_dict):
         except ValueError:
             self.domain = None
             self.path = None
-        
-        super().__init__(entity_params=entity_params,
-                 instance_label=url)
-        
-    def __repr__(self):
-        return f&#34;{self.instance_label}&#34;
-#        return f&#34;Link({self.instance_label})&#34;
-    
-    def __hash__(self):
-        return hash((super().__hash__(), self.instance_label))
-    
-    def to_json(self, dumps=False):
-        d = super().to_json(dumps=False)
-        d[&#34;class&#34;] = &#34;Link&#34;
-        if dumps: return json.dumps(d)
-        return d
-    
-    @classmethod
-    def from_json(cls, json_dict):
-        url = json_dict[&#34;instance_label&#34;]
-        entity_params = json_dict[&#34;entity&#34;]
-        link = cls(url, **entity_params)
-        return link</code></pre>
+        super().__init__(url)</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
-<li><a title="conversationkg.conversations.entities.EntityInstance" href="#conversationkg.conversations.entities.EntityInstance">EntityInstance</a></li>
+<li><a title="conversationkg.conversations.entities.StringEntity" href="#conversationkg.conversations.entities.StringEntity">StringEntity</a></li>
+<li><a title="conversationkg.conversations.entities.Entity" href="#conversationkg.conversations.entities.Entity">Entity</a></li>
+<li>builtins.str</li>
 </ul>
-<h3>Static methods</h3>
-<dl>
-<dt id="conversationkg.conversations.entities.Link.from_json"><code class="name flex">
-<span>def <span class="ident">from_json</span></span>(<span>json_dict)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@classmethod
-def from_json(cls, json_dict):
-    url = json_dict[&#34;instance_label&#34;]
-    entity_params = json_dict[&#34;entity&#34;]
-    link = cls(url, **entity_params)
-    return link</code></pre>
-</details>
-</dd>
-</dl>
-<h3>Methods</h3>
-<dl>
-<dt id="conversationkg.conversations.entities.Link.to_json"><code class="name flex">
-<span>def <span class="ident">to_json</span></span>(<span>self, dumps=False)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def to_json(self, dumps=False):
-    d = super().to_json(dumps=False)
-    d[&#34;class&#34;] = &#34;Link&#34;
-    if dumps: return json.dumps(d)
-    return d</code></pre>
-</details>
-</dd>
-</dl>
 </dd>
 <dt id="conversationkg.conversations.entities.Organisation"><code class="flex name class">
 <span>class <span class="ident">Organisation</span></span>
-<span>(</span><span>name, domain, **entity_params)</span>
+<span>(</span><span>name, domain)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -1063,40 +595,37 @@ def from_json(cls, json_dict):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class Organisation(EntityInstance):    
-    def __init__(self, name, domain, **entity_params):
-        super().__init__(entity_params=entity_params, 
-             instance_label = name)
-        
+<pre><code class="python">class Organisation(Entity):
+    def __init__(self, name, domain):
         self.domain = domain
+        super().__init__(name)
         
-    def __repr__(self):
-        return f&#34;{self.instance_label if self.instance_label else &#39;_&#39;}&#34;
-#       return f&#34;Org({self.instance_label if self.instance_label else &#39;NO_NAME&#39;}, {self.domain})&#34;
-
+    def __eq__(self, other):
+        return super().__eq__(other) and self.domain == other.domain
     
     def __hash__(self):
-        return hash((super().__hash__(), self.instance_label, self.domain))
-    
-    def to_json(self, dumps=False):
-        d = super().to_json(dumps=False)
-        d[&#34;domain&#34;] = self.domain
-        d[&#34;class&#34;] = &#34;Organisation&#34;
+        return hash((super().__hash__(), self.domain))
         
-        if dumps: return json.dumps(d)
+    
+    def __repr__(self):
+        return f&#34;Organisation({self.name}, {self.domain})&#34;
+    
+    def __str__(self):
+        return f&#34;{self.name} &lt;{self.domain}&gt;&#34;
+
+    def to_json(self):
+        d = super().to_json()
+        d[&#34;domain&#34;] = self.domain
         return d
     
     @classmethod
     def from_json(cls, json_dict):
-        name = json_dict[&#34;instance_label&#34;]
-        domain = json_dict[&#34;domain&#34;]
-        entity_params = json_dict[&#34;entity&#34;]
-        org = cls(name, domain, **entity_params)
-        return org</code></pre>
+        return cls(json_dict[&#34;name&#34;],
+                   json_dict[&#34;domain&#34;])</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
-<li><a title="conversationkg.conversations.entities.EntityInstance" href="#conversationkg.conversations.entities.EntityInstance">EntityInstance</a></li>
+<li><a title="conversationkg.conversations.entities.Entity" href="#conversationkg.conversations.entities.Entity">Entity</a></li>
 </ul>
 <h3>Static methods</h3>
 <dl>
@@ -1111,18 +640,15 @@ def from_json(cls, json_dict):
 </summary>
 <pre><code class="python">@classmethod
 def from_json(cls, json_dict):
-    name = json_dict[&#34;instance_label&#34;]
-    domain = json_dict[&#34;domain&#34;]
-    entity_params = json_dict[&#34;entity&#34;]
-    org = cls(name, domain, **entity_params)
-    return org</code></pre>
+    return cls(json_dict[&#34;name&#34;],
+               json_dict[&#34;domain&#34;])</code></pre>
 </details>
 </dd>
 </dl>
 <h3>Methods</h3>
 <dl>
 <dt id="conversationkg.conversations.entities.Organisation.to_json"><code class="name flex">
-<span>def <span class="ident">to_json</span></span>(<span>self, dumps=False)</span>
+<span>def <span class="ident">to_json</span></span>(<span>self)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -1130,12 +656,9 @@ def from_json(cls, json_dict):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def to_json(self, dumps=False):
-    d = super().to_json(dumps=False)
+<pre><code class="python">def to_json(self):
+    d = super().to_json()
     d[&#34;domain&#34;] = self.domain
-    d[&#34;class&#34;] = &#34;Organisation&#34;
-    
-    if dumps: return json.dumps(d)
     return d</code></pre>
 </details>
 </dd>
@@ -1143,7 +666,7 @@ def from_json(cls, json_dict):
 </dd>
 <dt id="conversationkg.conversations.entities.Person"><code class="flex name class">
 <span>class <span class="ident">Person</span></span>
-<span>(</span><span>name, address, **entity_params)</span>
+<span>(</span><span>name, address)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -1151,61 +674,43 @@ def from_json(cls, json_dict):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class Person(EntityInstance):
-    def __init__(self, name, address, **entity_params):
-        super().__init__(entity_params)
-        
-#        if not address: 
-#            self.address = None
-#            self.organisation = None
-#        else:
-            
-        self.address = Address(address)        
-        Universe.observe(self.address, self, &#34;evidenced_by&#34;)        
+<pre><code class="python">class Person(Entity):
+    def __init__(self, name, address):            
+        self.address = Address(address)               
         self.organisation = self.address.org_from_address
-        
         
         if not name: name = &#34;&#34;        
         name = name.strip(&#34;&#39;&#34;).strip(&#39;&#34;&#39;).replace(&#34;\n&#34;, &#34; &#34;)
-
-        if name == self.address.instance_label.lower():
-            name = &#34;&#34;
-        self.instance_label = name
+        if name == self.address.name.lower():
+            name = &#34;&#34;        
         
-        
-    def __repr__(self):
-        return f&#34;Person({self.instance_label if self.instance_label else &#39;NO_NAME&#39;}, {self.address})&#34;
-    
-    def __hash__(self):
-        return hash((super().__hash__(), self.instance_label, self.address))
-    
+        super().__init__(name)
     
     def __eq__(self, other):
-        if not (type(self) == type(other) == Person):
-            return False
-        return hash(self) == hash(other)
+        return super().__eq__(other) and self.address == other.address
     
-    def to_json(self, dumps=False):
-        d = super().to_json(dumps=False)
-        d[&#34;address&#34;] = self.address.instance_label
-        d[&#34;organisation&#34;] = self.organisation.to_json(dumps=False) if self.organisation is not None else None
-        d[&#34;class&#34;] = &#34;Person&#34;
-        if dumps: return json.dumps(d)
+    def __hash__(self):
+        return hash((super().__hash__(), self.address))
+    
+    def __repr__(self):
+        return f&#34;Person({self.name}, {self.address.name})&#34;
+    
+    def __str__(self):
+        return f&#34;{self.name} &lt;{self.address.name}&gt;&#34;
+    
+    def to_json(self):
+        d = super().to_json()
+        d[&#34;address&#34;] = self.address.name
         return d
-        
+    
     @classmethod
     def from_json(cls, json_dict):
-        name = json_dict[&#34;instance_label&#34;]
-        address = json_dict[&#34;address&#34;]
-        
-        entity_params = json_dict[&#34;entity&#34;]
-        
-        person = cls(name, address, **entity_params)
-        return person</code></pre>
+        return cls(json_dict[&#34;name&#34;],
+                   json_dict[&#34;address&#34;])</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
-<li><a title="conversationkg.conversations.entities.EntityInstance" href="#conversationkg.conversations.entities.EntityInstance">EntityInstance</a></li>
+<li><a title="conversationkg.conversations.entities.Entity" href="#conversationkg.conversations.entities.Entity">Entity</a></li>
 </ul>
 <h3>Subclasses</h3>
 <ul class="hlist">
@@ -1224,20 +729,15 @@ def from_json(cls, json_dict):
 </summary>
 <pre><code class="python">@classmethod
 def from_json(cls, json_dict):
-    name = json_dict[&#34;instance_label&#34;]
-    address = json_dict[&#34;address&#34;]
-    
-    entity_params = json_dict[&#34;entity&#34;]
-    
-    person = cls(name, address, **entity_params)
-    return person</code></pre>
+    return cls(json_dict[&#34;name&#34;],
+               json_dict[&#34;address&#34;])</code></pre>
 </details>
 </dd>
 </dl>
 <h3>Methods</h3>
 <dl>
 <dt id="conversationkg.conversations.entities.Person.to_json"><code class="name flex">
-<span>def <span class="ident">to_json</span></span>(<span>self, dumps=False)</span>
+<span>def <span class="ident">to_json</span></span>(<span>self)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -1245,20 +745,17 @@ def from_json(cls, json_dict):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def to_json(self, dumps=False):
-    d = super().to_json(dumps=False)
-    d[&#34;address&#34;] = self.address.instance_label
-    d[&#34;organisation&#34;] = self.organisation.to_json(dumps=False) if self.organisation is not None else None
-    d[&#34;class&#34;] = &#34;Person&#34;
-    if dumps: return json.dumps(d)
+<pre><code class="python">def to_json(self):
+    d = super().to_json()
+    d[&#34;address&#34;] = self.address.name
     return d</code></pre>
 </details>
 </dd>
 </dl>
 </dd>
-<dt id="conversationkg.conversations.entities.Sub"><code class="flex name class">
-<span>class <span class="ident">Sub</span></span>
-<span>(</span><span>s)</span>
+<dt id="conversationkg.conversations.entities.StringEntity"><code class="flex name class">
+<span>class <span class="ident">StringEntity</span></span>
+<span>(</span><span>string)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>str(object='') -&gt; str
@@ -1274,27 +771,218 @@ errors defaults to 'strict'.</p></div>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class Sub(Base, str):
+<pre><code class="python">class StringEntity(Entity, str):
+    def __new__(cls, string):
+        return str.__new__(cls, string)
     
-    def __new__(cls, s):
-        self = super().__new__(cls, s)
-        return self
-    
-    
-    def __init__(self, s):
-        Base.__init__(self, len(s))
-        
-        self.y = 13
-        
-        
-    def __eq__(self, other):
-        return str.__eq__(self, other)</code></pre>
+    def __init__(self, string):
+        Entity.__init__(self, string)</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
-<li><a title="conversationkg.conversations.entities.Base" href="#conversationkg.conversations.entities.Base">Base</a></li>
+<li><a title="conversationkg.conversations.entities.Entity" href="#conversationkg.conversations.entities.Entity">Entity</a></li>
 <li>builtins.str</li>
 </ul>
+<h3>Subclasses</h3>
+<ul class="hlist">
+<li><a title="conversationkg.conversations.entities.Address" href="#conversationkg.conversations.entities.Address">Address</a></li>
+<li><a title="conversationkg.conversations.entities.KeyWord" href="#conversationkg.conversations.entities.KeyWord">KeyWord</a></li>
+<li><a title="conversationkg.conversations.entities.Link" href="#conversationkg.conversations.entities.Link">Link</a></li>
+</ul>
+</dd>
+<dt id="conversationkg.conversations.entities.Topic"><code class="flex name class">
+<span>class <span class="ident">Topic</span></span>
+<span>(</span><span>index, word_dist, words=None)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Topic(Entity):
+    def __init__(self, index, word_dist, words=None):
+        self.index = index
+        self.word_dist = np.asarray(word_dist)
+        self.word_dist.flags.writeable = False
+        self.words = words if words else range(self.word_dist.size)
+        self.sorted_words = tuple(self.words[i] for i in self.word_dist.argsort())
+        
+        super().__init__(str(index))
+        
+        
+    def top_words(self, n, include_probs=False):
+        if include_probs:
+            return [(self.word_dist[i], KeyWord(self.words[i])) 
+                    for i in self.word_dist.argsort()[:n]]
+        return [KeyWord(w) for w in self.sorted_words[:n]]
+    
+    def __str__(self):
+        return f&#34;Topic {self.index}: &#34; + f&#34;{list(map(str, self.top_words(5)))}&#34;[1:-1]
+    
+    def __repr__(self):
+        probs, words = list(zip(*self.top_words(5, include_probs=True)))
+        return f&#34;Topic({self.index}, {probs}, {words})&#34;
+    
+    def __hash__(self):
+        return hash((self.index, self.word_dist.tostring()))
+    
+    def __eq__(self, other):
+        if not isinstance(other, Topic):
+            return False
+        return self.index == other.index and np.array_equal(self.word_dist, other.word_dist)
+    
+    
+    def to_json(self):
+        return {&#34;class&#34;: self.__class__.__name__,
+                &#34;index&#34;: self.index,
+                &#34;words&#34;: self.words,
+                &#34;word_dist&#34;: self.word_dist.tolist()}
+    
+    @classmethod
+    def from_json(cls, json_dict):
+        params = [json_dict[k] for k in [&#34;index&#34;, &#34;word_dist&#34;, &#34;words&#34;]]
+        return cls(*params)</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="conversationkg.conversations.entities.Entity" href="#conversationkg.conversations.entities.Entity">Entity</a></li>
+</ul>
+<h3>Static methods</h3>
+<dl>
+<dt id="conversationkg.conversations.entities.Topic.from_json"><code class="name flex">
+<span>def <span class="ident">from_json</span></span>(<span>json_dict)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@classmethod
+def from_json(cls, json_dict):
+    params = [json_dict[k] for k in [&#34;index&#34;, &#34;word_dist&#34;, &#34;words&#34;]]
+    return cls(*params)</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="conversationkg.conversations.entities.Topic.to_json"><code class="name flex">
+<span>def <span class="ident">to_json</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def to_json(self):
+    return {&#34;class&#34;: self.__class__.__name__,
+            &#34;index&#34;: self.index,
+            &#34;words&#34;: self.words,
+            &#34;word_dist&#34;: self.word_dist.tolist()}</code></pre>
+</details>
+</dd>
+<dt id="conversationkg.conversations.entities.Topic.top_words"><code class="name flex">
+<span>def <span class="ident">top_words</span></span>(<span>self, n, include_probs=False)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def top_words(self, n, include_probs=False):
+    if include_probs:
+        return [(self.word_dist[i], KeyWord(self.words[i])) 
+                for i in self.word_dist.argsort()[:n]]
+    return [KeyWord(w) for w in self.sorted_words[:n]]</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="conversationkg.conversations.entities.TopicInstance"><code class="flex name class">
+<span>class <span class="ident">TopicInstance</span></span>
+<span>(</span><span>topic, confidence)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class TopicInstance:  
+    def __init__(self, topic, confidence):
+        self.topic = topic
+        self.index = topic.index
+        self.score = confidence
+        
+    def __str__(self):
+        return f&#34;Prob[{self.topic}] = {self.score:0.3f}&#34;
+    
+    def __repr__(self):
+        return f&#34;TopicInstance({repr(self.topic)}, {self.score})&#34;
+    
+    def __eq__(self, other):
+        if isinstance(other, Topic):
+            return self.topic == other
+        elif isinstance(other, TopicInstance):
+            return self.topic == other.topic
+        else:
+            return False
+        
+    def __hash__(self):
+        return hash(self.topic)
+    
+    def to_json(self):
+        d = {&#34;class&#34;:self.__class__.__name__, &#34;score&#34;:self.score}
+        d[&#34;topic&#34;] = self.topic.to_json(dumps=False)
+        return d
+    
+    @classmethod
+    def from_json(cls, json_dict):
+        topic = Topic.from_json(json_dict[&#34;topic&#34;])
+        score = json_dict[&#34;score&#34;]
+        return cls(topic, score)</code></pre>
+</details>
+<h3>Static methods</h3>
+<dl>
+<dt id="conversationkg.conversations.entities.TopicInstance.from_json"><code class="name flex">
+<span>def <span class="ident">from_json</span></span>(<span>json_dict)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@classmethod
+def from_json(cls, json_dict):
+    topic = Topic.from_json(json_dict[&#34;topic&#34;])
+    score = json_dict[&#34;score&#34;]
+    return cls(topic, score)</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="conversationkg.conversations.entities.TopicInstance.to_json"><code class="name flex">
+<span>def <span class="ident">to_json</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def to_json(self):
+    d = {&#34;class&#34;:self.__class__.__name__, &#34;score&#34;:self.score}
+    d[&#34;topic&#34;] = self.topic.to_json(dumps=False)
+    return d</code></pre>
+</details>
+</dd>
+</dl>
 </dd>
 </dl>
 </section>
@@ -1314,27 +1002,12 @@ errors defaults to 'strict'.</p></div>
 <ul>
 <li>
 <h4><code><a title="conversationkg.conversations.entities.Address" href="#conversationkg.conversations.entities.Address">Address</a></code></h4>
-<ul class="">
-<li><code><a title="conversationkg.conversations.entities.Address.from_json" href="#conversationkg.conversations.entities.Address.from_json">from_json</a></code></li>
-<li><code><a title="conversationkg.conversations.entities.Address.to_json" href="#conversationkg.conversations.entities.Address.to_json">to_json</a></code></li>
-</ul>
-</li>
-<li>
-<h4><code><a title="conversationkg.conversations.entities.Base" href="#conversationkg.conversations.entities.Base">Base</a></code></h4>
 </li>
 <li>
 <h4><code><a title="conversationkg.conversations.entities.Entity" href="#conversationkg.conversations.entities.Entity">Entity</a></code></h4>
 <ul class="">
 <li><code><a title="conversationkg.conversations.entities.Entity.from_json" href="#conversationkg.conversations.entities.Entity.from_json">from_json</a></code></li>
 <li><code><a title="conversationkg.conversations.entities.Entity.to_json" href="#conversationkg.conversations.entities.Entity.to_json">to_json</a></code></li>
-</ul>
-</li>
-<li>
-<h4><code><a title="conversationkg.conversations.entities.EntityInstance" href="#conversationkg.conversations.entities.EntityInstance">EntityInstance</a></code></h4>
-<ul class="">
-<li><code><a title="conversationkg.conversations.entities.EntityInstance.from_json" href="#conversationkg.conversations.entities.EntityInstance.from_json">from_json</a></code></li>
-<li><code><a title="conversationkg.conversations.entities.EntityInstance.from_tapioca_api" href="#conversationkg.conversations.entities.EntityInstance.from_tapioca_api">from_tapioca_api</a></code></li>
-<li><code><a title="conversationkg.conversations.entities.EntityInstance.to_json" href="#conversationkg.conversations.entities.EntityInstance.to_json">to_json</a></code></li>
 </ul>
 </li>
 <li>
@@ -1348,17 +1021,9 @@ errors defaults to 'strict'.</p></div>
 </li>
 <li>
 <h4><code><a title="conversationkg.conversations.entities.KeyWord" href="#conversationkg.conversations.entities.KeyWord">KeyWord</a></code></h4>
-<ul class="">
-<li><code><a title="conversationkg.conversations.entities.KeyWord.from_json" href="#conversationkg.conversations.entities.KeyWord.from_json">from_json</a></code></li>
-<li><code><a title="conversationkg.conversations.entities.KeyWord.to_json" href="#conversationkg.conversations.entities.KeyWord.to_json">to_json</a></code></li>
-</ul>
 </li>
 <li>
 <h4><code><a title="conversationkg.conversations.entities.Link" href="#conversationkg.conversations.entities.Link">Link</a></code></h4>
-<ul class="">
-<li><code><a title="conversationkg.conversations.entities.Link.from_json" href="#conversationkg.conversations.entities.Link.from_json">from_json</a></code></li>
-<li><code><a title="conversationkg.conversations.entities.Link.to_json" href="#conversationkg.conversations.entities.Link.to_json">to_json</a></code></li>
-</ul>
 </li>
 <li>
 <h4><code><a title="conversationkg.conversations.entities.Organisation" href="#conversationkg.conversations.entities.Organisation">Organisation</a></code></h4>
@@ -1375,7 +1040,22 @@ errors defaults to 'strict'.</p></div>
 </ul>
 </li>
 <li>
-<h4><code><a title="conversationkg.conversations.entities.Sub" href="#conversationkg.conversations.entities.Sub">Sub</a></code></h4>
+<h4><code><a title="conversationkg.conversations.entities.StringEntity" href="#conversationkg.conversations.entities.StringEntity">StringEntity</a></code></h4>
+</li>
+<li>
+<h4><code><a title="conversationkg.conversations.entities.Topic" href="#conversationkg.conversations.entities.Topic">Topic</a></code></h4>
+<ul class="">
+<li><code><a title="conversationkg.conversations.entities.Topic.from_json" href="#conversationkg.conversations.entities.Topic.from_json">from_json</a></code></li>
+<li><code><a title="conversationkg.conversations.entities.Topic.to_json" href="#conversationkg.conversations.entities.Topic.to_json">to_json</a></code></li>
+<li><code><a title="conversationkg.conversations.entities.Topic.top_words" href="#conversationkg.conversations.entities.Topic.top_words">top_words</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="conversationkg.conversations.entities.TopicInstance" href="#conversationkg.conversations.entities.TopicInstance">TopicInstance</a></code></h4>
+<ul class="">
+<li><code><a title="conversationkg.conversations.entities.TopicInstance.from_json" href="#conversationkg.conversations.entities.TopicInstance.from_json">from_json</a></code></li>
+<li><code><a title="conversationkg.conversations.entities.TopicInstance.to_json" href="#conversationkg.conversations.entities.TopicInstance.to_json">to_json</a></code></li>
+</ul>
 </li>
 </ul>
 </li>

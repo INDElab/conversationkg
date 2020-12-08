@@ -26,7 +26,21 @@ from sklearn.feature_extraction.text import CountVectorizer as count
 
 
 class FactoryChain:
+    """
+    Not Implemented (yet). Idea is to wrap a sequence of factory classes into this FactoryChain
+    which runs the factories on a corpus. 
+    Most important use: Some factories depend on the output of others (e.g. TopicFactory depends on VectorFactory), 
+    so the FactoryChain could help ensure that factories are executed in the correct order and produce meaningful
+    error messages if this is not the case (rather than pure AttributeErrors).
+    Other uses: FactoryChain could keep track of the factories that have been applied, gather statistics,
+    help parallelisation, preform preparation and postprocessing tasks, etc.
+    """
     def __init__(*classes, **keyword_args):
+        """
+        FactoryChain is initialised with a list of factory classes and keyword arguments, where
+        each key is expected to be the name of a factory class and the value is a dict of parameters
+        for that factory, e.g. CountVectoriser=dict(max_df=0.7, min_df=5). 
+        """
 #        no_dependencies = {c for c in classes if getattr(c, "depends_on", None) is None}
         for c in classes:
             if c.depends_on not in classes:
@@ -36,9 +50,68 @@ class FactoryChain:
 
 
 
+from joblib import Parallel, delayed
+
 class Factory:
+    """
+    The base class for any specialised factory family, such as VectorFactory, TopicFactory, etc.
+    Use this class as base class to create a new factory family; perhaps for instance a StatsFactory 
+    for a family of factories which observe statistics about emails and conversations and attach those to both.
+    
+    TODO:
+        - default __init__? -> perhaps for checks if subclassing factory family is well-defined?
+        - default __call__ function with basic functionality (that factories override if necessary)
+        - parallelisation (including parameters)
+    """
+    
+    def __init__(self):
+        raise NotImplementedError
+    
+    
+    def process_conversation(self, conversation):
+        raise NotImplementedError
+    
+    def process_email(self, email):
+        raise NotImplementedError
+        
+        
+    def parallelise_call(self, conversation_iter, n_jobs=-1, processing_function=None):
+        if processing_function is None:
+            processing_function = self.process_conversation
+        delayed_func = delayed(processing_function)
+        # Parallel(n_jobs=n_jobs, require='sharedmem')
+        return Parallel(n_jobs=n_jobs)(delayed_func(conv) for conv in conversation_iter)
+    
+    
+    def __call__(self, corpus, parallel=True, n_jobs=-1):
+        progressbar = tqdm(corpus, 
+                           desc=f"{self.__class__.__name__} iterating conversations"
+                                f" {'in parallel' if parallel else ''}")
+        
+        if parallel:
+            return self.parallelise_call(progressbar, n_jobs)
+        else:
+            processed_conversations = list(map(self.process_conversation, progressbar))
+            
+        return processed_conversations
+        
+    
+    
     @staticmethod
     def combine_processors(*processors):
+        """
+        Convenience function which combines a list of processors (i.e. functions) into a single one, equivalent to
+        mathematical function composition. In terms of call order, the function at the first index of the list 
+        is called last, while the function at the last index is called first (**unlike** the convention in 
+        function composition).
+        May be unsafe to use if the given functions take and return different numbers and types of arguments.
+        
+        Usage example:
+            to_lower = str.lower
+            remove_outer_whitespace = str.strip
+            remove_comma = lambda s: s.replace(",", "")
+            str_normaliser = Factory.combine_processors([remove_comma, remove_outer_whitespace, to_lower])
+        """
         return reduce(lambda f, g: lambda x: f(g(x)), processors, lambda x: x)
 #        return reduce(lambda f, g: lambda *x, **y: f(g(*x, **y)), processors, lambda *x, **y: (x, y))
 
@@ -50,8 +123,6 @@ class VectorFactory(Factory):
 
         self.fitted_corpus = corpus
         self.add_matrix = add_matrix_to_corpus
-
-
         
         self.vectoriser = vectoriser_algorithm(**default_args)
         self.matrix = self.vectoriser.fit_transform([
@@ -64,29 +135,62 @@ class VectorFactory(Factory):
         self.vocabulary = self.vectoriser.get_feature_names()
         
 
-    def __call__(self, corpus=None):
+    def process_conversation(self, conversation):
+        conversation.vectorised = next(self.conv_iter)
+        for email in conversation:
+            email_vector = self.process_email(email)
+        return conversation.vectorised
+    
+    def process_email(self, email):
+        email.body.vectorised = next(self.email_iter)
+        return email.body.vectorised
+
+
+    def __call__(self, corpus=None, **kwargs):
         if not corpus:
             corpus = self.fitted_corpus
-        conv_matrix = self.conversation_matrix
-        email_ind = 0
-        for i, conv in enumerate(corpus):
-            conv.vector = conv_matrix[i]
-            for email in conv:
-                email.body.vectorised = self.matrix[email_ind]
-                email_ind += 1
-                
+        
         if self.add_matrix:
             corpus.vectorised_vocabulary = self.vocabulary
             corpus.vectorised = self.matrix
-            corpus.conversations_vectorised = self.conversation_matrix
+            corpus.conversations_vectorised = self.conversation_matrix        
+        
+        self.conv_iter = iter(self.conversation_matrix)
+        self.email_iter = iter(self.matrix)
+        
+        return super().__call__(corpus, **kwargs)
+        
+
+#        if not corpus:
+#            corpus = self.fitted_corpus
+#        conv_matrix = self.conversation_matrix
+#        email_ind = 0
+#        for i, conv in enumerate(corpus):
+#            conv.vector = conv_matrix[i]
+#            for email in conv:
+#                email.body.vectorised = self.matrix[email_ind]
+#                email_ind += 1
+#                
+#        if self.add_matrix:
+#            corpus.vectorised_vocabulary = self.vocabulary
+#            corpus.vectorised = self.matrix
+#            corpus.conversations_vectorised = self.conversation_matrix
                 
 
 class CountVectorizer(VectorFactory):
+    """
+    Wrapper for scikit-learn's equally-named [CountVectorizer](https://scikit-learn.org/stable/modules/generated/sklearn.feature_extraction.text.CountVectorizer.html).
+    
+    """
     def __init__(self, corpus, **vectoriser_kwargs):
         super().__init__(corpus, count, **vectoriser_kwargs)
 
                
 class TfidfVectorizer(VectorFactory):
+    """
+    Wrapper for scikit-learn's equally-named [TfidfVectorizer](https://scikit-learn.org/stable/modules/generated/sklearn.feature_extraction.text.TfidfVectorizer.html).
+    
+    """    
     def __init__(self, corpus, **vectoriser_kwargs):
         super().__init__(corpus, tfidf, **vectoriser_kwargs)
 
@@ -101,31 +205,52 @@ class TopicFactory(Factory):
             raise AttributeError("TopicFactory needs a prediction function to be well-defined!")            
 
         self.fitted_corpus = corpus
-        self.word_distribution = self.word_distribution /self.word_distribution.sum(axis=1)[:, np.newaxis]
+        self.word_distribution = self.word_distribution/self.word_distribution.sum(axis=1)[:, np.newaxis]
         self.topics = [Topic(i, dist, corpus.vectorised_vocabulary)
                             for i, dist in enumerate(self.word_distribution)]
     
-        
-    def __call__(self, corpus=None):
+    
+    def get_topic(self, topic_dist):
+        max_prob_ind = topic_dist.argmax()
+        return TopicInstance(self.topics[max_prob_ind], topic_dist[max_prob_ind])
+    
+    
+    def process_conversation(self, conversation):
+        conversation.topic = self.get_topic(next(self.conv_iter))    
+        for email in conversation:
+            email_topic = self.process_email(email)
+        return conversation.topic
+
+    def process_email(self, email):
+        email.topic = self.get_topic(next(self.email_iter))
+        return email.topic
+            
+    
+    
+    
+    def __call__(self, corpus=None, **kwargs):
         if not corpus:
             corpus = self.fitted_corpus
         
-        convo_topic_dists = self.predict(corpus.conversations_vectorised)
-        email_topic_dists = self.predict(corpus.vectorised)
+        self.conv_iter = iter(self.predict(corpus.conversations_vectorised))
+        self.email_iter = iter(self.predict(corpus.vectorised))
         
-        email_ind = 0 
-        for i, conv in tqdm(enumerate(corpus), 
-                         desc=f"{self.__class__.__name__} iterating conversations",
-                         total=len(corpus)):
-            convo_topic_ind = convo_topic_dists[i].argmax()
-            conv.topic = TopicInstance(self.topics[convo_topic_ind], 
-                                       convo_topic_dists[i][convo_topic_ind])
-            
-            for email in conv:
-                email_topic_ind = email_topic_dists[email_ind].argmax()
-                email.topic = TopicInstance(self.topics[email_topic_ind], 
-                                            email_topic_dists[email_ind][email_topic_ind])
-                email_ind += 1
+        return super().__call__(corpus, **kwargs)
+        
+        
+#        email_ind = 0 
+#        for i, conv in tqdm(enumerate(corpus), 
+#                         desc=f"{self.__class__.__name__} iterating conversations",
+#                         total=len(corpus)):
+#            convo_topic_ind = convo_topic_dists[i].argmax()
+#            conv.topic = TopicInstance(self.topics[convo_topic_ind], 
+#                                       convo_topic_dists[i][convo_topic_ind])
+#            
+#            for email in conv:
+#                email_topic_ind = email_topic_dists[email_ind].argmax()
+#                email.topic = TopicInstance(self.topics[email_topic_ind], 
+#                                            email_topic_dists[email_ind][email_topic_ind])
+#                email_ind += 1
 
 
 class SKLearnLDA(TopicFactory):
@@ -190,18 +315,28 @@ class NamedEntityFactory(Factory):
         cls = type(label.title(), (StringEntity, ), dict(class_dynamically_created=True))
         return cls(entity_string)
 
+
+    def process_conversation(self, conversation):
+        conversation.entities = []
+        for email in conversation:
+            email_entities = self.process_email(email)
+            conversation.entities.append(email_entities)
+        return conversation.entities
     
+    def process_email(self, email):
+        email.entities = list(filter(None, self.post(self.get_entities_with_labels(self.pre(email.body.normalised)))))
+        return email.entities
     
-    def __call__(self, corpus):
-        for conv in tqdm(corpus, 
-                         desc=f"{self.__class__.__name__} iterating conversations"):
-            all_entities = []
-            for email in conv:
-                email.entities = list(filter(None, 
-                                             self.post(self.get_entities_with_labels(self.pre(email.body.normalised)))
-                                             ))
-                all_entities.extend(email.entities)
-            conv.entities = all_entities
+#    def __call__(self, corpus):
+#        for conv in tqdm(corpus, 
+#                         desc=f"{self.__class__.__name__} iterating conversations"):
+#            all_entities = []
+#            for email in conv:
+#                email.entities = list(filter(None, 
+#                                             self.post(self.get_entities_with_labels(self.pre(email.body.normalised)))
+#                                             ))
+#                all_entities.extend(email.entities)
+#            conv.entities = all_entities
     
     
 class SpaCyNER(NamedEntityFactory):
@@ -237,30 +372,34 @@ class KeyWordFactory(Factory):
         self.pre = self.combine_processors(*preprocessors)
         self.post = self.combine_processors(self.output_to_class, *postprocessors)
         
+#        # set to False if process_conversation calls process_email, to True otherwise
+#        self.process_emails_separately = False
+        
 #        super().__init__(self, corpus=None, preprocessors, postprocessors)
 
 
     def process_conversation(self, conversation):
-        all_keywords = []
+        conversation.keywords = []
         for email in conversation:
-            email.keywords = list(filter(None,
-                                         self.post(self.get_keywords(self.pre(email.body.normalised)))
-                                ))
-            all_keywords.extend(email.keywords)
-        conversation.keywords = all_keywords
+            email_keywords = self.process_email(email)
+            conversation.keywords.append(email_keywords)
+        return conversation.keywords
+
+    def process_email(self, email):
+        email.keywords = list(filter(None, self.post(self.get_keywords(self.pre(email.body.normalised)))))
+        return email.keywords
 
 
-
-    def __call__(self, corpus):
-        for conv in tqdm(corpus, 
-                         desc=f"{self.__class__.__name__} iterating conversations"):
-            all_keywords = []
-            for email in conv:
-                email.keywords = list(filter(None,
-                                             self.post(self.get_keywords(self.pre(email.body.normalised)))
-                                    ))
-                all_keywords.extend(email.keywords)
-            conv.keywords = all_keywords
+#    def __call__(self, corpus):
+#        for conv in tqdm(corpus, 
+#                         desc=f"{self.__class__.__name__} iterating conversations"):
+#            all_keywords = []
+#            for email in conv:
+#                email.keywords = list(filter(None,
+#                                             self.post(self.get_keywords(self.pre(email.body.normalised)))
+#                                    ))
+#                all_keywords.extend(email.keywords)
+#            conv.keywords = all_keywords
     
     
     @staticmethod

@@ -42,8 +42,8 @@ nlp = spacy.load(&#34;en_core_web_md&#34;)
 from rake_nltk import Rake
 rake = Rake()
 
-from .entities import EntityInstance, Person, Link, Address, KeyWord
-from .topics import TopicInstance
+from .entities import Person, Link, Address, KeyWord, TopicInstance
+#from .topics import TopicInstance
 from .ledger import Universe
 
 url_re = re.compile(r&#34;http[s]?:\/\/(?:[a-zA-Z]|[0-9]|[$-_@.&amp;+~]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+&#34;)
@@ -98,7 +98,7 @@ class Email(metaclass=Universe):
                                      mail_dict[&#34;id_from_body&#34;]),
                     mail_dict[&#34;inreplyto&#34;],
                     mail_dict[&#34;subject&#34;],
-                    [],
+                    [], # attachments
                     []) # observers, i.e. persons in CC               
                     
         
@@ -244,7 +244,6 @@ class EmailBody(str, metaclass=Universe):
                             &#34;of {nlp.max_length}! Clipping the body to the maximum length and proceeding.&#34;)
             
             s = s[:nlp.max_length]
-        
         ents = nlp(s).ents
         ents = [(str(e).strip(), e.label_) for e in ents]
         return ents
@@ -253,8 +252,6 @@ class EmailBody(str, metaclass=Universe):
         rake.extract_keywords_from_text(self.normalised)
         kws = rake.get_ranked_phrases_with_scores()
         return [KeyWord(phrase) for score, phrase in kws if score &gt; 1.0]
-    
-
     
     def to_json(self, dumps=False):
         d = {&#34;class&#34;: self.__class__.__name__,
@@ -294,7 +291,6 @@ class EmailBody(str, metaclass=Universe):
                 reply += fragment.content
                 
         return (reply, signature, quoted)
-        
         
         </code></pre>
 </details>
@@ -415,7 +411,7 @@ class EmailBody(str, metaclass=Universe):
                                      mail_dict[&#34;id_from_body&#34;]),
                     mail_dict[&#34;inreplyto&#34;],
                     mail_dict[&#34;subject&#34;],
-                    [],
+                    [], # attachments
                     []) # observers, i.e. persons in CC               
                     
         
@@ -534,7 +530,7 @@ def from_email_dict(cls, mail_dict, **unused_kwargs):
                                  mail_dict[&#34;id_from_body&#34;]),
                 mail_dict[&#34;inreplyto&#34;],
                 mail_dict[&#34;subject&#34;],
-                [],
+                [], # attachments
                 []) # observers, i.e. persons in CC               </code></pre>
 </details>
 </dd>
@@ -666,7 +662,6 @@ errors defaults to 'strict'.</p></div>
                             &#34;of {nlp.max_length}! Clipping the body to the maximum length and proceeding.&#34;)
             
             s = s[:nlp.max_length]
-        
         ents = nlp(s).ents
         ents = [(str(e).strip(), e.label_) for e in ents]
         return ents
@@ -675,8 +670,6 @@ errors defaults to 'strict'.</p></div>
         rake.extract_keywords_from_text(self.normalised)
         kws = rake.get_ranked_phrases_with_scores()
         return [KeyWord(phrase) for score, phrase in kws if score &gt; 1.0]
-    
-
     
     def to_json(self, dumps=False):
         d = {&#34;class&#34;: self.__class__.__name__,
@@ -789,7 +782,6 @@ def from_json(cls, json_dict):
                         &#34;of {nlp.max_length}! Clipping the body to the maximum length and proceeding.&#34;)
         
         s = s[:nlp.max_length]
-    
     ents = nlp(s).ents
     ents = [(str(e).strip(), e.label_) for e in ents]
     return ents</code></pre>

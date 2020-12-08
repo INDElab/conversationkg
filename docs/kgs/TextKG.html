@@ -41,14 +41,15 @@ class TextKG(KG):
         provenances = []
         
         for conv in tqdm(email_corpus, desc=&#34;Iterating Conversations in TextKG&#34;):
-#            triples.append((conv, &#34;is_about&#34;, conv.topic.topic))
-#            provenances.append(conv[0].message_id)
+            triples.append((conv, &#34;is_about&#34;, conv.topic.topic))
+            provenances.append(conv[0].message_id)
             
             for email in conv:
-#                triples.append((email, &#34;is_about&#34;, email.topic.topic))
-#                provenances.append(email.message_id)
+                triples.append((email, &#34;is_about&#34;, email.topic.topic))
+                provenances.append(email.message_id)
                 
-                mentioned_people = [Person(WholePerson(str(e), &#34;&#34;)) for e, l in email.body.entities if l == &#34;PERSON&#34;]
+                mentioned_people = [Person(WholePerson(str(e), &#34;&#34;)) for e, l in email.body.entities 
+                                    if l == &#34;PERSON&#34;]
 
                 for person in mentioned_people:
                     triples.append((email, &#34;mentions&#34;, person))
@@ -89,14 +90,15 @@ class TextKG(KG):
         provenances = []
         
         for conv in tqdm(email_corpus, desc=&#34;Iterating Conversations in TextKG&#34;):
-#            triples.append((conv, &#34;is_about&#34;, conv.topic.topic))
-#            provenances.append(conv[0].message_id)
+            triples.append((conv, &#34;is_about&#34;, conv.topic.topic))
+            provenances.append(conv[0].message_id)
             
             for email in conv:
-#                triples.append((email, &#34;is_about&#34;, email.topic.topic))
-#                provenances.append(email.message_id)
+                triples.append((email, &#34;is_about&#34;, email.topic.topic))
+                provenances.append(email.message_id)
                 
-                mentioned_people = [Person(WholePerson(str(e), &#34;&#34;)) for e, l in email.body.entities if l == &#34;PERSON&#34;]
+                mentioned_people = [Person(WholePerson(str(e), &#34;&#34;)) for e, l in email.body.entities 
+                                    if l == &#34;PERSON&#34;]
 
                 for person in mentioned_people:
                     triples.append((email, &#34;mentions&#34;, person))

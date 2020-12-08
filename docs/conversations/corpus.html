@@ -29,19 +29,17 @@
 <pre><code class="python">import warnings
 from tqdm import tqdm
 import json
+from joblib import Parallel, delayed
 
 from itertools import groupby
 from collections import defaultdict
 
 import numpy as np
 import scipy
-from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
 
 from .emails import Email
-from .entities import KeyWord
-from .topics import TopicInstance
+from .entities import TopicInstance
 from .ledger import Universe
-
 
 
 def group_by_subject_line(emails, strip={&#34;Re: &#34;}, **kwargs):
@@ -96,39 +94,123 @@ def group_by_id(emails, **kwargs):
         convo_tuples = list(collect_recursive(starter, []))
         yield from convo_tuples
         
+        
+        
+class EmailCorpusCollection(list, metaclass=Universe):
+    @classmethod
+    def from_list_of_ungrouped_email_dicts(cls, list_of_email_dict_list, 
+                                           grouping_function=group_by_id,
+                                           **grouping_function_args):
+        
+        corpus_list = [EmailCorpus.from_ungrouped_email_dicts(email_dicts, 
+                                                              grouping_function,
+                                                              **grouping_function_args)
+                        for email_dicts in list_of_email_dict_list]
+        return cls(corpus_list)
+        
+    
+    @classmethod
+    def from_email_dict_list(cls, list_of_email_dict_list):
+        corpus_list = [EmailCorpus.from_email_dicts(email_dicts)
+                        for email_dicts in list_of_email_dict_list]
+        return cls(corpus_list)
+        
+    def __new__(cls, list_of_email_corpora=[]):
+        self = super().__new__(cls, [])
+        return self
+    
+    def __init__(self, list_of_email_corpora):
+        if len(self) &lt; 1:
+            self.names = []
+            self.n_conversations = self.n_emails = 0
+        else:
+            self.names = [getattr(c, &#34;name&#34;, None) for c in self]
+            self.n_conversations = sum(map(len, self))
+            self.n_emails = sum(c.n_emails for c in self)
+
+        
+    def apply(self, *factories):
+        progressbar = tqdm(self, desc=&#34;Applying factories to corpus&#34;)
+        for corpus in progressbar:
+            progressbar.set_description(f&#34;Applying factories to corpus {corpus.name}&#34;)
+            yield list(corpus.apply(*factories))
+        
+    def iter_conversations(self):
+        for corpus in self:
+            for conv in corpus:
+                yield conv
+    
+    def iter_emails(self):
+        for conv in self.iter_conversations():
+            for email in conv:
+                yield email              
+                
+    def merge_corpora(self):
+        return EmailCorpus(self.iter_conversations())
+                
+    def __getitem__(self, key):
+        corpus_slice = super().__getitem__(key)
+        # user is asking for a single corpus
+        if isinstance(key, int):
+            return corpus_slice
+        return EmailCorpusCollection(corpus_slice)
+    
+    def append(self, corpus):
+        super().append(corpus)
+        self.names.append(getattr(corpus, &#34;name&#34;, None))
+        self.n_conversations += len(corpus)
+        self.n_emails += corpus.n_emails
+                
+
 
 
 class EmailCorpus(tuple, metaclass=Universe):
+    @staticmethod
+    def parallelise(it, func, n_jobs=-1):
+        delayed_f = delayed(func)
+        return Parallel(n_jobs)(delayed_f(x) for x in it)
+    
+    
     @classmethod
     def from_ungrouped_email_dicts(cls, 
                                    email_dicts, 
+                                   corpus_name=None,
                                    grouping_function=group_by_id, 
-                                   vectorise_default=False, 
                                    **grouping_function_args):
         
-        emails = tqdm(map(Email.from_email_dict, email_dicts), total=len(email_dicts))
+#        emails = tqdm(map(Email.from_email_dict, email_dicts), total=len(email_dicts),
+#                      desc=&#34;Iterating emails in EmailCorpus.from_ungrouped_email_dicts&#34;)
+        progressbar = tqdm(email_dicts, 
+                           desc=&#34;Iterating emails in EmailCorpus.from_ungrouped_email_dicts&#34;)
+        emails = cls.parallelise(progressbar, Email.from_email_dict)
         
         grouped_emails = grouping_function(emails, **grouping_function_args)
         
         conversations = (Conversation(subj, email_ls) for subj, email_ls in grouped_emails)
-        return cls(conversations, vectorise_default=vectorise_default)
+        return cls(conversations, corpus_name)
+    
     
     @classmethod
-    def from_email_dicts(cls, email_dicts, vectorise_default=False):
-        conversations = (Conversation.from_email_dicts(subj, mail_dicts) 
-                            for subj, mail_dicts in tqdm(email_dicts))
-        return cls(conversations, vectorise_default=vectorise_default)
+    def from_email_dicts(cls, email_dicts, corpus_name=None):
+        progressbar = tqdm(email_dicts, 
+                           desc=&#34;Iterating conversations in EmailCorpus.from_email_dicts&#34;)
+        f = lambda tup: Conversation.from_email_dicts(*tup)
+        conversations = cls.parallelise(progressbar, f)
+        return cls(conversations, corpus_name)
 
-    def __new__(cls, conversations, vectorise_default=False):
-#        if len(conversations) &lt; 1:
-#            raise ValueError(&#34;Empty list of conversations given!&#34;)
+    def __new__(cls, conversations, corpus_name=None):
         self = super().__new__(cls, sorted(conversations))
-        return self        
+        if len(self) &lt; 1:
+            raise ValueError(&#34;Empty list of conversations given!&#34;)
+        return self
         
-    def __init__(self, conversations, vectorise_default=False):        
+    def __init__(self, conversations, corpus_name=None):        
         for conv in self:
             Universe.observe(conv, self, &#34;evidenced_by&#34;)
-            
+        
+        if corpus_name:
+            self.name = corpus_name
+        
         self.n_emails = sum(len(c) for c in self)
         
         self.interlocutors = set(p for c in self for p in c.interlocutors)
@@ -140,11 +222,6 @@ class EmailCorpus(tuple, metaclass=Universe):
         else:
             self.start_time, self.end_time = self[0].start_time, self[0].end_time
         
-        if vectorise_default:
-            self.vectorise()
-        else:
-            self.vectorised = self.vectoriser = None
-    
     
     def __getitem__(self, key):
         conv_slice = super().__getitem__(key)
@@ -153,42 +230,35 @@ class EmailCorpus(tuple, metaclass=Universe):
             return conv_slice
         # else: key is a slice(), i.e. user is asking for a subcorpus
         
-        subcorpus = EmailCorpus(conv_slice, vectorise_default=False)
+        subcorpus = EmailCorpus(conv_slice)
         
-        if self.vectorised is not None:
-            subcorpus.vectorised = self.vectorised[key, ]
-            subcorpus.vectoriser = self.vectoriser
+        
+        email_inds = list(range(sum(len(c) for c in conv_slice)))
+        
+        
+        if hasattr(self, &#34;vectorised&#34;):
+            subcorpus.vectorised = self.vectorised[email_inds, ]
+            subcorpus.conversations_vectorised = self.conversations_vectorised[key, ]
+            subcorpus.vectorised_vocabulary = self.vectorised_vocabulary
         return subcorpus
     
     
     def iter_emails(self):
         for conversation in self:
             for email in conversation:
-                yield email
-                
-                
-    def vectorise(self, vectoriser_algorithm=CountVectorizer, **kwargs):
-#        default_args = dict(max_df=0.5, min_df=0.1, max_features=self.n_emails)
-        default_args = dict(max_df=0.7, min_df=5)
-        
-        default_args.update(kwargs)
-        
-        self.vectoriser = vectoriser_algorithm(**default_args)
-        
-        self.vectorised = self.vectoriser.fit_transform([
-                email.body.normalised for email in self.iter_emails()
-                ])
+                yield email    
     
-        for email, vec in zip(self.iter_emails(), self.vectorised):
-            email.body.vectorised = vec
     
-        
+    def apply(self, *factories):
+        for f in factories: yield f(self)
+    
+    
     def save(self, filename):
-        if self.vectorised.size*self.vectorised.dtype.itemsize &gt; 100e6:
-            print(&#34;WARNING: The matrix holding the vectroised emails &#34;
-                  &#34;may be larger than 100mb!&#34;
-                  &#34;Saving separately in scipy-native .npz format!&#34;)
-            scipy.sparse.save_npz(&#34;corpus_vectorised.npz&#34;, self.vectorised)
+#        if self.vectorised.size*self.vectorised.dtype.itemsize &gt; 100e6:
+#            print(&#34;WARNING: The matrix holding the vectorised emails &#34;
+#                  &#34;may be larger than 100mb!&#34;
+#                  &#34;Saving separately in scipy-native .npz format!&#34;)
+#            scipy.sparse.save_npz(&#34;corpus_vectorised.npz&#34;, self.vectorised)
         with open(filename, &#34;w&#34;, encoding=&#34;utf-8&#34;) as handle:
             json.dump(self.to_json(), handle)
     
@@ -198,22 +268,23 @@ class EmailCorpus(tuple, metaclass=Universe):
             return cls.from_json(json.load(handle))
 
     def to_json(self, dumps=False):
-        if self.vectorised is None:
-            vectorised_to_save = None
-            vectoriser_params = None
-        else:
-            if self.vectorised.size*self.vectorised.dtype.itemsize &gt; 100e6:
-                warnings.warn(&#34;WARNING: The matrix holding the vectroised emails &#34;
-                      &#34;may be larger than 100mb! Omitting from JSON representation!&#34;)
-                vectorised_to_save = &#34;corpus_vectorised.npz&#34;
-            else:
-                vectorised_to_save = self.vectorised.toarray().tolist()
-            vectoriser_params = self.vectoriser.get_params()
-            del vectoriser_params[&#34;dtype&#34;]
+#        if self.vectorised is None:
+#            vectorised_to_save = None
+#            vectoriser_params = None
+#        else:
+#            if self.vectorised.size*self.vectorised.dtype.itemsize &gt; 100e6:
+#                warnings.warn(&#34;WARNING: The matrix holding the vectorised emails &#34;
+#                      &#34;may be larger than 100mb! Omitting from JSON representation!&#34;)
+#                vectorised_to_save = &#34;corpus_vectorised.npz&#34;
+#            else:
+#                vectorised_to_save = self.vectorised.toarray().tolist()
+#            vectoriser_params = self.vectoriser.get_params()
+#            del vectoriser_params[&#34;dtype&#34;]
         
-        d = {&#34;self&#34;: [conv.to_json(dumps=False) for conv in self],
-            &#34;vectorised&#34;: vectorised_to_save,
-            &#34;vectoriser_params&#34;: vectoriser_params}        
+        d = {&#34;class&#34;: self.__class__.__name__,
+            &#34;self&#34;: [conv.to_json(dumps=False) for conv in self]}#,
+#            &#34;vectorised&#34;: vectorised_to_save,
+#            &#34;vectoriser_params&#34;: vectoriser_params}        
         
         if dumps: return json.dumps(d)
         return d
@@ -223,30 +294,30 @@ class EmailCorpus(tuple, metaclass=Universe):
         conversations = [Conversation.from_json(conv_dict) for conv_dict in json_dict[&#34;self&#34;]]
         
         
-        vectorised_value = json_dict[&#34;vectorised&#34;]
-        if vectorised_value:
-            if isinstance(vectorised_value, str):
-                vectorised = scipy.sparse.load_npz(vectorised_value)
-            else:
-                vectorised = scipy.sparse.csr_matrix(vectorised_value)
-        else:
-            vectorised = None
-            
-        vectoriser_params = json_dict[&#34;vectoriser_params&#34;]
+#        vectorised_value = json_dict[&#34;vectorised&#34;]
+#        if vectorised_value:
+#            if isinstance(vectorised_value, str):
+#                vectorised = scipy.sparse.load_npz(vectorised_value)
+#            else:
+#                vectorised = scipy.sparse.csr_matrix(vectorised_value)
+#        else:
+#            vectorised = None
+#            
+#        vectoriser_params = json_dict[&#34;vectoriser_params&#34;]
         corpus = cls.from_conversations(conversations, vectorise_default=False)
-        corpus.vectorised = vectorised
-        corpus.vectoriser = \
-            CountVectorizer(**vectoriser_params) if vectoriser_params else None
+#        corpus.vectorised = vectorised
+#        corpus.vectoriser = \
+#            CountVectorizer(**vectoriser_params) if vectoriser_params else None
         return corpus        
         
     
     
 class Conversation(tuple, metaclass=Universe):
     @classmethod
-    def from_email_dicts(cls, subject, email_dicts, **kwargs):
-        return cls(subject, (Email.from_email_dict(mail_dict) for mail_dict in email_dicts), **kwargs)
+    def from_email_dicts(cls, subject, email_dicts):
+        return cls(subject, (Email.from_email_dict(mail_dict) for mail_dict in email_dicts))
     
-    def __new__(cls, subject, emails, **kwargs):
+    def __new__(cls, subject, emails):
         self = super().__new__(cls, sorted(emails))
         for email in self:
             Universe.observe(email, self, &#34;evidenced_by&#34;)
@@ -272,7 +343,6 @@ class Conversation(tuple, metaclass=Universe):
                             for d in doc_ls)
 
         self.first_observed_at = self.start_time
-#        self.topic = None
     
     def __eq__(self, other):
         if not (type(self) == type(other) == Conversation):
@@ -321,25 +391,11 @@ class Conversation(tuple, metaclass=Universe):
         return conv
     
     
-    
-    
-    
-#%%
+    def get_email_bodies(self, attr=None, join_str=None):
+        get = lambda e: str(e) if (attr is None) else getattr(e, attr)
+        bodies = [get(e.body) for e in self]
         
-    
-#class S(tuple):
-#    
-#    def __new__(cls, ls):
-#        self = super().__new__(cls, sorted(ls))
-#        return self
-#    
-#    def __init__(self, ls):
-#        self.l = len(self)
-#        self.x = 13
-#        
-#        
-##    def __g
-#        </code></pre>
+        return bodies if (join_str is None) else join_str.join(bodies)</code></pre>
 </details>
 </section>
 <section>
@@ -440,10 +496,10 @@ tuple(iterable) -&gt; tuple initialized from iterable's items</p>
 </summary>
 <pre><code class="python">class Conversation(tuple, metaclass=Universe):
     @classmethod
-    def from_email_dicts(cls, subject, email_dicts, **kwargs):
-        return cls(subject, (Email.from_email_dict(mail_dict) for mail_dict in email_dicts), **kwargs)
+    def from_email_dicts(cls, subject, email_dicts):
+        return cls(subject, (Email.from_email_dict(mail_dict) for mail_dict in email_dicts))
     
-    def __new__(cls, subject, emails, **kwargs):
+    def __new__(cls, subject, emails):
         self = super().__new__(cls, sorted(emails))
         for email in self:
             Universe.observe(email, self, &#34;evidenced_by&#34;)
@@ -469,7 +525,6 @@ tuple(iterable) -&gt; tuple initialized from iterable's items</p>
                             for d in doc_ls)
 
         self.first_observed_at = self.start_time
-#        self.topic = None
     
     def __eq__(self, other):
         if not (type(self) == type(other) == Conversation):
@@ -515,7 +570,14 @@ tuple(iterable) -&gt; tuple initialized from iterable's items</p>
         if &#34;topic&#34; in json_dict:
             conv.topic = TopicInstance.from_json(json_dict[&#34;topic&#34;])
             
-        return conv</code></pre>
+        return conv
+    
+    
+    def get_email_bodies(self, attr=None, join_str=None):
+        get = lambda e: str(e) if (attr is None) else getattr(e, attr)
+        bodies = [get(e.body) for e in self]
+        
+        return bodies if (join_str is None) else join_str.join(bodies)</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -524,7 +586,7 @@ tuple(iterable) -&gt; tuple initialized from iterable's items</p>
 <h3>Static methods</h3>
 <dl>
 <dt id="conversationkg.conversations.corpus.Conversation.from_email_dicts"><code class="name flex">
-<span>def <span class="ident">from_email_dicts</span></span>(<span>subject, email_dicts, **kwargs)</span>
+<span>def <span class="ident">from_email_dicts</span></span>(<span>subject, email_dicts)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -533,8 +595,8 @@ tuple(iterable) -&gt; tuple initialized from iterable's items</p>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@classmethod
-def from_email_dicts(cls, subject, email_dicts, **kwargs):
-    return cls(subject, (Email.from_email_dict(mail_dict) for mail_dict in email_dicts), **kwargs)</code></pre>
+def from_email_dicts(cls, subject, email_dicts):
+    return cls(subject, (Email.from_email_dict(mail_dict) for mail_dict in email_dicts))</code></pre>
 </details>
 </dd>
 <dt id="conversationkg.conversations.corpus.Conversation.from_json"><code class="name flex">
@@ -563,6 +625,22 @@ def from_json(cls, json_dict):
 </dl>
 <h3>Methods</h3>
 <dl>
+<dt id="conversationkg.conversations.corpus.Conversation.get_email_bodies"><code class="name flex">
+<span>def <span class="ident">get_email_bodies</span></span>(<span>self, attr=None, join_str=None)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_email_bodies(self, attr=None, join_str=None):
+    get = lambda e: str(e) if (attr is None) else getattr(e, attr)
+    bodies = [get(e.body) for e in self]
+    
+    return bodies if (join_str is None) else join_str.join(bodies)</code></pre>
+</details>
+</dd>
 <dt id="conversationkg.conversations.corpus.Conversation.to_json"><code class="name flex">
 <span>def <span class="ident">to_json</span></span>(<span>self, dumps=False)</span>
 </code></dt>
@@ -587,7 +665,7 @@ def from_json(cls, json_dict):
 </dd>
 <dt id="conversationkg.conversations.corpus.EmailCorpus"><code class="flex name class">
 <span>class <span class="ident">EmailCorpus</span></span>
-<span>(</span><span>conversations, vectorise_default=False)</span>
+<span>(</span><span>conversations, corpus_name=None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>tuple() -&gt; empty tuple
@@ -598,36 +676,52 @@ tuple(iterable) -&gt; tuple initialized from iterable's items</p>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class EmailCorpus(tuple, metaclass=Universe):
+    @staticmethod
+    def parallelise(it, func, n_jobs=-1):
+        delayed_f = delayed(func)
+        return Parallel(n_jobs)(delayed_f(x) for x in it)
+    
+    
     @classmethod
     def from_ungrouped_email_dicts(cls, 
                                    email_dicts, 
+                                   corpus_name=None,
                                    grouping_function=group_by_id, 
-                                   vectorise_default=False, 
                                    **grouping_function_args):
         
-        emails = tqdm(map(Email.from_email_dict, email_dicts), total=len(email_dicts))
+#        emails = tqdm(map(Email.from_email_dict, email_dicts), total=len(email_dicts),
+#                      desc=&#34;Iterating emails in EmailCorpus.from_ungrouped_email_dicts&#34;)
+        progressbar = tqdm(email_dicts, 
+                           desc=&#34;Iterating emails in EmailCorpus.from_ungrouped_email_dicts&#34;)
+        emails = cls.parallelise(progressbar, Email.from_email_dict)
         
         grouped_emails = grouping_function(emails, **grouping_function_args)
         
         conversations = (Conversation(subj, email_ls) for subj, email_ls in grouped_emails)
-        return cls(conversations, vectorise_default=vectorise_default)
+        return cls(conversations, corpus_name)
+    
     
     @classmethod
-    def from_email_dicts(cls, email_dicts, vectorise_default=False):
-        conversations = (Conversation.from_email_dicts(subj, mail_dicts) 
-                            for subj, mail_dicts in tqdm(email_dicts))
-        return cls(conversations, vectorise_default=vectorise_default)
+    def from_email_dicts(cls, email_dicts, corpus_name=None):
+        progressbar = tqdm(email_dicts, 
+                           desc=&#34;Iterating conversations in EmailCorpus.from_email_dicts&#34;)
+        f = lambda tup: Conversation.from_email_dicts(*tup)
+        conversations = cls.parallelise(progressbar, f)
+        return cls(conversations, corpus_name)
 
-    def __new__(cls, conversations, vectorise_default=False):
-#        if len(conversations) &lt; 1:
-#            raise ValueError(&#34;Empty list of conversations given!&#34;)
+    def __new__(cls, conversations, corpus_name=None):
         self = super().__new__(cls, sorted(conversations))
-        return self        
+        if len(self) &lt; 1:
+            raise ValueError(&#34;Empty list of conversations given!&#34;)
+        return self
         
-    def __init__(self, conversations, vectorise_default=False):        
+    def __init__(self, conversations, corpus_name=None):        
         for conv in self:
             Universe.observe(conv, self, &#34;evidenced_by&#34;)
-            
+        
+        if corpus_name:
+            self.name = corpus_name
+        
         self.n_emails = sum(len(c) for c in self)
         
         self.interlocutors = set(p for c in self for p in c.interlocutors)
@@ -639,11 +733,6 @@ tuple(iterable) -&gt; tuple initialized from iterable's items</p>
         else:
             self.start_time, self.end_time = self[0].start_time, self[0].end_time
         
-        if vectorise_default:
-            self.vectorise()
-        else:
-            self.vectorised = self.vectoriser = None
-    
     
     def __getitem__(self, key):
         conv_slice = super().__getitem__(key)
@@ -652,42 +741,35 @@ tuple(iterable) -&gt; tuple initialized from iterable's items</p>
             return conv_slice
         # else: key is a slice(), i.e. user is asking for a subcorpus
         
-        subcorpus = EmailCorpus(conv_slice, vectorise_default=False)
+        subcorpus = EmailCorpus(conv_slice)
         
-        if self.vectorised is not None:
-            subcorpus.vectorised = self.vectorised[key, ]
-            subcorpus.vectoriser = self.vectoriser
+        
+        email_inds = list(range(sum(len(c) for c in conv_slice)))
+        
+        
+        if hasattr(self, &#34;vectorised&#34;):
+            subcorpus.vectorised = self.vectorised[email_inds, ]
+            subcorpus.conversations_vectorised = self.conversations_vectorised[key, ]
+            subcorpus.vectorised_vocabulary = self.vectorised_vocabulary
         return subcorpus
     
     
     def iter_emails(self):
         for conversation in self:
             for email in conversation:
-                yield email
-                
-                
-    def vectorise(self, vectoriser_algorithm=CountVectorizer, **kwargs):
-#        default_args = dict(max_df=0.5, min_df=0.1, max_features=self.n_emails)
-        default_args = dict(max_df=0.7, min_df=5)
-        
-        default_args.update(kwargs)
-        
-        self.vectoriser = vectoriser_algorithm(**default_args)
-        
-        self.vectorised = self.vectoriser.fit_transform([
-                email.body.normalised for email in self.iter_emails()
-                ])
+                yield email    
     
-        for email, vec in zip(self.iter_emails(), self.vectorised):
-            email.body.vectorised = vec
     
-        
+    def apply(self, *factories):
+        for f in factories: yield f(self)
+    
+    
     def save(self, filename):
-        if self.vectorised.size*self.vectorised.dtype.itemsize &gt; 100e6:
-            print(&#34;WARNING: The matrix holding the vectroised emails &#34;
-                  &#34;may be larger than 100mb!&#34;
-                  &#34;Saving separately in scipy-native .npz format!&#34;)
-            scipy.sparse.save_npz(&#34;corpus_vectorised.npz&#34;, self.vectorised)
+#        if self.vectorised.size*self.vectorised.dtype.itemsize &gt; 100e6:
+#            print(&#34;WARNING: The matrix holding the vectorised emails &#34;
+#                  &#34;may be larger than 100mb!&#34;
+#                  &#34;Saving separately in scipy-native .npz format!&#34;)
+#            scipy.sparse.save_npz(&#34;corpus_vectorised.npz&#34;, self.vectorised)
         with open(filename, &#34;w&#34;, encoding=&#34;utf-8&#34;) as handle:
             json.dump(self.to_json(), handle)
     
@@ -697,22 +779,23 @@ tuple(iterable) -&gt; tuple initialized from iterable's items</p>
             return cls.from_json(json.load(handle))
 
     def to_json(self, dumps=False):
-        if self.vectorised is None:
-            vectorised_to_save = None
-            vectoriser_params = None
-        else:
-            if self.vectorised.size*self.vectorised.dtype.itemsize &gt; 100e6:
-                warnings.warn(&#34;WARNING: The matrix holding the vectroised emails &#34;
-                      &#34;may be larger than 100mb! Omitting from JSON representation!&#34;)
-                vectorised_to_save = &#34;corpus_vectorised.npz&#34;
-            else:
-                vectorised_to_save = self.vectorised.toarray().tolist()
-            vectoriser_params = self.vectoriser.get_params()
-            del vectoriser_params[&#34;dtype&#34;]
+#        if self.vectorised is None:
+#            vectorised_to_save = None
+#            vectoriser_params = None
+#        else:
+#            if self.vectorised.size*self.vectorised.dtype.itemsize &gt; 100e6:
+#                warnings.warn(&#34;WARNING: The matrix holding the vectorised emails &#34;
+#                      &#34;may be larger than 100mb! Omitting from JSON representation!&#34;)
+#                vectorised_to_save = &#34;corpus_vectorised.npz&#34;
+#            else:
+#                vectorised_to_save = self.vectorised.toarray().tolist()
+#            vectoriser_params = self.vectoriser.get_params()
+#            del vectoriser_params[&#34;dtype&#34;]
         
-        d = {&#34;self&#34;: [conv.to_json(dumps=False) for conv in self],
-            &#34;vectorised&#34;: vectorised_to_save,
-            &#34;vectoriser_params&#34;: vectoriser_params}        
+        d = {&#34;class&#34;: self.__class__.__name__,
+            &#34;self&#34;: [conv.to_json(dumps=False) for conv in self]}#,
+#            &#34;vectorised&#34;: vectorised_to_save,
+#            &#34;vectoriser_params&#34;: vectoriser_params}        
         
         if dumps: return json.dumps(d)
         return d
@@ -722,20 +805,20 @@ tuple(iterable) -&gt; tuple initialized from iterable's items</p>
         conversations = [Conversation.from_json(conv_dict) for conv_dict in json_dict[&#34;self&#34;]]
         
         
-        vectorised_value = json_dict[&#34;vectorised&#34;]
-        if vectorised_value:
-            if isinstance(vectorised_value, str):
-                vectorised = scipy.sparse.load_npz(vectorised_value)
-            else:
-                vectorised = scipy.sparse.csr_matrix(vectorised_value)
-        else:
-            vectorised = None
-            
-        vectoriser_params = json_dict[&#34;vectoriser_params&#34;]
+#        vectorised_value = json_dict[&#34;vectorised&#34;]
+#        if vectorised_value:
+#            if isinstance(vectorised_value, str):
+#                vectorised = scipy.sparse.load_npz(vectorised_value)
+#            else:
+#                vectorised = scipy.sparse.csr_matrix(vectorised_value)
+#        else:
+#            vectorised = None
+#            
+#        vectoriser_params = json_dict[&#34;vectoriser_params&#34;]
         corpus = cls.from_conversations(conversations, vectorise_default=False)
-        corpus.vectorised = vectorised
-        corpus.vectoriser = \
-            CountVectorizer(**vectoriser_params) if vectoriser_params else None
+#        corpus.vectorised = vectorised
+#        corpus.vectoriser = \
+#            CountVectorizer(**vectoriser_params) if vectoriser_params else None
         return corpus        </code></pre>
 </details>
 <h3>Ancestors</h3>
@@ -745,7 +828,7 @@ tuple(iterable) -&gt; tuple initialized from iterable's items</p>
 <h3>Static methods</h3>
 <dl>
 <dt id="conversationkg.conversations.corpus.EmailCorpus.from_email_dicts"><code class="name flex">
-<span>def <span class="ident">from_email_dicts</span></span>(<span>email_dicts, vectorise_default=False)</span>
+<span>def <span class="ident">from_email_dicts</span></span>(<span>email_dicts, corpus_name=None)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -754,10 +837,12 @@ tuple(iterable) -&gt; tuple initialized from iterable's items</p>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@classmethod
-def from_email_dicts(cls, email_dicts, vectorise_default=False):
-    conversations = (Conversation.from_email_dicts(subj, mail_dicts) 
-                        for subj, mail_dicts in tqdm(email_dicts))
-    return cls(conversations, vectorise_default=vectorise_default)</code></pre>
+def from_email_dicts(cls, email_dicts, corpus_name=None):
+    progressbar = tqdm(email_dicts, 
+                       desc=&#34;Iterating conversations in EmailCorpus.from_email_dicts&#34;)
+    f = lambda tup: Conversation.from_email_dicts(*tup)
+    conversations = cls.parallelise(progressbar, f)
+    return cls(conversations, corpus_name)</code></pre>
 </details>
 </dd>
 <dt id="conversationkg.conversations.corpus.EmailCorpus.from_json"><code class="name flex">
@@ -769,30 +854,30 @@ def from_email_dicts(cls, email_dicts, vectorise_default=False):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">@classmethod
-def from_json(cls, json_dict):
-    conversations = [Conversation.from_json(conv_dict) for conv_dict in json_dict[&#34;self&#34;]]
-    
-    
-    vectorised_value = json_dict[&#34;vectorised&#34;]
-    if vectorised_value:
-        if isinstance(vectorised_value, str):
-            vectorised = scipy.sparse.load_npz(vectorised_value)
-        else:
-            vectorised = scipy.sparse.csr_matrix(vectorised_value)
-    else:
-        vectorised = None
+<pre><code class="python">    @classmethod
+    def from_json(cls, json_dict):
+        conversations = [Conversation.from_json(conv_dict) for conv_dict in json_dict[&#34;self&#34;]]
         
-    vectoriser_params = json_dict[&#34;vectoriser_params&#34;]
-    corpus = cls.from_conversations(conversations, vectorise_default=False)
-    corpus.vectorised = vectorised
-    corpus.vectoriser = \
-        CountVectorizer(**vectoriser_params) if vectoriser_params else None
-    return corpus        </code></pre>
+        
+#        vectorised_value = json_dict[&#34;vectorised&#34;]
+#        if vectorised_value:
+#            if isinstance(vectorised_value, str):
+#                vectorised = scipy.sparse.load_npz(vectorised_value)
+#            else:
+#                vectorised = scipy.sparse.csr_matrix(vectorised_value)
+#        else:
+#            vectorised = None
+#            
+#        vectoriser_params = json_dict[&#34;vectoriser_params&#34;]
+        corpus = cls.from_conversations(conversations, vectorise_default=False)
+#        corpus.vectorised = vectorised
+#        corpus.vectoriser = \
+#            CountVectorizer(**vectoriser_params) if vectoriser_params else None
+        return corpus        </code></pre>
 </details>
 </dd>
 <dt id="conversationkg.conversations.corpus.EmailCorpus.from_ungrouped_email_dicts"><code class="name flex">
-<span>def <span class="ident">from_ungrouped_email_dicts</span></span>(<span>email_dicts, grouping_function=&lt;function group_by_id&gt;, vectorise_default=False, **grouping_function_args)</span>
+<span>def <span class="ident">from_ungrouped_email_dicts</span></span>(<span>email_dicts, corpus_name=None, grouping_function=&lt;function group_by_id&gt;, **grouping_function_args)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -800,19 +885,23 @@ def from_json(cls, json_dict):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">@classmethod
-def from_ungrouped_email_dicts(cls, 
-                               email_dicts, 
-                               grouping_function=group_by_id, 
-                               vectorise_default=False, 
-                               **grouping_function_args):
-    
-    emails = tqdm(map(Email.from_email_dict, email_dicts), total=len(email_dicts))
-    
-    grouped_emails = grouping_function(emails, **grouping_function_args)
-    
-    conversations = (Conversation(subj, email_ls) for subj, email_ls in grouped_emails)
-    return cls(conversations, vectorise_default=vectorise_default)</code></pre>
+<pre><code class="python">    @classmethod
+    def from_ungrouped_email_dicts(cls, 
+                                   email_dicts, 
+                                   corpus_name=None,
+                                   grouping_function=group_by_id, 
+                                   **grouping_function_args):
+        
+#        emails = tqdm(map(Email.from_email_dict, email_dicts), total=len(email_dicts),
+#                      desc=&#34;Iterating emails in EmailCorpus.from_ungrouped_email_dicts&#34;)
+        progressbar = tqdm(email_dicts, 
+                           desc=&#34;Iterating emails in EmailCorpus.from_ungrouped_email_dicts&#34;)
+        emails = cls.parallelise(progressbar, Email.from_email_dict)
+        
+        grouped_emails = grouping_function(emails, **grouping_function_args)
+        
+        conversations = (Conversation(subj, email_ls) for subj, email_ls in grouped_emails)
+        return cls(conversations, corpus_name)</code></pre>
 </details>
 </dd>
 <dt id="conversationkg.conversations.corpus.EmailCorpus.load"><code class="name flex">
@@ -830,9 +919,37 @@ def load(cls, filename):
         return cls.from_json(json.load(handle))</code></pre>
 </details>
 </dd>
+<dt id="conversationkg.conversations.corpus.EmailCorpus.parallelise"><code class="name flex">
+<span>def <span class="ident">parallelise</span></span>(<span>it, func, n_jobs=-1)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@staticmethod
+def parallelise(it, func, n_jobs=-1):
+    delayed_f = delayed(func)
+    return Parallel(n_jobs)(delayed_f(x) for x in it)</code></pre>
+</details>
+</dd>
 </dl>
 <h3>Methods</h3>
 <dl>
+<dt id="conversationkg.conversations.corpus.EmailCorpus.apply"><code class="name flex">
+<span>def <span class="ident">apply</span></span>(<span>self, *factories)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def apply(self, *factories):
+    for f in factories: yield f(self)</code></pre>
+</details>
+</dd>
 <dt id="conversationkg.conversations.corpus.EmailCorpus.iter_emails"><code class="name flex">
 <span>def <span class="ident">iter_emails</span></span>(<span>self)</span>
 </code></dt>
@@ -845,7 +962,7 @@ def load(cls, filename):
 <pre><code class="python">def iter_emails(self):
     for conversation in self:
         for email in conversation:
-            yield email</code></pre>
+            yield email    </code></pre>
 </details>
 </dd>
 <dt id="conversationkg.conversations.corpus.EmailCorpus.save"><code class="name flex">
@@ -857,14 +974,14 @@ def load(cls, filename):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def save(self, filename):
-    if self.vectorised.size*self.vectorised.dtype.itemsize &gt; 100e6:
-        print(&#34;WARNING: The matrix holding the vectroised emails &#34;
-              &#34;may be larger than 100mb!&#34;
-              &#34;Saving separately in scipy-native .npz format!&#34;)
-        scipy.sparse.save_npz(&#34;corpus_vectorised.npz&#34;, self.vectorised)
-    with open(filename, &#34;w&#34;, encoding=&#34;utf-8&#34;) as handle:
-        json.dump(self.to_json(), handle)</code></pre>
+<pre><code class="python">    def save(self, filename):
+#        if self.vectorised.size*self.vectorised.dtype.itemsize &gt; 100e6:
+#            print(&#34;WARNING: The matrix holding the vectorised emails &#34;
+#                  &#34;may be larger than 100mb!&#34;
+#                  &#34;Saving separately in scipy-native .npz format!&#34;)
+#            scipy.sparse.save_npz(&#34;corpus_vectorised.npz&#34;, self.vectorised)
+        with open(filename, &#34;w&#34;, encoding=&#34;utf-8&#34;) as handle:
+            json.dump(self.to_json(), handle)</code></pre>
 </details>
 </dd>
 <dt id="conversationkg.conversations.corpus.EmailCorpus.to_json"><code class="name flex">
@@ -876,30 +993,115 @@ def load(cls, filename):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def to_json(self, dumps=False):
-    if self.vectorised is None:
-        vectorised_to_save = None
-        vectoriser_params = None
-    else:
-        if self.vectorised.size*self.vectorised.dtype.itemsize &gt; 100e6:
-            warnings.warn(&#34;WARNING: The matrix holding the vectroised emails &#34;
-                  &#34;may be larger than 100mb! Omitting from JSON representation!&#34;)
-            vectorised_to_save = &#34;corpus_vectorised.npz&#34;
-        else:
-            vectorised_to_save = self.vectorised.toarray().tolist()
-        vectoriser_params = self.vectoriser.get_params()
-        del vectoriser_params[&#34;dtype&#34;]
-    
-    d = {&#34;self&#34;: [conv.to_json(dumps=False) for conv in self],
-        &#34;vectorised&#34;: vectorised_to_save,
-        &#34;vectoriser_params&#34;: vectoriser_params}        
-    
-    if dumps: return json.dumps(d)
-    return d</code></pre>
+<pre><code class="python">    def to_json(self, dumps=False):
+#        if self.vectorised is None:
+#            vectorised_to_save = None
+#            vectoriser_params = None
+#        else:
+#            if self.vectorised.size*self.vectorised.dtype.itemsize &gt; 100e6:
+#                warnings.warn(&#34;WARNING: The matrix holding the vectorised emails &#34;
+#                      &#34;may be larger than 100mb! Omitting from JSON representation!&#34;)
+#                vectorised_to_save = &#34;corpus_vectorised.npz&#34;
+#            else:
+#                vectorised_to_save = self.vectorised.toarray().tolist()
+#            vectoriser_params = self.vectoriser.get_params()
+#            del vectoriser_params[&#34;dtype&#34;]
+        
+        d = {&#34;class&#34;: self.__class__.__name__,
+            &#34;self&#34;: [conv.to_json(dumps=False) for conv in self]}#,
+#            &#34;vectorised&#34;: vectorised_to_save,
+#            &#34;vectoriser_params&#34;: vectoriser_params}        
+        
+        if dumps: return json.dumps(d)
+        return d</code></pre>
 </details>
 </dd>
-<dt id="conversationkg.conversations.corpus.EmailCorpus.vectorise"><code class="name flex">
-<span>def <span class="ident">vectorise</span></span>(<span>self, vectoriser_algorithm=sklearn.feature_extraction.text.CountVectorizer, **kwargs)</span>
+</dl>
+</dd>
+<dt id="conversationkg.conversations.corpus.EmailCorpusCollection"><code class="flex name class">
+<span>class <span class="ident">EmailCorpusCollection</span></span>
+<span>(</span><span>list_of_email_corpora)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>list() -&gt; new empty list
+list(iterable) -&gt; new list initialized from iterable's items</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class EmailCorpusCollection(list, metaclass=Universe):
+    @classmethod
+    def from_list_of_ungrouped_email_dicts(cls, list_of_email_dict_list, 
+                                           grouping_function=group_by_id,
+                                           **grouping_function_args):
+        
+        corpus_list = [EmailCorpus.from_ungrouped_email_dicts(email_dicts, 
+                                                              grouping_function,
+                                                              **grouping_function_args)
+                        for email_dicts in list_of_email_dict_list]
+        return cls(corpus_list)
+        
+    
+    @classmethod
+    def from_email_dict_list(cls, list_of_email_dict_list):
+        corpus_list = [EmailCorpus.from_email_dicts(email_dicts)
+                        for email_dicts in list_of_email_dict_list]
+        return cls(corpus_list)
+        
+    def __new__(cls, list_of_email_corpora=[]):
+        self = super().__new__(cls, [])
+        return self
+    
+    def __init__(self, list_of_email_corpora):
+        if len(self) &lt; 1:
+            self.names = []
+            self.n_conversations = self.n_emails = 0
+        else:
+            self.names = [getattr(c, &#34;name&#34;, None) for c in self]
+            self.n_conversations = sum(map(len, self))
+            self.n_emails = sum(c.n_emails for c in self)
+
+        
+    def apply(self, *factories):
+        progressbar = tqdm(self, desc=&#34;Applying factories to corpus&#34;)
+        for corpus in progressbar:
+            progressbar.set_description(f&#34;Applying factories to corpus {corpus.name}&#34;)
+            yield list(corpus.apply(*factories))
+        
+    def iter_conversations(self):
+        for corpus in self:
+            for conv in corpus:
+                yield conv
+    
+    def iter_emails(self):
+        for conv in self.iter_conversations():
+            for email in conv:
+                yield email              
+                
+    def merge_corpora(self):
+        return EmailCorpus(self.iter_conversations())
+                
+    def __getitem__(self, key):
+        corpus_slice = super().__getitem__(key)
+        # user is asking for a single corpus
+        if isinstance(key, int):
+            return corpus_slice
+        return EmailCorpusCollection(corpus_slice)
+    
+    def append(self, corpus):
+        super().append(corpus)
+        self.names.append(getattr(corpus, &#34;name&#34;, None))
+        self.n_conversations += len(corpus)
+        self.n_emails += corpus.n_emails</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>builtins.list</li>
+</ul>
+<h3>Static methods</h3>
+<dl>
+<dt id="conversationkg.conversations.corpus.EmailCorpusCollection.from_email_dict_list"><code class="name flex">
+<span>def <span class="ident">from_email_dict_list</span></span>(<span>list_of_email_dict_list)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -907,20 +1109,110 @@ def load(cls, filename):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">    def vectorise(self, vectoriser_algorithm=CountVectorizer, **kwargs):
-#        default_args = dict(max_df=0.5, min_df=0.1, max_features=self.n_emails)
-        default_args = dict(max_df=0.7, min_df=5)
-        
-        default_args.update(kwargs)
-        
-        self.vectoriser = vectoriser_algorithm(**default_args)
-        
-        self.vectorised = self.vectoriser.fit_transform([
-                email.body.normalised for email in self.iter_emails()
-                ])
+<pre><code class="python">@classmethod
+def from_email_dict_list(cls, list_of_email_dict_list):
+    corpus_list = [EmailCorpus.from_email_dicts(email_dicts)
+                    for email_dicts in list_of_email_dict_list]
+    return cls(corpus_list)</code></pre>
+</details>
+</dd>
+<dt id="conversationkg.conversations.corpus.EmailCorpusCollection.from_list_of_ungrouped_email_dicts"><code class="name flex">
+<span>def <span class="ident">from_list_of_ungrouped_email_dicts</span></span>(<span>list_of_email_dict_list, grouping_function=&lt;function group_by_id&gt;, **grouping_function_args)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@classmethod
+def from_list_of_ungrouped_email_dicts(cls, list_of_email_dict_list, 
+                                       grouping_function=group_by_id,
+                                       **grouping_function_args):
     
-        for email, vec in zip(self.iter_emails(), self.vectorised):
-            email.body.vectorised = vec</code></pre>
+    corpus_list = [EmailCorpus.from_ungrouped_email_dicts(email_dicts, 
+                                                          grouping_function,
+                                                          **grouping_function_args)
+                    for email_dicts in list_of_email_dict_list]
+    return cls(corpus_list)</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="conversationkg.conversations.corpus.EmailCorpusCollection.append"><code class="name flex">
+<span>def <span class="ident">append</span></span>(<span>self, corpus)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>L.append(object) -&gt; None &ndash; append object to end</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def append(self, corpus):
+    super().append(corpus)
+    self.names.append(getattr(corpus, &#34;name&#34;, None))
+    self.n_conversations += len(corpus)
+    self.n_emails += corpus.n_emails</code></pre>
+</details>
+</dd>
+<dt id="conversationkg.conversations.corpus.EmailCorpusCollection.apply"><code class="name flex">
+<span>def <span class="ident">apply</span></span>(<span>self, *factories)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def apply(self, *factories):
+    progressbar = tqdm(self, desc=&#34;Applying factories to corpus&#34;)
+    for corpus in progressbar:
+        progressbar.set_description(f&#34;Applying factories to corpus {corpus.name}&#34;)
+        yield list(corpus.apply(*factories))</code></pre>
+</details>
+</dd>
+<dt id="conversationkg.conversations.corpus.EmailCorpusCollection.iter_conversations"><code class="name flex">
+<span>def <span class="ident">iter_conversations</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def iter_conversations(self):
+    for corpus in self:
+        for conv in corpus:
+            yield conv</code></pre>
+</details>
+</dd>
+<dt id="conversationkg.conversations.corpus.EmailCorpusCollection.iter_emails"><code class="name flex">
+<span>def <span class="ident">iter_emails</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def iter_emails(self):
+    for conv in self.iter_conversations():
+        for email in conv:
+            yield email              </code></pre>
+</details>
+</dd>
+<dt id="conversationkg.conversations.corpus.EmailCorpusCollection.merge_corpora"><code class="name flex">
+<span>def <span class="ident">merge_corpora</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def merge_corpora(self):
+    return EmailCorpus(self.iter_conversations())</code></pre>
 </details>
 </dd>
 </dl>
@@ -952,20 +1244,34 @@ def load(cls, filename):
 <ul class="">
 <li><code><a title="conversationkg.conversations.corpus.Conversation.from_email_dicts" href="#conversationkg.conversations.corpus.Conversation.from_email_dicts">from_email_dicts</a></code></li>
 <li><code><a title="conversationkg.conversations.corpus.Conversation.from_json" href="#conversationkg.conversations.corpus.Conversation.from_json">from_json</a></code></li>
+<li><code><a title="conversationkg.conversations.corpus.Conversation.get_email_bodies" href="#conversationkg.conversations.corpus.Conversation.get_email_bodies">get_email_bodies</a></code></li>
 <li><code><a title="conversationkg.conversations.corpus.Conversation.to_json" href="#conversationkg.conversations.corpus.Conversation.to_json">to_json</a></code></li>
 </ul>
 </li>
 <li>
 <h4><code><a title="conversationkg.conversations.corpus.EmailCorpus" href="#conversationkg.conversations.corpus.EmailCorpus">EmailCorpus</a></code></h4>
 <ul class="">
+<li><code><a title="conversationkg.conversations.corpus.EmailCorpus.apply" href="#conversationkg.conversations.corpus.EmailCorpus.apply">apply</a></code></li>
 <li><code><a title="conversationkg.conversations.corpus.EmailCorpus.from_email_dicts" href="#conversationkg.conversations.corpus.EmailCorpus.from_email_dicts">from_email_dicts</a></code></li>
 <li><code><a title="conversationkg.conversations.corpus.EmailCorpus.from_json" href="#conversationkg.conversations.corpus.EmailCorpus.from_json">from_json</a></code></li>
 <li><code><a title="conversationkg.conversations.corpus.EmailCorpus.from_ungrouped_email_dicts" href="#conversationkg.conversations.corpus.EmailCorpus.from_ungrouped_email_dicts">from_ungrouped_email_dicts</a></code></li>
 <li><code><a title="conversationkg.conversations.corpus.EmailCorpus.iter_emails" href="#conversationkg.conversations.corpus.EmailCorpus.iter_emails">iter_emails</a></code></li>
 <li><code><a title="conversationkg.conversations.corpus.EmailCorpus.load" href="#conversationkg.conversations.corpus.EmailCorpus.load">load</a></code></li>
+<li><code><a title="conversationkg.conversations.corpus.EmailCorpus.parallelise" href="#conversationkg.conversations.corpus.EmailCorpus.parallelise">parallelise</a></code></li>
 <li><code><a title="conversationkg.conversations.corpus.EmailCorpus.save" href="#conversationkg.conversations.corpus.EmailCorpus.save">save</a></code></li>
 <li><code><a title="conversationkg.conversations.corpus.EmailCorpus.to_json" href="#conversationkg.conversations.corpus.EmailCorpus.to_json">to_json</a></code></li>
-<li><code><a title="conversationkg.conversations.corpus.EmailCorpus.vectorise" href="#conversationkg.conversations.corpus.EmailCorpus.vectorise">vectorise</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="conversationkg.conversations.corpus.EmailCorpusCollection" href="#conversationkg.conversations.corpus.EmailCorpusCollection">EmailCorpusCollection</a></code></h4>
+<ul class="">
+<li><code><a title="conversationkg.conversations.corpus.EmailCorpusCollection.append" href="#conversationkg.conversations.corpus.EmailCorpusCollection.append">append</a></code></li>
+<li><code><a title="conversationkg.conversations.corpus.EmailCorpusCollection.apply" href="#conversationkg.conversations.corpus.EmailCorpusCollection.apply">apply</a></code></li>
+<li><code><a title="conversationkg.conversations.corpus.EmailCorpusCollection.from_email_dict_list" href="#conversationkg.conversations.corpus.EmailCorpusCollection.from_email_dict_list">from_email_dict_list</a></code></li>
+<li><code><a title="conversationkg.conversations.corpus.EmailCorpusCollection.from_list_of_ungrouped_email_dicts" href="#conversationkg.conversations.corpus.EmailCorpusCollection.from_list_of_ungrouped_email_dicts">from_list_of_ungrouped_email_dicts</a></code></li>
+<li><code><a title="conversationkg.conversations.corpus.EmailCorpusCollection.iter_conversations" href="#conversationkg.conversations.corpus.EmailCorpusCollection.iter_conversations">iter_conversations</a></code></li>
+<li><code><a title="conversationkg.conversations.corpus.EmailCorpusCollection.iter_emails" href="#conversationkg.conversations.corpus.EmailCorpusCollection.iter_emails">iter_emails</a></code></li>
+<li><code><a title="conversationkg.conversations.corpus.EmailCorpusCollection.merge_corpora" href="#conversationkg.conversations.corpus.EmailCorpusCollection.merge_corpora">merge_corpora</a></code></li>
 </ul>
 </li>
 </ul>

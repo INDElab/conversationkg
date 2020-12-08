@@ -4,7 +4,7 @@ from conversationkg import example_mailinglists, load_example_data_as_raw_JSON
 from conversationkg import load_example_data_as_EmailCorpus
 
 from conversationkg.conversations import EmailCorpusCollection
-from conversationkg.conversations.factories import TfidfVectorizer, SKLearnLDA, SpaCyNER, RakeKeyWordExtractor
+from conversationkg.conversations.factories import TfidfVectorizer, SKLearnLDA, SpaCyNER, StanzaNER, RakeKeyWordExtractor
 
 # from conversationkg import load_example_data_as_EmailKG, load_example_data_as_TextKG
 from conversationkg.kgs import EmailKG, TextKG
@@ -21,22 +21,26 @@ collection = EmailCorpusCollection([])
 for mailing_list in example_mailinglists:
     print(f"\nCurrent mailing list: {mailing_list}...")
     
-    corpus = load_example_data_as_EmailCorpus(mailing_list, n_conversations=50)
+    corpus = load_example_data_as_EmailCorpus(mailing_list, n_conversations=50, 
+                                              corpus_name=mailing_list)
     print(f"\nSUCCESS [{mailing_list}]: Corpus instantiated")
 
-#    vectoriser = TfidfVectorizer(corpus, **vectoriser_params)
-#    vectoriser(corpus)
-#
-#    factories = [
-#            SKLearnLDA(corpus, **lda_params),
-#            SpaCyNER(),
-#            RakeKeyWordExtractor()
-#            ]
-#    
-#    
-#    
-#    for f in factories:
-#        f(corpus)
+    vectoriser = TfidfVectorizer(corpus, **vectoriser_params)
+    vectoriser(corpus)
+
+    factories = [
+            SKLearnLDA(corpus, **lda_params),
+            SpaCyNER(),
+            RakeKeyWordExtractor()
+            ]
+    
+    
+    print(f"SUCCESS [{mailing_list}]: factories initialised")
+    
+    for f in factories:
+        f(corpus)
+        
+    print(f"SUCCESS [{mailing_list}]: factories applied to corpus")
         
     collection.append(corpus)
 
