@@ -183,7 +183,7 @@ class Link(StringEntity):
 
         
 class KeyWord(StringEntity, str):
-    pass
+    None
 
 
 
@@ -266,12 +266,3 @@ class TopicInstance:
         score = json_dict["score"]
         return cls(topic, score)
     
-
-
-    
-
-    
-#class DynamicEntity(metaclass=EntityUniverse):
-    
-    
-        

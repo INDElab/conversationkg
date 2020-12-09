@@ -45,7 +45,6 @@ class Person(WholePerson):
         
         return d/max(len(my_name), len(your_name))
     
-    
     def __hash__(self):
 #        raise NotImplementedError
         return hash(self.name)
@@ -99,6 +98,7 @@ class KG:
                     provenances.append(email.message_id)
         
         
+        # scaffolding
         for c1, c2 in zip(email_corpus, email_corpus[1:]):
             triples.append((c1, "before", c2))
             provenances.append(c2[0].message_id)
@@ -107,14 +107,13 @@ class KG:
                 triples.append((e1, "before", e2))
                 provenances.append(e2.message_id)
 
-        
         return cls(triples, provenances)
-    
     
     
     def __init__(self, triples, provenances):
         self.triples = triples
         self.provenances = provenances
+    
     
     def translate(self, entity2ind=None, pred2ind=None, attach=False):
         if entity2ind or pred2ind:
@@ -160,11 +159,13 @@ class KG:
             return uni_e2i, uni_p2i
         
     
-    def tuples(self):
-        return [(s, o) for s, p, o in self.triples]
+    def tuples(self, of_rel=None):
+        is_rel = lambda p: (p == of_rel) if (of_rel is not None) else True
+        return [(s, o) for s, p, o in self.triples if is_rel(p)]
     
-    def entities(self, filter_f=lambda x: True):
-        return set(e for s, p, o in self.triples for e in (s, o) if filter_f(e))
+    def entities(self, of_type=None):
+        is_type = lambda e: isinstance(e, of_type) if (of_type is not None) else True
+        return set(e for s, p, o in self.triples for e in (s, o) if is_type(e))
     
     def predicates(self):
         return set(p for s, p, o in self.triples)

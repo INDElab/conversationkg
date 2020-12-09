@@ -34,13 +34,16 @@ print("SUCCESS: Data loaded")
 
 #%%
 
-processor = Parallel(n_jobs=4)
+#processor = Parallel(n_jobs=4)
+#
+#delayed_f = delayed(Conversation.from_email_dicts)
+#
+#conversations = processor(delayed_f(subj, d) for subj, d in tqdm(raw_data))
+#
+#corpus = EmailCorpus(conversations)
 
-delayed_f = delayed(Conversation.from_email_dicts)
 
-conversations = processor(delayed_f(subj, d) for subj, d in tqdm(raw_data))
-
-corpus = EmailCorpus(conversations)
+corpus = EmailCorpus.from_email_dicts(raw_data, parallel=True)
 
 
 # above the parallelised version vs. the single-process one:
@@ -58,19 +61,24 @@ print(f"\t({len(corpus)} conversations, {corpus.n_emails} emails)")
 #%%
 
 
-#v = TfidfVectorizer(corpus)
-#
-#_ = v(corpus)
-#
-#
-#lda = SKLearnLDA(corpus, 5)
-#
-#_ = lda(corpus)
+v = TfidfVectorizer(corpus)
 
+v(corpus, parallel=True, attach_matrices_to_corpus=True)
 
-ner = SpaCyNER(preprocessors=lambda s: s.replace("a", "b"))
+#%%
 
-_ = ner(corpus, parallel=False) # , n_jobs=4)
+lda = SKLearnLDA(corpus, 5)
+
+_ = lda(corpus, parallel=True)
+
+#%%
+
+spacy = SpaCyNER(preprocessors=lambda s: s.replace("a", "b"))
+spacy_outputs = spacy(corpus, parallel=True) # , n_jobs=4)
+
+stanza = StanzaNER(preprocessors=lambda s: s.replace("a", "b"))
+stanza_outputs = stanza(corpus[:3], parallel=False) # , n_jobs=4)
+
 
 
 
@@ -78,9 +86,17 @@ _ = ner(corpus, parallel=False) # , n_jobs=4)
 # SpaCyNER iterating conversations : 100%|██████████| 300/300 [01:18<00:00,  3.84it/s]
 #%%
 
-df = delayed(ner.process_conversation)
 
-procd = Parallel(n_jobs=4)(df(c) for c in tqdm(corpus))
+class StanzaNER:
+    def __init__(self, preprocessors=[], postprocessors=[]):
+        self.nlp = stanza.Pipeline('en', processors="tokenize, ner")
+        
+    def get_entities(self, text):
+        return [d.text for d in self.nlp(text).ents]
+    
+    def get_entities_with_labels(self, text):
+        return [(d.text, d.type) for d in self.nlp(text).ents]            
+
 
 
 #%%

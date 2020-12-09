@@ -44,10 +44,89 @@ for f in factories:
 
 #%%
 
+from conversationkg.conversations import Person
+from conversationkg.kgs import KG
+from conversationkg.kgs import PersonNode
 
-from conversationkg.kgs import KG, EmailKG, TextKG
 
 
-textkg = TextKG(corpus)
+class EmailKG(KG):
+    def __new__(cls, email_corpus):
+        triples = []
+        
+        provenances = []
+        
+        for conv in tqdm(email_corpus, desc="Iterating Conversations in EmailKG"):            
+            for email in conv:
+                sender, receiver = Person(email.sender),\
+                                        Person(email.receiver)
+                
+                
+                triples.append((sender, "part_of", conv))
+                provenances.append(email.message_id)
+                
+                triples.append((receiver, "part_of", conv))
+                provenances.append(email.message_id)
+                
+                
+                triples.append((sender, "talked_to", receiver))
+                provenances.append(email.message_id)
+                
+#                triples.append((sender, "evidences", sender.address))
+#                provenances.append(email.message_id)                
+#                triples.append((receiver, "evidences", receiver.address))
+#                provenances.append(email.message_id)                
+                
 
-emailkg = EmailKG(corpus)
+                triples.append((sender.organisation, "part_of", conv))
+                provenances.append(email.message_id)                
+                triples.append((receiver.organisation, "part_of", conv))
+                provenances.append(email.message_id)
+
+                triples.append((sender.organisation, 
+                                     "talked_to", receiver.organisation))
+                provenances.append(email.message_id)
+                triples.append((sender, "evidences",
+                                     sender.organisation))
+                provenances.append(email.message_id)
+
+                triples.append((receiver, "evidences",
+                                     receiver.organisation))
+                provenances.append(email.message_id)
+
+        
+        return KG.from_email_corpus(email_corpus, triples, provenances)
+
+
+class TextKG(KG):
+    def __new__(cls, email_corpus):
+        triples = []
+        
+        provenances = []
+        
+        for conv in tqdm(email_corpus, desc="Iterating Conversations in TextKG"):
+            triples.append((conv, "is_about", conv.topic.topic))
+            provenances.append(conv[0].message_id)
+            
+            for email in conv:
+                triples.append((email, "is_about", email.topic.topic))
+                provenances.append(email.message_id)
+                
+                mentioned_people = [PersonNode(Person(str(e), "")) for e, l in email.body.entities 
+                                    if l == "PERSON"]
+
+                for person in mentioned_people:
+                    triples.append((email, "mentions", person))
+                    provenances.append(email.message_id)
+                    
+                    for person2 in mentioned_people:
+                        if not person == person2:
+                            triples.append((person, "talked_to", person2))
+                            provenances.append(email.message_id)
+
+        
+        return KG.from_email_corpus(email_corpus, triples, provenances)
+    
+    
+    
+#%%

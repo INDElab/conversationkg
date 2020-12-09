@@ -77,6 +77,7 @@ class Email(metaclass=Universe):
     def __init__(self, body, sender, receiver, time, 
                  message_id, inreplyto_id, 
                  subject, observers, attachments, **unused_kwargs):
+        
         self.message_id = message_id
         self.inreplyto_id = inreplyto_id
         
@@ -97,9 +98,9 @@ class Email(metaclass=Universe):
         
 #        self.topic = None
         
-        Universe.observe(body, self, "evidenced_by")
-        Universe.observe(sender, self, "evidenced_by")
-        Universe.observe(receiver, self, "evidenced_by")
+#        Universe.observe(body, self, "evidenced_by")
+#        Universe.observe(sender, self, "evidenced_by")
+#        Universe.observe(receiver, self, "evidenced_by")
         
         
     # for sorting
@@ -172,58 +173,32 @@ class EmailBody(str, metaclass=Universe):
         return self
         
     
-    def __init__(self, body_str, 
-                 links=None, addresses=None, entities=[], **kwargs):
-        
+    def __init__(self, body_str, **kwargs):
         self.body, self.signature, self.quoted = EmailBody.discern_quoted(body_str)
-
         self.normalised = self.normalise()
                 
-        self.links = links if links else tuple(self.extract_links())
-        self.addresses = addresses if addresses else tuple(self.extract_addresses())
+#        self.links = links if links else tuple(self.extract_links())
+#        self.addresses = addresses if addresses else tuple(self.extract_addresses())
         self.code_snippets = []
         
         
-        if entities:
-            self.entities = entities
-        else:
-            self.entities = self.discover_entities()
+#        self.entities = None
+#        self.keywords = None
+#        self.topic = None
         
-        for entity in self.entities:
-            Universe.observe(entity, self, "mentioned_in")
+        
+#        if entities:
+#            self.entities = entities
+#        else:
+#            self.entities = self.discover_entities()
+        
+#        for entity in self.entities:
+#            Universe.observe(entity, self, "mentioned_in")
             
     
     def normalise(self):
         normalised_self = self.strip('"').strip("'").lower()
         return normalised_self
-    
-    def extract_links(self):
-        for l in url_re.findall(self.normalised):
-            link = Link(l)
-            Universe.observe(link, self, "mentioned_in")
-            yield link
-    
-    def extract_addresses(self):
-        for addr in address_pattern.findall(self.normalised):
-            address = Address(addr)
-            Universe.observe(address, self, "mentioned_in")
-            yield address
-            
-    def discover_entities(self):
-        s = str(self.normalised)
-        if len(s) > nlp.max_length:
-            warnings.warn(f"Email body of {len(self)} characters exceeds spacy's maximum"
-                            "of {nlp.max_length}! Clipping the body to the maximum length and proceeding.")
-            
-            s = s[:nlp.max_length]
-        ents = nlp(s).ents
-        ents = [(str(e).strip(), e.label_) for e in ents]
-        return ents
-    
-    def discover_keywords(self):
-        rake.extract_keywords_from_text(self.normalised)
-        kws = rake.get_ranked_phrases_with_scores()
-        return [KeyWord(phrase) for score, phrase in kws if score > 1.0]
     
     def to_json(self, dumps=False):
         d = {"class": self.__class__.__name__,
@@ -263,5 +238,35 @@ class EmailBody(str, metaclass=Universe):
                 reply += fragment.content
                 
         return (reply, signature, quoted)
+    
+    
+    
+#    def extract_links(self):
+#        for l in url_re.findall(self.normalised):
+#            link = Link(l)
+#            Universe.observe(link, self, "mentioned_in")
+#            yield link
+#    
+#    def extract_addresses(self):
+#        for addr in address_pattern.findall(self.normalised):
+#            address = Address(addr)
+#            Universe.observe(address, self, "mentioned_in")
+#            yield address
+            
+#    def discover_entities(self):
+#        s = str(self.normalised)
+#        if len(s) > nlp.max_length:
+#            warnings.warn(f"Email body of {len(self)} characters exceeds spacy's maximum"
+#                            "of {nlp.max_length}! Clipping the body to the maximum length and proceeding.")
+#            
+#            s = s[:nlp.max_length]
+#        ents = nlp(s).ents
+#        ents = [(str(e).strip(), e.label_) for e in ents]
+#        return ents
+#    
+#    def discover_keywords(self):
+#        rake.extract_keywords_from_text(self.normalised)
+#        kws = rake.get_ranked_phrases_with_scores()
+#        return [KeyWord(phrase) for score, phrase in kws if score > 1.0]
         
         

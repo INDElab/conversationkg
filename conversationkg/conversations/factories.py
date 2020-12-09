@@ -1,8 +1,10 @@
-import numpy as np
 import json
+import re
+from functools import reduce
+
+import numpy as np
 from tqdm import tqdm
 
-from functools import reduce
 
 # topic modelling
 from sklearn.decomposition import LatentDirichletAllocation
@@ -19,7 +21,7 @@ from rake_nltk import Rake
 from .entities import Entity, StringEntity
 from .entities import Topic, TopicInstance
 from .entities import Person, Organisation
-from .entities import KeyWord
+from .entities import KeyWord, Link, Address
 
 from sklearn.feature_extraction.text import TfidfVectorizer as tfidf
 from sklearn.feature_extraction.text import CountVectorizer as count
@@ -60,19 +62,20 @@ class Factory:
     
     TODO:
         - default __init__? -> perhaps for checks if subclassing factory family is well-defined?
-        - default __call__ function with basic functionality (that factories override if necessary)
-        - parallelisation (including parameters)
     """
     
     def __init__(self):
-        raise NotImplementedError
+        raise NotImplementedError("Factory is only intended to be an abstract base class, "
+                                  "please use a more specific subclass.")
     
     
     def process_conversation(self, conversation):
-        raise NotImplementedError
+        raise NotImplementedError("Factory is only intended to be an abstract base class, "
+                                  "please use a more specific subclass.")
     
     def process_email(self, email):
-        raise NotImplementedError
+        raise NotImplementedError("Factory is only intended to be an abstract base class, "
+                                  "please use a more specific subclass.")
         
         
     def parallelise_call(self, conversation_iter, n_jobs=-1, processing_function=None):
@@ -80,14 +83,13 @@ class Factory:
             processing_function = self.process_conversation
         delayed_func = delayed(processing_function)
         # Parallel(n_jobs=n_jobs, require='sharedmem')
-        return Parallel(n_jobs=n_jobs)(delayed_func(conv) for conv in conversation_iter)
+        return Parallel(n_jobs=n_jobs, require='sharedmem')(delayed_func(conv) for conv in conversation_iter)
     
     
     def __call__(self, corpus, parallel=True, n_jobs=-1):
         progressbar = tqdm(corpus, 
                            desc=f"{self.__class__.__name__} iterating conversations"
-                                f" {'in parallel' if parallel else ''}")
-        
+                                f" {'with ' + str(n_jobs) + ' processes' if parallel else ''}")
         if parallel:
             return self.parallelise_call(progressbar, n_jobs)
         else:
@@ -117,46 +119,56 @@ class Factory:
 
 
 class VectorFactory(Factory):
-    def __init__(self, corpus, vectoriser_algorithm, add_matrix_to_corpus=True, **vectoriser_kwargs):
-        default_args = dict(max_df=0.7, min_df=5)
-        default_args.update(vectoriser_kwargs)
-
+    def __init__(self, corpus, vectoriser_algorithm, call_on_given_corpus=False, **vectoriser_kwargs):
         self.fitted_corpus = corpus
-        self.add_matrix = add_matrix_to_corpus
+
         
+        default_args = dict(max_df=0.7, min_df=5)
+        default_args.update(vectoriser_kwargs)        
         self.vectoriser = vectoriser_algorithm(**default_args)
-        self.matrix = self.vectoriser.fit_transform([
+        self.vectoriser.fit([
                             email.body.normalised for email in corpus.iter_emails()
                         ])
-        self.conversation_matrix = self.vectoriser.transform(
-                                    [conv.get_email_bodies(attr="normalised", join_str=" ") for conv in corpus]
-                                    )        
-        
+
         self.vocabulary = self.vectoriser.get_feature_names()
+        
+        if call_on_given_corpus:
+            self.__call__(attach_matrices_to_corpus=True) # doesn't make sense with False since nothing is returned
         
 
     def process_conversation(self, conversation):
-        conversation.vectorised = next(self.conv_iter)
+        conversation.vectorised = self.conversation_matrix[self.i]
+        self.i += 1
         for email in conversation:
             email_vector = self.process_email(email)
         return conversation.vectorised
     
     def process_email(self, email):
-        email.body.vectorised = next(self.email_iter)
-        return email.body.vectorised
+        e = email.body
+        e.vectorised = self.email_matrix[self.j]
+        self.j += 1
+        return e.vectorised
 
 
-    def __call__(self, corpus=None, **kwargs):
+    def __call__(self, corpus=None, attach_matrices_to_corpus=False, **kwargs):
         if not corpus:
             corpus = self.fitted_corpus
-        
-        if self.add_matrix:
+
+        self.conversation_matrix = self.vectoriser.transform(
+                    [conv.subject + " " + 
+                     conv.get_email_bodies(attr="normalised", join_str=" ") 
+                     for conv in corpus]
+                    )
+        self.email_matrix = self.vectoriser.transform(
+                    [email.body.normalised for email in corpus.iter_emails()]
+                    )
+            
+        if attach_matrices_to_corpus:
             corpus.vectorised_vocabulary = self.vocabulary
-            corpus.vectorised = self.matrix
+            corpus.vectorised = self.email_matrix
             corpus.conversations_vectorised = self.conversation_matrix        
         
-        self.conv_iter = iter(self.conversation_matrix)
-        self.email_iter = iter(self.matrix)
+        self.i = self.j = 0
         
         return super().__call__(corpus, **kwargs)
         
@@ -216,14 +228,17 @@ class TopicFactory(Factory):
     
     
     def process_conversation(self, conversation):
-        conversation.topic = self.get_topic(next(self.conv_iter))    
+        conversation.topic = self.get_topic(self.conversation_preds[self.i])    
+        self.i += 1
         for email in conversation:
             email_topic = self.process_email(email)
         return conversation.topic
 
     def process_email(self, email):
-        email.topic = self.get_topic(next(self.email_iter))
-        return email.topic
+        e = email.body
+        e.topic = self.get_topic(self.email_preds[self.j])
+        self.j += 1
+        return e.topic
             
     
     
@@ -232,8 +247,9 @@ class TopicFactory(Factory):
         if not corpus:
             corpus = self.fitted_corpus
         
-        self.conv_iter = iter(self.predict(corpus.conversations_vectorised))
-        self.email_iter = iter(self.predict(corpus.vectorised))
+        self.i = self.j = 0
+        self.conversation_preds = self.predict(corpus.conversations_vectorised)
+        self.email_preds = self.predict(corpus.vectorised)
         
         return super().__call__(corpus, **kwargs)
         
@@ -289,13 +305,11 @@ class GensimLDA(TopicFactory):
                                   "as required by the parent TopicFactory.")
 
 
-        
 
 class NamedEntityFactory(Factory):
-    def __init__(self, corpus, preprocessors=[], postprocessors=[]):
-        self.product_type = Entity
-        self.product_name = "entities"
-        
+    product_name = "entities"
+    product_class = Entity
+    def __init__(self, corpus, preprocessors=[], postprocessors=[]):        
         self.pre = self.combine_processors(*preprocessors)
         self.post = self.combine_processors(self.string_to_class, *postprocessors)
         
@@ -320,23 +334,19 @@ class NamedEntityFactory(Factory):
         conversation.entities = []
         for email in conversation:
             email_entities = self.process_email(email)
-            conversation.entities.append(email_entities)
+            conversation.entities.extend(email_entities)
         return conversation.entities
     
     def process_email(self, email):
-        email.entities = list(filter(None, self.post(self.get_entities_with_labels(self.pre(email.body.normalised)))))
-        return email.entities
+        e = email.body
+        e.entities = list(filter(None, self.post(self.get_entities_with_labels(self.pre(email.body.normalised)))))
+        return e.entities
     
-#    def __call__(self, corpus):
-#        for conv in tqdm(corpus, 
-#                         desc=f"{self.__class__.__name__} iterating conversations"):
-#            all_entities = []
-#            for email in conv:
-#                email.entities = list(filter(None, 
-#                                             self.post(self.get_entities_with_labels(self.pre(email.body.normalised)))
-#                                             ))
-#                all_entities.extend(email.entities)
-#            conv.entities = all_entities
+    
+#    def get_entities(self, text):
+#        raise NotImplementedError("Please use a subclass such as SpaCyNER or StanzaNER!")
+#    def get_entities_with_labels(self, text):
+#        raise NotImplementedError("Please use a subclass such as SpaCyNER or StanzaNER!")
     
     
 class SpaCyNER(NamedEntityFactory):
@@ -364,19 +374,14 @@ class StanzaNER(NamedEntityFactory):
 
 
 
+
+
 class KeyWordFactory(Factory):
+    product_name = "keywords"
+    product_class = KeyWord
     def __init__(self, preprocessors=[], postprocessors=[]):
-        self.product_type = KeyWord
-        self.product_name = "keywords"
-        
         self.pre = self.combine_processors(*preprocessors)
         self.post = self.combine_processors(self.output_to_class, *postprocessors)
-        
-#        # set to False if process_conversation calls process_email, to True otherwise
-#        self.process_emails_separately = False
-        
-#        super().__init__(self, corpus=None, preprocessors, postprocessors)
-
 
     def process_conversation(self, conversation):
         conversation.keywords = []
@@ -386,40 +391,76 @@ class KeyWordFactory(Factory):
         return conversation.keywords
 
     def process_email(self, email):
-        email.keywords = list(filter(None, self.post(self.get_keywords(self.pre(email.body.normalised)))))
-        return email.keywords
-
-
-#    def __call__(self, corpus):
-#        for conv in tqdm(corpus, 
-#                         desc=f"{self.__class__.__name__} iterating conversations"):
-#            all_keywords = []
-#            for email in conv:
-#                email.keywords = list(filter(None,
-#                                             self.post(self.get_keywords(self.pre(email.body.normalised)))
-#                                    ))
-#                all_keywords.extend(email.keywords)
-#            conv.keywords = all_keywords
-    
+        e = email.body
+        e.keywords = list(filter(None, self.post(self.get_keywords(self.pre(e.normalised)))))
+        return e.keywords
     
     @staticmethod
     def output_to_class(keyword_list):
         return [KeyWord(s) for s in keyword_list]
     
     
-    
 class RakeKeyWordExtractor(KeyWordFactory):
-    def __init__(self, preprocessors=[], postprocessors=[]):
+    def __init__(self, preprocessors=[], postprocessors=[], score_threshold=0.0):
         self.rake = Rake()
-        postprocessors = [self.remove_low_scores, *postprocessors]  # self.combine_processors(self.remove_low_scores, *postprocessors)
+        self.score_threshold = score_threshold
+        postprocessors = [lambda ls: self.remove_low_scores(ls, self.score_threshold), 
+                          *postprocessors]
         super().__init__(preprocessors, postprocessors)
-    
+            
     @staticmethod    
     def remove_low_scores(keyword_list, score=1.0):
         return [phrase for score, phrase in keyword_list if score > 1.0]
-    
-    
+      
     
     def get_keywords(self, text):
-        self.rake.extract_keywords_from_text(text)
+        try:
+            self.rake.extract_keywords_from_text(text)
+        except ZeroDivisionError:
+            return []
         return self.rake.get_ranked_phrases_with_scores()
+    
+
+
+
+  
+    
+class RegexFactory(Factory):
+    def __init__(self, preprocessors=[], postprocessors=[]):
+        super().__init__(preprocessors, postprocessors)
+        
+    def get_all(self, text):
+        if self.__class__ is RegexFactory:
+            raise NotImplementedError("Please use a subclass such as AddressFactory or LinkFactory!")
+        return self.pattern.findall(text)
+    
+    def process_conversation(self, conversation):
+        products = []
+        for e in conversation:
+            email_products = self.process_email(e)
+            products.extend(email_products)
+        setattr(conversation, self.product_name, products)
+        return products
+    
+    
+    def process_email(self, email):
+        e = email.body
+        products = list(filter(None, self.post(self.get_all(self.pre(e.normalised)))))
+        setattr(e, self.product_name, products)
+        return products
+    
+
+class AddressFactory(RegexFactory):
+    pattern = re.compile(r'[\w\.-]+@[\w\.-]+')
+    product_name = "addresses"
+    product_class = Address
+    
+    
+class LinkFactory(RegexFactory):
+    pattern = re.compile(r"http[s]?:\/\/(?:[a-zA-Z]|[0-9]|[$-_@.&+~]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+")
+    product_name = "links"
+    product_name = Link
+        
+    
+    
+    

@@ -7,6 +7,114 @@ from collections import Counter
 import matplotlib
 import pandas as pd
 
+import json
+
+
+class JSONWriter:
+    def __init__(self, kg):
+        self.kg = kg
+        self.entities = kg.entities()
+        self.triples = kg.triples
+        self.provenances = kg.provenances
+
+
+
+    def store(self, name, save_mapping=True):
+        with open(f"{name}.json", "w") as handle:
+            json.dump(self.translated, handle)
+            
+        with open(f"{name}.provenances.json", "w") as handle:
+            json.dump(self.provenances, handle)
+        
+        if save_mapping:
+            reversed_d = self.reverse_mapping(self.entity2ind)
+            json_d = {i:e.to_json() for i, e in reversed_d.items()}
+            
+            with open(f"{name}.ind2entity.json", "w") as handle:
+                json.dump(json_d, handle)
+            
+            reverse_d = self.reverse_mapping(self.pred2ind)
+            with open(f"{name}.ind2pred.json", "w") as handle:
+                json.dump(reverse_d, handle)
+    
+    
+    @classmethod
+    def restore(cls, name, load_mapping_of=None):
+        def get_class(cls_name):
+            for mod in conversations_modules:
+                try:
+                    cls = getattr(mod, cls_name)
+                    return cls
+                except AttributeError:
+                    pass
+            raise AttributeError(f"{cls_name} could not be found in any of the modules!")
+        
+        
+        def json_to_entity(json_dict):
+            try:
+                json_dict["class"]
+            except KeyError:
+                print(json_dict.keys())
+                raise
+            
+            cls_name = json_dict["class"]
+            cls = get_class(cls_name)
+            return cls.from_json(json_dict)
+        
+        
+        if load_mapping_of is None:
+            load_mapping_of = name
+        
+        with open(f"{load_mapping_of}.ind2entity.json") as handle:
+            loaded_entity_mapping = {int(i): d for i, d in json.load(handle).items()}
+            ind2entity = {i:json_to_entity(d) for i, d in loaded_entity_mapping.items()}
+        
+        ind2entity = {i: (Person(x) if type(x) is WholePerson else x)
+                        for i, x in ind2entity.items()}
+        
+        with open(f"{load_mapping_of}.ind2pred.json") as handle:
+            ind2pred = {int(i): d for i, d in json.load(handle).items()}
+        
+        
+        with open(f"{name}.json") as handle:
+            loaded = json.load(handle)    
+        
+        restored_triples = [(ind2entity[s],
+                             ind2pred[p],
+                             ind2entity[o]) for s, p, o in loaded]
+                
+        
+        with open(f"{name}.provenances.json") as handle:
+            provenances = json.load(handle)
+            
+        
+        kg = KG(restored_triples, provenances)
+        
+        kg.translated = loaded
+        kg.entity2ind = kg.reverse_mapping(ind2entity)
+        kg.pred2ind = kg.reverse_mapping(ind2pred)
+        
+        return kg
+    
+    
+    @staticmethod
+    def reverse_mapping(d):
+        rev_d = {}
+        
+        for k, v in d.items():
+            if not v in rev_d:
+                rev_d[v] = k
+            else:
+                print("duplicate:", v)
+                if not type(v) is Person:
+                    raise ValueError("Non-bijective mapping!")
+        
+        return rev_d
+
+
+
+
+
 
 class CSVWriter:
     def __init__(self, kg):
@@ -103,6 +211,11 @@ class CSVWriter:
         
         
 
+
+
+
+
+
 from neo4j import GraphDatabase      
 
 class Neo4jWriter:
@@ -114,7 +227,6 @@ class Neo4jWriter:
 
     def to_neo4j(self):
         pass
-    
     
     
     

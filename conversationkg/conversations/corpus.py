@@ -121,11 +121,11 @@ class EmailCorpusCollection(list, metaclass=Universe):
         return EmailCorpus(self.iter_conversations())
                 
     def __getitem__(self, key):
-        corpus_slice = super().__getitem__(key)
+        collection_slice = super().__getitem__(key)
         # user is asking for a single corpus
-        if isinstance(key, int):
-            return corpus_slice
-        return EmailCorpusCollection(corpus_slice)
+        if isinstance(key, int) or collection_slice == []:
+            return collection_slice
+        return EmailCorpusCollection(collection_slice)
     
     def append(self, corpus):
         super().append(corpus)
@@ -147,14 +147,16 @@ class EmailCorpus(tuple, metaclass=Universe):
     def from_ungrouped_email_dicts(cls, 
                                    email_dicts, 
                                    corpus_name=None,
-                                   grouping_function=group_by_id, 
+                                   grouping_function=group_by_id,
+                                   parallel=True, n_jobs=-1,
                                    **grouping_function_args):
         
 #        emails = tqdm(map(Email.from_email_dict, email_dicts), total=len(email_dicts),
 #                      desc="Iterating emails in EmailCorpus.from_ungrouped_email_dicts")
         progressbar = tqdm(email_dicts, 
                            desc="Iterating emails in EmailCorpus.from_ungrouped_email_dicts")
-        emails = cls.parallelise(progressbar, Email.from_email_dict)
+        emails = cls.parallelise(progressbar, Email.from_email_dict)\
+                    if parallel else list(map(Email.from_email_dict, progressbar))
         
         grouped_emails = grouping_function(emails, **grouping_function_args)
         
@@ -163,11 +165,12 @@ class EmailCorpus(tuple, metaclass=Universe):
     
     
     @classmethod
-    def from_email_dicts(cls, email_dicts, corpus_name=None):
+    def from_email_dicts(cls, email_dicts, corpus_name=None, parallel=True, n_jobs=-1):
         progressbar = tqdm(email_dicts, 
                            desc="Iterating conversations in EmailCorpus.from_email_dicts")
         f = lambda tup: Conversation.from_email_dicts(*tup)
-        conversations = cls.parallelise(progressbar, f)
+        conversations = cls.parallelise(progressbar, f)\
+                    if parallel else list(map(f, progressbar))
         return cls(conversations, corpus_name)
 
     def __new__(cls, conversations, corpus_name=None):
@@ -177,8 +180,8 @@ class EmailCorpus(tuple, metaclass=Universe):
         return self
         
     def __init__(self, conversations, corpus_name=None):        
-        for conv in self:
-            Universe.observe(conv, self, "evidenced_by")
+#        for conv in self:
+#            Universe.observe(conv, self, "evidenced_by")
         
         if corpus_name:
             self.name = corpus_name
@@ -196,17 +199,15 @@ class EmailCorpus(tuple, metaclass=Universe):
         
     
     def __getitem__(self, key):
-        conv_slice = super().__getitem__(key)
+        corp_slice = super().__getitem__(key)
         # user is asking for a single conversation
-        if isinstance(key, int):
-            return conv_slice
+        if isinstance(key, int) or corp_slice is tuple():
+            return corp_slice
         # else: key is a slice(), i.e. user is asking for a subcorpus
         
-        subcorpus = EmailCorpus(conv_slice)
+        subcorpus = EmailCorpus(corp_slice)
         
-        
-        email_inds = list(range(sum(len(c) for c in conv_slice)))
-        
+        email_inds = list(range(sum(len(c) for c in corp_slice)))
         
         if hasattr(self, "vectorised"):
             subcorpus.vectorised = self.vectorised[email_inds, ]
@@ -310,11 +311,17 @@ class Conversation(tuple, metaclass=Universe):
         self.observers = set(p for m in self for p in m.observers) # people in CC
         
         self.attachments = set(a for m in self for a in m.attachments)
-        self.documents = set(d for m in self 
-                            for doc_ls in (m.body.links, m.body.addresses, m.body.code_snippets)
-                            for d in doc_ls)
+#        self.documents = set(d for m in self 
+#                            for doc_ls in (m.body.links, m.body.addresses, m.body.code_snippets)
+#                            for d in doc_ls)
 
         self.first_observed_at = self.start_time
+    
+    def __getitem__(self, key):
+        conv_slice = super().__getitem__(key)
+        if isinstance(key, int) or conv_slice is tuple():
+            return conv_slice
+        return Conversation(self.subject, conv_slice)
     
     def __eq__(self, other):
         if not (type(self) == type(other) == Conversation):
