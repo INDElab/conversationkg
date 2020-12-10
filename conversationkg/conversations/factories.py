@@ -112,7 +112,7 @@ class Factory:
             to_lower = str.lower
             remove_outer_whitespace = str.strip
             remove_comma = lambda s: s.replace(",", "")
-            str_normaliser = Factory.combine_processors([remove_comma, remove_outer_whitespace, to_lower])
+            str_normaliser = Factory.combine_processors(remove_comma, remove_outer_whitespace, to_lower)
         """
         return reduce(lambda f, g: lambda x: f(g(x)), processors, lambda x: x)
 #        return reduce(lambda f, g: lambda *x, **y: f(g(*x, **y)), processors, lambda *x, **y: (x, y))
@@ -381,7 +381,7 @@ class KeyWordFactory(Factory):
     product_class = KeyWord
     def __init__(self, preprocessors=[], postprocessors=[]):
         self.pre = self.combine_processors(*preprocessors)
-        self.post = self.combine_processors(self.output_to_class, *postprocessors)
+        self.post = self.combine_processors(self.string_to_class, *postprocessors)
 
     def process_conversation(self, conversation):
         conversation.keywords = []
@@ -396,7 +396,7 @@ class KeyWordFactory(Factory):
         return e.keywords
     
     @staticmethod
-    def output_to_class(keyword_list):
+    def string_to_class(keyword_list):
         return [KeyWord(s) for s in keyword_list]
     
     
@@ -404,8 +404,7 @@ class RakeKeyWordExtractor(KeyWordFactory):
     def __init__(self, preprocessors=[], postprocessors=[], score_threshold=0.0):
         self.rake = Rake()
         self.score_threshold = score_threshold
-        postprocessors = [lambda ls: self.remove_low_scores(ls, self.score_threshold), 
-                          *postprocessors]
+        postprocessors = [*postprocessors, lambda ls: self.remove_low_scores(ls, self.score_threshold)]
         super().__init__(preprocessors, postprocessors)
             
     @staticmethod    
@@ -427,7 +426,17 @@ class RakeKeyWordExtractor(KeyWordFactory):
     
 class RegexFactory(Factory):
     def __init__(self, preprocessors=[], postprocessors=[]):
-        super().__init__(preprocessors, postprocessors)
+        self.pre = self.combine_processors(*preprocessors)
+        self.post = self.combine_processors(lambda ls: self.str_to_class(ls, self.product_class), 
+                                            *postprocessors)
+
+        
+#        super().__init__(preprocessors, postprocessors)
+        
+        
+    @staticmethod
+    def str_to_class(str_list, cls):
+        return list(map(cls, str_list))
         
     def get_all(self, text):
         if self.__class__ is RegexFactory:
@@ -447,6 +456,7 @@ class RegexFactory(Factory):
         e = email.body
         products = list(filter(None, self.post(self.get_all(self.pre(e.normalised)))))
         setattr(e, self.product_name, products)
+        print(self.product_name, len(getattr(e, self.product_name)))
         return products
     
 
@@ -459,7 +469,7 @@ class AddressFactory(RegexFactory):
 class LinkFactory(RegexFactory):
     pattern = re.compile(r"http[s]?:\/\/(?:[a-zA-Z]|[0-9]|[$-_@.&+~]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+")
     product_name = "links"
-    product_name = Link
+    product_class = Link
         
     
     

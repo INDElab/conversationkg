@@ -223,7 +223,10 @@ class EmailCorpus(tuple, metaclass=Universe):
     
     
     def apply(self, *factories):
-        for f in factories: yield f(self)
+        results = {}
+        for f in tqdm(factories, 
+                      desc=f"Applying {len(factories)} factories"):
+            results[f] = f(self)
     
     
     def save(self, filename):
