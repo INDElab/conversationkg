@@ -109,5 +109,6 @@ textkg.to_csv("textkg")
 ```
 
 
-
+## Acknowledgements
+This material is based upon work supported by the Air Force Office of Scientific Research under award number FA8655-20-1-7005. Any opinions, finding, and conclusions or recommendations expressed in this material are those of the author(s) and do not necessarily reflect the views of the United States Air Force.
 
