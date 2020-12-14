@@ -83,8 +83,9 @@ class Factory:
             processing_function = self.process_conversation
         delayed_func = delayed(processing_function)
         # Parallel(n_jobs=n_jobs, require='sharedmem')
-        return Parallel(n_jobs=n_jobs, require='sharedmem')(delayed_func(conv) for conv in conversation_iter)
-    
+        with Parallel(n_jobs=n_jobs) as parallel:
+            result = parallel(delayed_func(conv) for conv in conversation_iter)
+        return result
     
     def __call__(self, corpus, parallel=True, n_jobs=-1):
         progressbar = tqdm(corpus, 
@@ -133,7 +134,7 @@ class VectorFactory(Factory):
         self.vocabulary = self.vectoriser.get_feature_names()
         
         if call_on_given_corpus:
-            self.__call__(attach_matrices_to_corpus=True) # doesn't make sense with False since nothing is returned
+            self.__call__(attach_matrices_to_corpus=True) # doesn't make sense with False since __init__ cannot return
         
 
     def process_conversation(self, conversation):
@@ -144,7 +145,7 @@ class VectorFactory(Factory):
         return conversation.vectorised
     
     def process_email(self, email):
-        e = email.body
+        e = email
         e.vectorised = self.email_matrix[self.j]
         self.j += 1
         return e.vectorised
@@ -235,7 +236,7 @@ class TopicFactory(Factory):
         return conversation.topic
 
     def process_email(self, email):
-        e = email.body
+        e = email
         e.topic = self.get_topic(self.email_preds[self.j])
         self.j += 1
         return e.topic
@@ -273,7 +274,7 @@ class SKLearnLDA(TopicFactory):
     def __init__(self, corpus, n_topics, **kwargs):
         self.model_args = dict(n_components=n_topics, max_iter=20, learning_method='batch',
                                random_state=0, verbose=1, n_jobs=-1)
-        self.model_args.update(learning_offset=self.model_args["max_iter"]//100*10)
+        self.model_args.update(learning_offset=(self.model_args["max_iter"]//100)*10)
         self.model_args.update(dict(evaluate_every=self.model_args["max_iter"]//10))
         self.model_args.update(kwargs)
         model = LatentDirichletAllocation(**self.model_args)
@@ -338,7 +339,7 @@ class NamedEntityFactory(Factory):
         return conversation.entities
     
     def process_email(self, email):
-        e = email.body
+        e = email
         e.entities = list(filter(None, self.post(self.get_entities_with_labels(self.pre(email.body.normalised)))))
         return e.entities
     
@@ -350,7 +351,7 @@ class NamedEntityFactory(Factory):
     
     
 class SpaCyNER(NamedEntityFactory):
-    def __init__(self, preprocessors=[], postprocessors=[]):
+    def __init__(self, preprocessors=[], postprocessors=[], **spacy_keywords):
         self.nlp = spacy.load("en_core_web_md")
         super().__init__(preprocessors, postprocessors)
         
@@ -362,8 +363,10 @@ class SpaCyNER(NamedEntityFactory):
         
     
 class StanzaNER(NamedEntityFactory):
-    def __init__(self, preprocessors=[], postprocessors=[]):
-        self.nlp = stanza.Pipeline('en', processors="tokenize, mwt, ner")
+    def __init__(self, preprocessors=[], postprocessors=[], **stanza_keywords):
+        pipeline__args = dict(lang="en", processors="tokenize, mwt, ner")
+        pipeline__args.update(stanza_keywords)
+        self.nlp = stanza.Pipeline(**pipeline__args)
         super().__init__(preprocessors, postprocessors)
         
     def get_entities(self, text):
@@ -391,8 +394,8 @@ class KeyWordFactory(Factory):
         return conversation.keywords
 
     def process_email(self, email):
-        e = email.body
-        e.keywords = list(filter(None, self.post(self.get_keywords(self.pre(e.normalised)))))
+        e = email
+        e.keywords = list(filter(None, self.post(self.get_keywords(self.pre(e.body.normalised)))))
         return e.keywords
     
     @staticmethod
@@ -453,10 +456,11 @@ class RegexFactory(Factory):
     
     
     def process_email(self, email):
-        e = email.body
-        products = list(filter(None, self.post(self.get_all(self.pre(e.normalised)))))
+        e = email
+        products = list(filter(None, self.post(self.get_all(self.pre(e.body.normalised)))))
         setattr(e, self.product_name, products)
-        print(self.product_name, len(getattr(e, self.product_name)))
+        
+        print(getattr(e, self.product_name))
         return products
     
 

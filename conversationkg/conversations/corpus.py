@@ -71,20 +71,26 @@ def group_by_id(emails, **kwargs):
 class EmailCorpusCollection(list, metaclass=Universe):
     @classmethod
     def from_list_of_ungrouped_email_dicts(cls, list_of_email_dict_list, 
+                                           corpus_names,
                                            grouping_function=group_by_id,
+                                           parallel=True, n_jobs=-1,
                                            **grouping_function_args):
         
-        corpus_list = [EmailCorpus.from_ungrouped_email_dicts(email_dicts, 
-                                                              grouping_function,
+        corpus_list = [EmailCorpus.from_ungrouped_email_dicts(email_dicts,
+                                                              corpus_name=name,
+                                                              grouping_function=grouping_function,
+                                                              parallel=parallel, n_jobs=n_jobs,
                                                               **grouping_function_args)
-                        for email_dicts in list_of_email_dict_list]
+                        for email_dicts, name in zip(list_of_email_dict_list, corpus_names)]
         return cls(corpus_list)
         
     
     @classmethod
-    def from_email_dict_list(cls, list_of_email_dict_list):
-        corpus_list = [EmailCorpus.from_email_dicts(email_dicts)
-                        for email_dicts in list_of_email_dict_list]
+    def from_email_dict_list(cls, list_of_email_dict_list, corpus_names, 
+                             parallel=True, n_jobs=-1):
+        corpus_list = [EmailCorpus.from_email_dicts(email_dicts, corpus_name=name,
+                                                    parallel=parallel, n_jobs=n_jobs)
+                        for email_dicts, name in zip(list_of_email_dict_list, corpus_names)]
         return cls(corpus_list)
         
     def __new__(cls, list_of_email_corpora=[]):
@@ -134,13 +140,14 @@ class EmailCorpusCollection(list, metaclass=Universe):
         self.n_emails += corpus.n_emails
                 
 
-
-
-class EmailCorpus(tuple, metaclass=Universe):
+class EmailCorpus(tuple, metaclass=Universe):    
     @staticmethod
     def parallelise(it, func, n_jobs=-1):
         delayed_f = delayed(func)
-        return Parallel(n_jobs)(delayed_f(x) for x in it)
+        with Parallel(n_jobs, require="sharedmem") as parallel:
+            result = parallel(delayed_f(x) for x in it)
+        return result
+        
     
     
     @classmethod
@@ -318,7 +325,7 @@ class Conversation(tuple, metaclass=Universe):
 #                            for doc_ls in (m.body.links, m.body.addresses, m.body.code_snippets)
 #                            for d in doc_ls)
 
-        self.first_observed_at = self.start_time
+#        self.first_observed_at = self.start_time
     
     def __getitem__(self, key):
         conv_slice = super().__getitem__(key)

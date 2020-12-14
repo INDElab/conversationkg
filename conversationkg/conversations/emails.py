@@ -202,10 +202,10 @@ class EmailBody(str, metaclass=Universe):
     
     def to_json(self, dumps=False):
         d = {"class": self.__class__.__name__,
-             "self": str(self), 
-             "links": [l.to_json(dumps=False) for l in self.links],
-             "addresses":[a for a in self.addresses],
-             "entities":[(e, l) for e, l in self.entities]}  # e.to_json(dumps=False)
+             "self": str(self)} 
+#             "links": [l.to_json(dumps=False) for l in self.links],
+#             "addresses":[a for a in self.addresses],
+#             "entities":[(e, l) for e, l in self.entities]}  # e.to_json(dumps=False)
         
         if dumps: return json.dumps(d)
         return d

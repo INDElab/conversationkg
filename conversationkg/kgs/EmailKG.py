@@ -1,6 +1,6 @@
 from tqdm import tqdm
 
-from .KGs import KG, Person
+from .KGs import KG, PersonNode
 
 class EmailKG(KG):
     def __new__(cls, email_corpus):
@@ -10,8 +10,8 @@ class EmailKG(KG):
         
         for conv in tqdm(email_corpus, desc="Iterating Conversations in EmailKG"):            
             for email in conv:
-                sender, receiver = Person(email.sender),\
-                                        Person(email.receiver)
+                sender, receiver = PersonNode(email.sender),\
+                                        PersonNode(email.receiver)
                 
                 
                 triples.append((sender, "part_of", conv))

@@ -1,6 +1,5 @@
 from pkg_resources import resource_string, resource_listdir
 import json
-import os
 
 from ..conversations import EmailCorpus
 

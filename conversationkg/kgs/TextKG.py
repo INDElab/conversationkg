@@ -1,7 +1,7 @@
 from tqdm import tqdm
 
 #from ..conversations.entities import Person as WholePerson
-from .KGs import KG, Person, WholePerson
+from .KGs import KG, Person, PersonNode
 
 
 
@@ -20,8 +20,8 @@ class TextKG(KG):
                 triples.append((email, "is_about", email.topic.topic))
                 provenances.append(email.message_id)
                 
-                mentioned_people = [Person(WholePerson(str(e), "")) for e, l in email.body.entities 
-                                    if l == "PERSON"]
+                mentioned_people = [PersonNode(Person(str(e), "")) for e in email.entities 
+                                    if isinstance(e, Person)]
 
                 for person in mentioned_people:
                     triples.append((email, "mentions", person))

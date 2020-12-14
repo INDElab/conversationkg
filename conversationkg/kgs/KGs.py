@@ -1,7 +1,7 @@
 #from ..conversations.corpus import EmailCorpus, Conversation
 #from ..conversations.emails import Email
 #from ..conversations.topics import TopicModel
-from ..conversations.entities import Person as WholePerson
+from ..conversations.entities import Person
 
 
 from ..conversations import corpus, emails, entities  # , topics
@@ -22,7 +22,7 @@ nlp = spacy.load("en_core_web_md")
 
 
 # distance threshold value of around 0.3 seems to capture identity quite well
-class Person(WholePerson):
+class PersonNode(Person):
     def __init__(self, person):  #, distance_threshold=0.0):
         self.__dict__ = person.__dict__
         
@@ -63,7 +63,7 @@ def put(d, x, i):
     return d[x], i
 
 def put_based_on_eq(d, x, i):
-    if not type(x) is Person:
+    if not type(x) is PersonNode:
         return put(d, x, i)
     
     print(x.name, end=", ")
@@ -89,11 +89,11 @@ class KG:
                 triples.append((email, "part_of", conv)) # both
                 provenances.append(email.message_id)
                 
-                for link in email.body.links: 
+                for link in email.links: 
                     triples.append((email, "mentions", link)) # both
                     provenances.append(email.message_id)
 
-                for addr in email.body.addresses:
+                for addr in email.addresses:
                     triples.append((email, "mentions", addr)) # both
                     provenances.append(email.message_id)
         
@@ -220,7 +220,7 @@ class KG:
             loaded_entity_mapping = {int(i): d for i, d in json.load(handle).items()}
             ind2entity = {i:json_to_entity(d) for i, d in loaded_entity_mapping.items()}
         
-        ind2entity = {i: (Person(x) if type(x) is WholePerson else x)
+        ind2entity = {i: (PersonNode(x) if type(x) is WholePerson else x)
                         for i, x in ind2entity.items()}
         
         with open(f"{load_mapping_of}.ind2pred.json") as handle:
@@ -257,7 +257,7 @@ class KG:
                 rev_d[v] = k
             else:
                 print("duplicate:", v)
-                if not type(v) is Person:
+                if not type(v) is PersonNode:
                     raise ValueError("Non-bijective mapping!")
         
         return rev_d
@@ -300,7 +300,7 @@ class KG:
         
     @classmethod
     def merge_persons_of(cls, kg, distance_threshold):
-        merging_f = cls._merge_nodes(kg, Person, distance_threshold)
+        merging_f = cls._merge_nodes(kg, PersonNode, distance_threshold)
 
         replace = lambda entity: merging_f[entity]\
                         if entity in merging_f else entity
