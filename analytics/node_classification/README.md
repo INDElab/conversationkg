@@ -130,7 +130,7 @@ Formally, node classification can be described as learning a function $f$ from a
 
 ## Background
 
-Having introduced two types KGs on the basis of the W3C Mailing List Acrchives, namely the EmailKG and the TextKG, we want to test the extent and quality to which the latter allows inferences onto the former. For a detailed description of the EmailKG and the TextKG, see [REF]; for the purposese of the current experiment, it is important to be aware 
+Having introduced two types KGs on the basis of the W3C Mailing List Archives, namely the EmailKG and the TextKG, we want to test the extent and quality to which the latter allows inferences onto the former. For a detailed description of the EmailKG and the TextKG, see [REF]; for the purposese of the current experiment, it is important to be aware 
 
 
   - testing how well node classes in the EmailKG can be recovered from the TextKG also indicates 
