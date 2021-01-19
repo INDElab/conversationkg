@@ -1,0 +1,67 @@
+numpy
+scipy
+torch
+sklearn
+transformers
+
+tqdm
+joblib
+
+matplotlib
+seaborn
+networkx
+
+beautifulsoup4
+email_reply_parser
+cchardet
+
+
+spacy
+stanza
+rake_nltk
+gensim
+
+
+# native packages
+os
+pickle
+http
+multiprocessing
+json
+re
+html
+logging
+pkg_resources
+time
+datetime
+collections
+email
+dateutil
+urllib
+itertools
+warnings
+importlib
+functools
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+from torch_RGCN.models import EmbeddingNodeClassifier
+# torch_RGCN
+import pandas as pd
+import gzip
+import rdflib as rdf
+from rdflib import URIRef
+
+
+

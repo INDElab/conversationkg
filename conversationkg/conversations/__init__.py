@@ -6,7 +6,7 @@ from .ledger import Universe
 
 
 
-hierarchy = [
+__all__ = [
         Universe,
         EmailCorpusCollection, EmailCorpus, Conversation, 
         Email, 
