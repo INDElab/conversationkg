@@ -42,6 +42,7 @@ _Note: The installation copies and extracts the contents of email_data_compresse
 #### Contribute
 
 Once you have cloned a local copy and made changes you wish to upload to the `main` branch of this repository, follow these (standard) steps:
+ 
   0. use `git pull` to update your local copy with remote changes (git will alert and abort if local changes would be overwritten)
   1. to add all changes at once, run `git add .` in the root directory (`git add [some folder]` only adds the changes made in `[some folder]`)
   2. commit the added changes with `git commit -m "[your message]"` where `[your message]` is hopefully a meaningful description of the changes
@@ -129,7 +130,7 @@ for factory in factories: factory(corpus)
 ```
 
 
-Beware that some of the downstream functionality, most importantly the parts of KG extraction, require or relie on factories having already been run on the corpus and may produce useless results otherwise.
+Beware that some of the downstream functionality, most importantly the parts of KG extraction, require or rely on factories having already been run on the corpus and may produce useless results otherwise.
 
 
 
@@ -182,4 +183,4 @@ public_credentials = """
 }
 """            
 ```
-Notice that some of the meta-data entries duplicate information, such as `author` and `from`; `conversation_building.declarations.emails` defines how such duplicated information is resolved. All keys in the meta-data need to be present for parsing but can may empty (`""`) values. However, some meta-data information is necessary for certain functionality when extracting the KG; for instance, the `"sent"` meta-data entry is used to obtain temporal ordering on both conversations and emails inside those in the email corpus.
+Notice that some of the meta-data entries duplicate information, such as `author` and `from`; `conversation_building.declarations.emails` defines how such duplicated information is resolved. All keys in the meta-data need to be present for parsing but may be empty (`""`) values. However, some meta-data information is necessary for certain functionality when extracting the KG; for instance, the `"sent"` meta-data entry is used to obtain temporal ordering on both conversations and emails inside those in the email corpus.
