@@ -95,7 +95,7 @@ The corpus object can alternatively be instantiated via a list of conversation o
 
 ```python
 
-from conversationkg.conversations import EmailCorpus
+from conversationkg.conversations import EmailCorpus, Conversation
 
 conversations = [Conversation.from_email_dicts(subject, email_dicts) for subject, email_dicts in json_data
 
@@ -132,7 +132,17 @@ Beware that some of the downstream functionality, most importantly the parts of 
 
 #### Instantiating KGs
 
+Instantiating either a TextKG or EmailKG object from a corpus object is as simple as:
 
+```python
+
+from conversationkg.kgs import EmailKG, TextKG
+
+emailkg = EmailKG(corpus)
+
+textkg = TextKG(corpus)
+
+```
 
 
 
