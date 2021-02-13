@@ -2,6 +2,10 @@
 
 Building knowledge graphs from dialogue and analyzing them.
 
+
+## [Wrapping Up TODO](/todo.md)
+
+
 ## Goals and Functions
 
  - parsing email conversations in (standard) JSON format into hierarchies of Python objects in order to make tasks such as inspection, iteration and extraction convenient
