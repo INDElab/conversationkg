@@ -15,11 +15,12 @@ beautifulsoup4
 email_reply_parser
 cchardet
 
-
 spacy
 stanza
 rake_nltk
 gensim
+
+rdflib
 
 
 # native packages
@@ -42,26 +43,3 @@ itertools
 warnings
 importlib
 functools
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-from torch_RGCN.models import EmbeddingNodeClassifier
-# torch_RGCN
-import pandas as pd
-import gzip
-import rdflib as rdf
-from rdflib import URIRef
-
-
-
