@@ -93,11 +93,13 @@ class EmailCorpusCollection(list, metaclass=Universe):
                         for email_dicts, name in zip(list_of_email_dict_list, corpus_names)]
         return cls(corpus_list)
         
-    def __new__(cls, list_of_email_corpora=[]):
-        self = super().__new__(cls, [])
-        return self
+#    def __new__(cls, list_of_email_corpora=[]):
+#        self = super().__new__(cls, [])
+#        return self
     
-    def __init__(self, list_of_email_corpora):
+    
+    def __init__(self, list_of_email_corpora=[]):
+        super().__init__(list_of_email_corpora)
         if len(self) < 1:
             self.names = []
             self.n_conversations = self.n_emails = 0

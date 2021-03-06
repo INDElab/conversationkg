@@ -1,11 +1,8 @@
-numpy
-scipy
-torch
-sklearn
-transformers
-
 tqdm
 joblib
+
+numpy
+sklearn
 
 matplotlib
 seaborn
@@ -23,23 +20,30 @@ gensim
 rdflib
 
 
+# optional packages -- used only in experiment scripts, install manually
+# scipy
+# torch
+# transformers
+
+
+
 # native packages
-os
-pickle
-http
-multiprocessing
-json
-re
-html
-logging
-pkg_resources
-time
-datetime
-collections
-email
-dateutil
-urllib
-itertools
-warnings
-importlib
-functools
+# os
+# pickle
+# http
+# multiprocessing
+# json
+# re
+# html
+# logging
+# pkg_resources
+# time
+# datetime
+# collections
+# email
+# dateutil
+# urllib
+# itertools
+# warnings
+# importlib
+# functools
