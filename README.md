@@ -3,8 +3,6 @@
 Building knowledge graphs from dialogue and analyzing them.
 
 
-## [Wrapping Up TODO](/todo.md)
-
 
 ## Goals and Functions
 
