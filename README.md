@@ -186,3 +186,7 @@ public_credentials = """
 """            
 ```
 Notice that some of the meta-data entries duplicate information, such as `author` and `from`; `conversation_building.declarations.emails` defines how such duplicated information is resolved. All keys in the meta-data need to be present for parsing but may be empty (`""`) values. However, some meta-data information is necessary for certain functionality when extracting the KG; for instance, the `"sent"` meta-data entry is used to obtain temporal ordering on both conversations and emails inside those in the email corpus.
+
+## Acknowledgements
+
+This material is based upon work supported by the Air Force Office of Scientific Research under award number FA8655-20-1-7005. Any opinions, finding, and conclusions or recommendations expressed in this material are those of the author(s) and do not necessarily reflect the views of the United States Air Force.
