@@ -3,7 +3,6 @@
 Building knowledge graphs from dialogue and analyzing them.
 
 
-
 ## Goals and Functions
 
  - parsing email conversations in (standard) JSON format into hierarchies of Python objects in order to make tasks such as inspection, iteration and extraction convenient
@@ -186,6 +185,13 @@ public_credentials = """
 """            
 ```
 Notice that some of the meta-data entries duplicate information, such as `author` and `from`; `conversation_building.declarations.emails` defines how such duplicated information is resolved. All keys in the meta-data need to be present for parsing but may be empty (`""`) values. However, some meta-data information is necessary for certain functionality when extracting the KG; for instance, the `"sent"` meta-data entry is used to obtain temporal ordering on both conversations and emails inside those in the email corpus.
+
+## Citation
+
+You can cite us at: 
+
+Valentin Vogelmann, Paul Groth, & Brian Grier. (2022). conversationkg. Zenodo. https://doi.org/10.5281/zenodo.5883258
+[![DOI](https://zenodo.org/badge/232061771.svg)](https://zenodo.org/badge/latestdoi/232061771)
 
 ## Acknowledgements
 
