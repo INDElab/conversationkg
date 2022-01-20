@@ -1,1 +1,17 @@
-Vogelmann, V. & Groth, P. & Grier, B. (2022). conversationkg [Computer software]. https://doi.org/10.5281/zenodo.5883258
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+authors:
+- family-names: "Vogelmann"
+  given-names: "Valentin"
+  orcid: "https://orcid.org/0000-0003-3519-7627"
+- family-names: "Groth"
+  given-names: "Paul"
+  orcid: "https://orcid.org/0000-0003-0183-6910"
+- family-names: "Grier"
+  given-names: "Brian"
+title: "conversationkg"
+version: 1.0.0-alpha
+doi: doi.org/10.5281/zenodo.5883258
+date-released: 2022-01-20
+url: "https://github.com/github/linguist"
+
